@@ -24,8 +24,8 @@ public class SolrApp {
     }
 
     public  void excecute() throws Exception {
-        DOMConfigurator.configure(MagicStrings.LOG4JLOCATION);
-        MysqlConnector mc = new MysqlConnector("UniDisk");
+        //DOMConfigurator.configure(MagicStrings.LOG4JLOCATION);
+        MysqlConnector mc = new MysqlConnector("unidisk");
         if (mc.checkCampaignStatus(this.database)) {
             logger.warn("Campaign is already computing");
             return;
@@ -71,7 +71,7 @@ public class SolrApp {
 
     }
     public static void main(String[] args) throws Exception {
-        SolrApp sapp = new SolrApp("ForschendesLernen");
+        SolrApp sapp = new SolrApp("testcrawl");
         sapp.excecute();
     }
 }

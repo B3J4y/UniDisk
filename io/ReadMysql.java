@@ -17,7 +17,7 @@ public class ReadMysql {
     public Model convertToModel(String database) throws NoResultsException {
         logger.debug("Entering contertToModel with database " + database);
         Model m = new Model(database);
-        MysqlConnector mc = new MysqlConnector("UniDisk");
+        MysqlConnector mc = new MysqlConnector("unidisk");
         VereinfachtesResultSet mr = mc.queryStichwortTable(database);
         while (mr.next()) {
             m.addDate(mr.getString("Stichwort"), mr.getString("Variable"), mr.getString("Metavariable"));

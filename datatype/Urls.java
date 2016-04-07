@@ -1,5 +1,6 @@
 package uzuzjmd.competence.crawler.datatype;
 
+import config.MagicStrings;
 import uzuzjmd.competence.crawler.exception.NoDomainFoundException;
 import uzuzjmd.competence.crawler.exception.NoHochschuleException;
 import uzuzjmd.competence.crawler.exception.NoResultsException;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 public class Urls {
     private List<UrlHochschule> urls;
-    private MysqlConnector mysqlConn = new MysqlConnector("Hochschulen");
+    private MysqlConnector mysqlConn = new MysqlConnector(MagicStrings.UNIVERSITIESDBNAME);
     public Urls() throws NoResultsException {
         urls = new ArrayList<>();
         mysqlConn.initHochschulen();

@@ -19,7 +19,7 @@ public class MysqlConnector {
       "&password=" + MagicStrings.thesaurusPassword;
     private VereinfachtesResultSet hochschulen;
     private List<MysqlResult> mysqlResults;
-    MysqlConnect connector;
+    public MysqlConnect connector;
 
     static private final Logger logger = LogManager.getLogger(MysqlConnector.class.getName());
 
@@ -28,6 +28,7 @@ public class MysqlConnector {
         String connection = String.format(connectionString, database);
         connector.connect(connection);
     }
+
 
     public void initHochschulen() throws NoResultsException {
         //logger.debug("Entering initHochschulen");
@@ -103,7 +104,7 @@ public class MysqlConnector {
     public boolean checkCampaignStatus (String camp) throws NoResultsException {
         logger.debug("Entering checkCampaignStatus with camp:" + camp);
         boolean res;
-        String query = "SELECT Status from Overview where Name=\"" + camp + "\"";
+        String query = "SELECT Status from overview where Name=\"" + camp + "\"";
         VereinfachtesResultSet result = connector.issueSelectStatement(query);
         if ((result == null) || (! result.isBeforeFirst()) ) {
             logger.debug("Leaving queryDomain with 0 fetches");
