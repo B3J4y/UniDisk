@@ -41,7 +41,7 @@ public class CrawlerDataAnalysis {
                     return input > percentile;
                 }
             });
-            logger.trace("number of values over percentile are: " + filteredSet.size());
+            logger.info("number of values over percentile are: " + filteredSet.size());
             guess = guess - 1.0;
             if (guess == 0) {
                 break;
