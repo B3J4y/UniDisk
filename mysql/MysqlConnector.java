@@ -80,7 +80,7 @@ public class MysqlConnector {
 
     public VereinfachtesResultSet queryStichwortTable(String table) throws NoResultsException {
         logger.debug("Entering queryDomain with domain:" + table);
-        String query = "Select * from " + table + "_Stichwort";
+        String query = "Select * from " + table + "_" + MagicStrings.stichWortSuffix;
         VereinfachtesResultSet result = connector.issueSelectStatement(query );
         if ((result == null) || (! result.isBeforeFirst()) ) {
             logger.debug("Leaving queryDomain with 0 fetches");

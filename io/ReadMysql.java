@@ -1,5 +1,6 @@
 package uzuzjmd.competence.crawler.io;
 
+import config.MagicStrings;
 import mysql.VereinfachtesResultSet;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -17,7 +18,7 @@ public class ReadMysql {
     public Model convertToModel(String database) throws NoResultsException {
         logger.debug("Entering contertToModel with database " + database);
         Model m = new Model(database);
-        MysqlConnector mc = new MysqlConnector("unidisk");
+        MysqlConnector mc = new MysqlConnector(MagicStrings.UNIVERSITIESDBNAME);
         VereinfachtesResultSet mr = mc.queryStichwortTable(database);
         while (mr.next()) {
             m.addDate(mr.getString("Stichwort"), mr.getString("Variable"), mr.getString("Metavariable"));

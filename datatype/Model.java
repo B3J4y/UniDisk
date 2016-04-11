@@ -258,7 +258,9 @@ public class Model implements PersistenceModel {
                     + "Content" + delimiter + "SolrScore" + delimiter + "URL" + delimiter +
                     "Depth" + delimiter + "Lat" + delimiter + "Lon", "Leaving initVarMetaFile");
         } else {
-            issueStatement(connextionString, "CREATE TABLE IF NOT EXISTS " + database + "_varMeta (Variable TEXT, Metavariable TEXT, Stichworte TEXT, Hochschule TEXT, Content TEXT, SolrScore TEXT, URL TEXT, Depth TEXT, Lat DOUBLE, Lon Double);");
+            issueStatement(connextionString, "CREATE TABLE IF NOT EXISTS " + database + "_"
+                    + MagicStrings.varMetaSuffix + " (Variable TEXT, Metavariable TEXT, Stichworte TEXT,"
+                    + "Hochschule TEXT, Content TEXT, SolrScore TEXT, URL TEXT, Depth TEXT, Lat DOUBLE, Lon Double);");
         }
     }
 
@@ -341,7 +343,11 @@ public class Model implements PersistenceModel {
         MysqlConnect connect = new MysqlConnect();
         connect.connect(connextionString);
         connect.issueInsertOrDeleteStatement("use " + MagicStrings.UNIVERSITIESDBNAME + ";");
-        connect.issueInsertOrDeleteStatement("INSERT INTO " + database + "_varMeta (`Variable`, `Metavariable`, `Stichworte`, `Hochschule`, `Content`, `SolrScore`, `URL`, `Depth`, `Lat`, `Lon`) VALUES (?,?,?,?,?,?,?,?,?,?)", col1, col2, col3, col4, col5, col6, col7, col8, latLon.split(delimiter)[0] , latLon.split(delimiter)[1]);
+        connect.issueInsertOrDeleteStatement("INSERT INTO " + database + "_"
+                + MagicStrings.varMetaSuffix + " (`Variable`, `Metavariable`, `Stichworte`, `Hochschule`, `Content`,"
+                + "`SolrScore`, `URL`, `Depth`, `Lat`, `Lon`) VALUES (?,?,?,?,?,?,?,?,?,?)"
+                , col1, col2, col3, col4, col5, col6, col7, col8, latLon.split(delimiter)[0]
+                , latLon.split(delimiter)[1]);
         connect.close();
     }
 

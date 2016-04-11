@@ -2,14 +2,18 @@ package uzuzjmd.competence.crawler.main;
 
 import config.MagicStrings;
 import neo4j.Neo4JConnector;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import uzuzjmd.competence.crawler.analysis.CrawlerDataAnalysis;
 import uzuzjmd.competence.crawler.datatype.Model;
 import uzuzjmd.competence.crawler.io.ReadCsv;
 import uzuzjmd.competence.crawler.io.ReadMysql;
 import uzuzjmd.competence.crawler.mysql.MysqlConnector;
 import uzuzjmd.competence.crawler.solr.SolrConnector;
+
+import java.util.Collection;
 
 /**
  * Created by carl on 06.01.16.
@@ -25,7 +29,7 @@ public class SolrApp {
 
     public  void excecute() throws Exception {
         //DOMConfigurator.configure(MagicStrings.LOG4JLOCATION);
-        MysqlConnector mc = new MysqlConnector("unidisk");
+        MysqlConnector mc = new MysqlConnector(MagicStrings.UNIVERSITIESDBNAME);
         if (mc.checkCampaignStatus(this.database)) {
             logger.warn("Campaign is already computing");
             return;
@@ -41,6 +45,10 @@ public class SolrApp {
         ReadMysql mysql = new ReadMysql();
         Neo4JConnector nj = new Neo4JConnector();
         SolrConnector connector = new SolrConnector(solrUrl);
+
+        CrawlerDataAnalysis cda = new CrawlerDataAnalysis(Integer.valueOf(MagicStrings.minPercentile),
+                Integer.valueOf(MagicStrings.maxPercentile), this.database);
+
         try {
             Model model = mysql.convertToModel(database);
             logger.info("New Model instance. Length - StichwortVar:" + model.stichwortVarSize() + " VarMeta:"
@@ -63,6 +71,18 @@ public class SolrApp {
             //model.stichwortResultToCsv(MagicStrings.stichWortPath);
             //model.varMetaResultToCsv(MagicStrings.varMetaPath);
             mc.setCampaignStatus(this.database, 2);
+            cda.prepareHochschuleSolrAnalyse();
+
+            double[] values = ArrayUtils.toPrimitive(cda.inputData.keySet().toArray(new Double[0]));
+
+            logger.debug("There are " + values.length + " elements in the table");
+            if (values.length > Integer.valueOf(MagicStrings.maxPercentile)) {
+
+                Collection<String> relevantData = cda.selectRelevantDataForPlotting();
+                cda.deleteInDatabase(relevantData);
+            } else {
+                logger.debug("The results in the table don't exceed the maximum limit.");
+            }
             logger.debug("Leaving main");
         } catch (Exception e) {
             mc.setCampaignStatus(this.database, 3);
@@ -71,7 +91,7 @@ public class SolrApp {
 
     }
     public static void main(String[] args) throws Exception {
-        SolrApp sapp = new SolrApp("testcrawl");
+        SolrApp sapp = new SolrApp("UnitTest");
         sapp.excecute();
     }
 }
