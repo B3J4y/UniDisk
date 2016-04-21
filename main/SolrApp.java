@@ -41,7 +41,7 @@ public class SolrApp {
         logger.debug("Entering main");
         logger.info("Read out csv or mysql");
 
-        ReadCsv csv = new ReadCsv(MagicStrings.dataPath);
+        //ReadCsv csv = new ReadCsv(MagicStrings.dataPath);
         ReadMysql mysql = new ReadMysql();
         Neo4JConnector nj = new Neo4JConnector();
         SolrConnector connector = new SolrConnector(solrUrl);
