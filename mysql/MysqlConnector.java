@@ -94,7 +94,7 @@ public class MysqlConnector {
     //Status: 0 = nothing done, 1 = work in progress, 2 = work done successfully, 3 = work aborted, because of reasons
     public void setCampaignStatus(String camp, int status) {
         logger.debug("Entering setCampaignStatus with camp:" + camp + ", status:" + String.valueOf(status));
-        String query = "UPDATE `Overview` SET Status=" + String.valueOf(status) + " WHERE Name=\""
+        String query = "UPDATE overview SET Status=" + String.valueOf(status) + " WHERE Name=\""
                 + camp +"\"";
         connector.issueUpdateStatement(query);
         logger.debug("Leaving setCampaignStatus");

@@ -211,6 +211,7 @@ public class Model implements PersistenceModel {
             writeFirstLineOfKeyUrlFile(filepath, "Entering initStichFile", "Stichwort" + delimiter + "URL" + delimiter + "SolrScore", "Leaving initStichFile");
         } else {
             issueStatement(connextionString, "CREATE TABLE IF NOT EXISTS " + database + "_ScoreStich (Stichwort TEXT, id TEXT, SolrScore DOUBLE);");
+            issueStatement(connextionString, "TRUNCATE TABLE " + database + "_ScoreStich;");
         }
     }
 
@@ -261,6 +262,7 @@ public class Model implements PersistenceModel {
             issueStatement(connextionString, "CREATE TABLE IF NOT EXISTS " + database + "_"
                     + MagicStrings.varMetaSuffix + " (Variable TEXT, Metavariable TEXT, Stichworte TEXT,"
                     + "Hochschule TEXT, Content TEXT, SolrScore TEXT, URL TEXT, Depth TEXT, Lat DOUBLE, Lon Double);");
+            issueStatement(connextionString, "TRUNCATE TABLE " + database + "_" + MagicStrings.varMetaSuffix + ";");
         }
     }
 

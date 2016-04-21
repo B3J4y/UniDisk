@@ -20,7 +20,7 @@ import java.util.Collection;
  */
 public class SolrApp {
     static private final Logger logger = LogManager.getLogger(SolrApp.class.getName());
-    static private final String solrUrl = "http://learnlib.soft.cs.uni-potsdam.de:80/solr/test2";
+    static private final String solrUrl = "http://learnlib.soft.cs.uni-potsdam.de:80/solr/basic";
     private String database;
 
     public SolrApp(String database) {
@@ -85,6 +85,8 @@ public class SolrApp {
             }
             logger.debug("Leaving main");
         } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.error(e.getStackTrace().toString());
             mc.setCampaignStatus(this.database, 3);
 
         }

@@ -111,6 +111,7 @@ public class CrawlerDataAnalysis {
 
     public void deleteInDatabase(Collection<String> inputData) {
         String str = StringUtils.join(inputData.toArray(), "\", \"");
-        mysqlConnect.connector.issueInsertOrDeleteStatement("DELETE FROM `UnitTest_varMeta` WHERE NOT (Hochschule) IN (\"" + str + "\")");
+        mysqlConnect.connector.issueInsertOrDeleteStatement("DELETE FROM `" + tableName + "_"
+                + MagicStrings.varMetaSuffix + "` WHERE NOT (Hochschule) IN (\"" + str + "\")");
     }
 }
