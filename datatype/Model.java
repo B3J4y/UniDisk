@@ -283,9 +283,29 @@ public class Model implements PersistenceModel {
 
     private void writeLine(String key, SolrDocumentList solrList, String filepath, String stich, List<String> lines, int i) throws URISyntaxException, NoResultsException {
         SolrDocument doc = solrList.get(i);
+        URI uri = new URI("");
 
         //Get Domain
-        URI uri = new URI(((String) doc.getFieldValue("url")).replace(" ", "").replace("[", "").replace("]", "").split("\\?")[0]);
+        try {
+            uri = new URI(((String) doc.getFieldValue("url")).replace(" ", "").replace("[", "").replace("]", "").replace("`", "").split("\\?")[0]);
+
+        } catch (URISyntaxException e) {
+            logger.error(((String) doc.getFieldValue("url")).replace(" ", "").replace("[", "").replace("]", "").replace("`", "").split("\\?")[0]);
+            logger.error(e);
+            for ( String part : ((String) doc.getFieldValue("url")).split("/") ) {
+                if ( part.contains("www")) {
+                    try {
+                        uri = new URI("http://" + part);
+                        break;
+                    } catch (URISyntaxException use) {
+                        logger.error(part);
+                        logger.error(use);
+                        throw use;
+                    }
+                }
+            }
+        }
+
         String domain = uri.getHost();
         String[] tempStrings = domain.split("\\.");
         if (tempStrings.length >= 0) {
@@ -294,6 +314,7 @@ public class Model implements PersistenceModel {
             logger.debug(uri.getHost() + " Has no dot");
         }
         urls.addDomain(domain, uri.getHost());
+
 
         //concatenate result
         try {
@@ -313,21 +334,21 @@ public class Model implements PersistenceModel {
                     hochschulname = domain;
                 }
 
-                Double score = Double.valueOf(doc.getFieldValue("score").toString())*1000;
+                Double score = Double.valueOf(doc.getFieldValue("score").toString()) * 1000;
                 if (score < 0.0000001) {
                     score = 0.0;
                 }
 
-                String col1 = key.replaceAll(delimiter, ":" ).replaceAll("'", "" );
-                String col2 = StringUtils.join(varMeta.getElements().get(key).metaVar, ";").replaceAll(delimiter, ":" ).replaceAll(delimiter, ":" ).replaceAll("'", "" )  ;
-                String col3 = stich.replaceAll(delimiter, ":" ).replaceAll("'", "") ;
-                String col4 = hochschulname.replaceAll(delimiter, ":" ).replaceAll("'", "") ;
+                String col1 = key.replaceAll(delimiter, ":").replaceAll("'", "");
+                String col2 = StringUtils.join(varMeta.getElements().get(key).metaVar, ";").replaceAll(delimiter, ":").replaceAll(delimiter, ":").replaceAll("'", "");
+                String col3 = stich.replaceAll(delimiter, ":").replaceAll("'", "");
+                String col4 = hochschulname.replaceAll(delimiter, ":").replaceAll("'", "");
                 //TODO Wieder den Content einfügen
                 //String col5 = doc.getFieldValue("content").toString().replaceAll(delimiter, ":" ).replaceAll("'", "") ;
                 String col5 = "";
-                String col6 = score.toString().replaceAll(delimiter, ":" ).replaceAll("'", "" ) ;
-                String col7 = doc.getFieldValue("url").toString().replaceAll(delimiter, ":" ).replaceAll("'", "") ;
-                String col8 = doc.getFieldValue("pageDepth").toString().replaceAll(delimiter, ":" ).replaceAll("'", "") ;
+                String col6 = score.toString().replaceAll(delimiter, ":").replaceAll("'", "");
+                String col7 = doc.getFieldValue("url").toString().replaceAll(delimiter, ":").replaceAll("'", "");
+                String col8 = doc.getFieldValue("pageDepth").toString().replaceAll(delimiter, ":").replaceAll("'", "");
 
                 if (fileBased) {
                     writeVarMetaToFile(filepath, lines, latLon, col1, col2, col3, col4, col5, col6, col7, col8);
@@ -337,12 +358,16 @@ public class Model implements PersistenceModel {
             }
         } catch (Exception e) {
             logger.warn("Something went wrong " + domain + " pageDepth " + doc.getFieldValue("pageDepth") + " so far");
-            logger.warn(e.getMessage());
+            logger.warn(e);
         }
+
     }
 
     private void writeVarMetaToDB(String latLon, String col1, String col2, String col3, String col4, String col5, String col6, String col7, String col8) {
         MysqlConnect connect = new MysqlConnect();
+        if (! latLon.contains(delimiter)) {
+            return;
+        }
         connect.connect(connextionString);
         connect.issueInsertOrDeleteStatement("use " + MagicStrings.UNIVERSITIESDBNAME + ";");
         connect.issueInsertOrDeleteStatement("INSERT INTO " + database + "_"
@@ -373,5 +398,9 @@ public class Model implements PersistenceModel {
 
     public int varMetaSize() {
         return varMeta.getElements().size();
+    }
+
+    public VarMeta getVarMeta() {
+        return varMeta;
     }
 }

@@ -90,4 +90,12 @@ public class VarMeta {
     public void setElements(HashMap<String, DateScore> elements) {
         this.elements = elements;
     }
+
+    public List<String> getVariables() {
+        List<String> resList = new ArrayList<String>();
+        for (String key : elements.keySet()){
+            resList.add(key);
+        }
+        return resList;
+    }
 }

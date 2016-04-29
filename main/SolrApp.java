@@ -70,30 +70,35 @@ public class SolrApp {
             //model.stichwortVarToCsv(MagicStrings.stichWortVarPath);
             //model.stichwortResultToCsv(MagicStrings.stichWortPath);
             //model.varMetaResultToCsv(MagicStrings.varMetaPath);
-            mc.setCampaignStatus(this.database, 2);
-            cda.prepareHochschuleSolrAnalyse();
 
-            double[] values = ArrayUtils.toPrimitive(cda.inputData.keySet().toArray(new Double[0]));
+            for (String var : model.getVarMeta().getVariables()) {
+                logger.debug("Search percentile for " + var);
+                cda.prepareHochschuleSolrAnalyse(var);
 
-            logger.debug("There are " + values.length + " elements in the table");
-            if (values.length > Integer.valueOf(MagicStrings.maxPercentile)) {
+                double[] values = ArrayUtils.toPrimitive(cda.inputData.keySet().toArray(new Double[0]));
 
-                Collection<String> relevantData = cda.selectRelevantDataForPlotting();
-                cda.deleteInDatabase(relevantData);
-            } else {
-                logger.debug("The results in the table don't exceed the maximum limit.");
+                logger.debug("There are " + values.length + " elements in the table");
+                if (values.length > Integer.valueOf(MagicStrings.maxPercentile)) {
+
+                    Collection<String> relevantData = cda.selectRelevantDataForPlotting();
+                    cda.deleteInDatabase(relevantData, var);
+                } else {
+                    logger.debug("The results in the table don't exceed the maximum limit.");
+                }
             }
+            mc.setCampaignStatus(this.database, 2);
             logger.debug("Leaving main");
         } catch (Exception e) {
-            logger.error(e.getMessage());
-            logger.error(e.getStackTrace().toString());
+            logger.error(e);
+
             mc.setCampaignStatus(this.database, 3);
+            e.getStackTrace();
 
         }
 
     }
     public static void main(String[] args) throws Exception {
-        SolrApp sapp = new SolrApp("UnitTest");
+        SolrApp sapp = new SolrApp("ForschendesLernen");
         sapp.excecute();
     }
 }

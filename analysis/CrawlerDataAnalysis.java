@@ -37,19 +37,21 @@ public class CrawlerDataAnalysis {
         this.tableName = tableName;
     }
 
-    public void prepareHochschuleSolrAnalyse() {
+    public void prepareHochschuleSolrAnalyse(String var) {
         logger.debug("Entering prepareHochschuleSolrAnalyse");
         LinkedList<Pair<Double>> latLonsTaken = new LinkedList<Pair<Double>>();
-        VereinfachtesResultSet result = mysqlConnect.connector.issueSelectStatement("Select Hochschule, SolrScore, Lat, Lon from "
+        String query = "Select Hochschule, SolrScore, Lat, Lon from "
                 + tableName + "_"
-                + MagicStrings.varMetaSuffix + " Where Lat != -1");
+                + MagicStrings.varMetaSuffix + " Where Lat != -1 "
+                + "AND Variable=\"" + var + "\"";
+        VereinfachtesResultSet result = mysqlConnect.connector.issueSelectStatement(query);
         inputData = new HashMap<>();
         HashMap<Pair<Double>, Double> latLongSolrMap = new HashMap<>();
-        if (! result.isBeforeFirst()) {
+        if (!result.isBeforeFirst()) {
             logger.warn(tableName + "_" + MagicStrings.varMetaSuffix + " Database is empty");
             return;
         }
-        while(result.next()) {
+        while (result.next()) {
             Pair<Double> latLonPair = new Pair<Double>(result.getDouble("Lat"), result.getDouble("Lon"));
             Double solrScore = result.getDouble("SolrScore");
             String hochschule = result.getString("Hochschule");
@@ -82,6 +84,7 @@ public class CrawlerDataAnalysis {
         DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(values);
         double guess = 100; // init value
         Boolean notInRange = true;
+        int sizeOfPerc = 0;
         while (notInRange) {
             final double percentile = descriptiveStatistics.getPercentile(guess);
             logger.trace("percentile for guess " + guess + " is: " + percentile);
@@ -91,7 +94,8 @@ public class CrawlerDataAnalysis {
                     return input > percentile;
                 }
             });
-            logger.info("number of values over percentile are: " + filteredSet.size());
+            sizeOfPerc = filteredSet.size();
+
             guess = guess - 1.0;
             if (guess == 0) {
                 break;
@@ -105,13 +109,16 @@ public class CrawlerDataAnalysis {
                 }
             }
         }
+        logger.info("number of values over percentile are: " + sizeOfPerc);
         // TODO: Exception
         return null;
     }
 
-    public void deleteInDatabase(Collection<String> inputData) {
+    public void deleteInDatabase(Collection<String> inputData, String var) {
         String str = StringUtils.join(inputData.toArray(), "\", \"");
         mysqlConnect.connector.issueInsertOrDeleteStatement("DELETE FROM `" + tableName + "_"
-                + MagicStrings.varMetaSuffix + "` WHERE NOT (Hochschule) IN (\"" + str + "\")");
+                + MagicStrings.varMetaSuffix + "` WHERE NOT (Hochschule) IN (\"" + str + "\") "
+                + "Variable=" + var
+        );
     }
 }
