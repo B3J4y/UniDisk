@@ -105,20 +105,22 @@ public class CrawlerDataAnalysis {
                     for (Double aDouble : filteredSet) {
                         finalResult.add(inputData.get(aDouble));
                     }
+                    logger.info("number of values over percentile are: " + sizeOfPerc);
                     return finalResult;
                 }
             }
         }
-        logger.info("number of values over percentile are: " + sizeOfPerc);
+
         // TODO: Exception
         return null;
     }
 
     public void deleteInDatabase(Collection<String> inputData, String var) {
+
         String str = StringUtils.join(inputData.toArray(), "\", \"");
-        mysqlConnect.connector.issueInsertOrDeleteStatement("DELETE FROM `" + tableName + "_"
+        String query = "DELETE FROM `" + tableName + "_"
                 + MagicStrings.varMetaSuffix + "` WHERE NOT (Hochschule) IN (\"" + str + "\") "
-                + "Variable=" + var
-        );
+                + "AND Variable=\"" + var + "\"";
+        mysqlConnect.connector.issueInsertOrDeleteStatement(query);
     }
 }

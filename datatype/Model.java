@@ -124,7 +124,7 @@ public class Model implements PersistenceModel {
 
 
     public void solrListToDB(String key, SolrDocumentList solrList) {
-        logger.debug("Entering solrListToDB");
+        logger.debug("Entering solrListToDB with " + key);
         int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConnector.getLimit());
         MysqlConnect connect = new MysqlConnect();
         connect.connect(connextionString);
@@ -366,6 +366,10 @@ public class Model implements PersistenceModel {
     private void writeVarMetaToDB(String latLon, String col1, String col2, String col3, String col4, String col5, String col6, String col7, String col8) {
         MysqlConnect connect = new MysqlConnect();
         if (! latLon.contains(delimiter)) {
+            return;
+        }
+        if ( latLon.contains("0;0") || latLon.contains("0.0;0.0")){
+            //logger.debug("is " + latLon);
             return;
         }
         connect.connect(connextionString);
