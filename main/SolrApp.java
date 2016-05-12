@@ -40,16 +40,16 @@ public class SolrApp {
         logger.debug(MagicStrings.ROOTPATH);
         logger.debug("Entering main");
         logger.info("Read out csv or mysql");
-
-        //ReadCsv csv = new ReadCsv(MagicStrings.dataPath);
-        ReadMysql mysql = new ReadMysql();
-        Neo4JConnector nj = new Neo4JConnector();
-        SolrConnector connector = new SolrConnector(solrUrl);
-
-        CrawlerDataAnalysis cda = new CrawlerDataAnalysis(Integer.valueOf(MagicStrings.minPercentile),
-                Integer.valueOf(MagicStrings.maxPercentile), this.database);
-
         try {
+            //ReadCsv csv = new ReadCsv(MagicStrings.dataPath);
+            ReadMysql mysql = new ReadMysql();
+            Neo4JConnector nj = new Neo4JConnector();
+            SolrConnector connector = new SolrConnector(solrUrl);
+
+            CrawlerDataAnalysis cda = new CrawlerDataAnalysis(Integer.valueOf(MagicStrings.minPercentile),
+                    Integer.valueOf(MagicStrings.maxPercentile), this.database);
+
+
             Model model = mysql.convertToModel(database);
             logger.info("New Model instance. Length - StichwortVar:" + model.stichwortVarSize() + " VarMeta:"
                     + model.varMetaSize());

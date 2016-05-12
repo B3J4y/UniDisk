@@ -15,5 +15,5 @@ public interface PersistenceModel {
 
     void stichwortVarToCsv(String filepath) throws IOException;
 
-    void varMetaToCsv(String key, SolrDocumentList solrList, String filepath, String stich) throws IOException, URISyntaxException;
+    void varMetaToCsv(String key, SolrDocumentList solrList, String filepath, String stich) throws IOException, URISyntaxException, InterruptedException;
 }

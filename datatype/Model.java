@@ -101,13 +101,17 @@ public class Model implements PersistenceModel {
      * @throws IOException
      * @throws SolrServerException
      */
-    public void scoreStichwort(SolrConnector connector, String filepath) throws IOException, SolrServerException {
+    public void scoreStichwort(SolrConnector connector, String filepath) throws IOException, SolrServerException, InterruptedException {
         logger.debug("Entering scoreStichwort with SolrConnector:" + connector.getServerUrl() + ", filepath: " + filepath);
         int i = 1;
         int size = stichwortVar.getElements().keySet().size();
         for (String key :
                 stichwortVar.getElements().keySet()) {
             logger.debug("scoreStich Object " + i + " from " + size);
+            if (Thread.interrupted()) {
+                logger.warn("Thread has been interrupted");
+                throw new InterruptedException("Thread interruption forced");
+            }
             i++;
             QueryResponse response = connector.connectToSolr(key);
             SolrDocumentList solrList = response.getResults();
@@ -123,7 +127,7 @@ public class Model implements PersistenceModel {
     }
 
 
-    public void solrListToDB(String key, SolrDocumentList solrList) {
+    public void solrListToDB(String key, SolrDocumentList solrList) throws InterruptedException {
         logger.debug("Entering solrListToDB with " + key);
         int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConnector.getLimit());
         MysqlConnect connect = new MysqlConnect();
@@ -131,6 +135,10 @@ public class Model implements PersistenceModel {
         connect.issueInsertOrDeleteStatement("set global max_connections = 20000000000;");
         connect.issueInsertOrDeleteStatement("use " + MagicStrings.UNIVERSITIESDBNAME + ";");
         for (int i = 0; i < sizeOfStichwortResult; i++) {
+            if (Thread.interrupted()) {
+                logger.warn("Thread has been interrupted");
+                throw new InterruptedException("Thread interruption forced");
+            }
             SolrDocument doc = solrList.get(i);
             connect.issueInsertOrDeleteStatement("INSERT INTO " + database + "_ScoreStich (`Stichwort`, `id`, `SolrScore`) VALUES (?,?,?);", key,  doc.getFieldValue("id"), doc.getFieldValue("score"));
         }
@@ -181,13 +189,17 @@ public class Model implements PersistenceModel {
         logger.debug("Leaving solrListToFile");
     }
 
-    public void scoreVariable(SolrConnector connector, String filepath) throws IOException, SolrServerException, URISyntaxException {
+    public void scoreVariable(SolrConnector connector, String filepath) throws IOException, SolrServerException, URISyntaxException, InterruptedException {
         logger.debug("Entering scoreVariable with SolrConnector:" + connector.getServerUrl());
         HashMap<String, String> varStich = varMeta.toSolrQuery(stichwortVar);
         int i = 1;
         int size = varStich.keySet().size();
         for (String key: varStich.keySet()) {
             logger.debug("scoreVar Object " + i + " from " + size);
+            if (Thread.interrupted()) {
+                logger.warn("Thread has been interrupted");
+                throw new InterruptedException("Thread interruption forced");
+            }
             i++;
             QueryResponse response = connector.connectToSolr(varStich.get(key));
             SolrDocumentList solrList = response.getResults();
@@ -268,10 +280,14 @@ public class Model implements PersistenceModel {
 
 
     @Override
-    public void varMetaToCsv(String key, SolrDocumentList solrList, String filepath, String stich) throws IOException, URISyntaxException {
+    public void varMetaToCsv(String key, SolrDocumentList solrList, String filepath, String stich) throws IOException, URISyntaxException, InterruptedException {
         List<String> lines = new ArrayList<>();
         int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConnector.getLimit());
         for (int i = 0; i < sizeOfStichwortResult; i++) {
+            if (Thread.interrupted()) {
+                logger.warn("Thread has been interrupted");
+                throw new InterruptedException("Thread interruption forced");
+            }
             try {
                 writeLine(key, solrList, filepath, stich, lines, i);
             } catch (NoResultsException e) {
