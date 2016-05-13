@@ -101,9 +101,9 @@ public class MysqlConnector {
 
     }
 
-    public boolean checkCampaignStatus (String camp) throws NoResultsException {
+    public int checkCampaignStatus (String camp) throws NoResultsException {
         logger.debug("Entering checkCampaignStatus with camp:" + camp);
-        boolean res;
+        int res;
         String query = "SELECT Status from overview where Name=\"" + camp + "\"";
         VereinfachtesResultSet result = connector.issueSelectStatement(query);
         if ((result == null) || (! result.isBeforeFirst()) ) {
@@ -111,7 +111,7 @@ public class MysqlConnector {
             throw new NoResultsException("No Results where fetched");
         }
         result.next();
-        res = result.getInt("Status") == 1;
+        res = result.getInt("Status");
         logger.debug("Leaving checkCampaignStatus with " + String.valueOf(res));
         return res;
     }
