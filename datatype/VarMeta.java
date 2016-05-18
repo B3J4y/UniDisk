@@ -12,53 +12,23 @@ import java.util.*;
  * Created by carl on 06.01.16.
  */
 public class VarMeta {
-    private HashMap<String, DateScore> elements;
+    private HashMap<String, SolrDocumentList> elements;
     static private final Logger logger = LogManager.getLogger(VarMeta.class.getName());
     private int sizeOfVarMeta = 0;
     public VarMeta() {
         elements = new HashMap<>();
     }
 
-    public HashMap<String, DateScore> getElements() {
+    public HashMap<String, SolrDocumentList> getElements() {
         return elements;
     }
 
-    public void addElement(String key, String var) {
-        logger.info("addElement key:" + key + " var:" + var);
-        if (elements.containsKey(key)) {
-            DateScore ds = elements.get(key);
-            ds.metaVar.add(var);
-            elements.put(key, ds);
-        } else {
-            elements.put(key, new DateScore(var));
-        }
+    public void addElement(String key) {
+        logger.info("addElement key:" + key);
+        elements.put(key, null);
         sizeOfVarMeta++;
     }
 
-    public void addElement(String key, DateScore ds) {
-        logger.info("addElement key:" + key + " var:" + ds.toString());
-        sizeOfVarMeta += ds.metaVar.size();
-        elements.put(key, ds);
-    }
-
-    public String[] toNeo4JQuery() {
-        logger.debug("Entering toNeo4JQuery");
-        String[] result = new String[sizeOfVarMeta];
-        int i = 0;
-        for (String key : elements.keySet()) {
-            DateScore ds = elements.get(key);
-            for (String metaVar : elements.get(key).metaVar) {
-                String str = Neo4JConnector.mergeRelation(
-                        new AbstractMap.SimpleEntry<String, String>("Variable", (String) key),
-                        new AbstractMap.SimpleEntry<String, String>("Meta", metaVar),
-                        "classOf");
-                result[i] = str;
-                i++;
-            }
-        }
-        logger.debug("Leaving toNeo4JQuery with query:" + Arrays.toString(result));
-        return result;
-    }
 
     public HashMap<String, String> toSolrQuery(StichwortVar swv) {
         logger.debug("Entering toSolrQuery");
@@ -84,10 +54,10 @@ public class VarMeta {
     }
 
     public void setSolrResult(SolrDocumentList docs, String key) {
-        elements.get(key).documentList = docs;
+        elements.put(key, docs);
     }
 
-    public void setElements(HashMap<String, DateScore> elements) {
+    public void setElements(HashMap<String, SolrDocumentList> elements) {
         this.elements = elements;
     }
 

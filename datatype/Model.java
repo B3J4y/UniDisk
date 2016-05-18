@@ -69,7 +69,7 @@ public class Model implements PersistenceModel {
             stichwortVar.addElement(stichwort, variable);
         }
         for (int i = 0; i < metas.length; i++) {
-            varMeta.addElement(variable, metas[i]);
+            varMeta.addElement(variable);
         }
         logger.debug("Leaving addDate");
     }
@@ -77,7 +77,7 @@ public class Model implements PersistenceModel {
     public String[] toNeo4JQuery() {
         logger.debug("Entering toNeo4JQuery");
 
-        String[] result = (String[]) ArrayUtils.addAll( ArrayUtils.addAll(new String[]{deleteModelInNeo4J()},  stichwortVar.toNeo4JQuery()), varMeta.toNeo4JQuery());
+        String[] result = (String[]) ArrayUtils.addAll( new String[]{deleteModelInNeo4J()},  stichwortVar.toNeo4JQuery());
         logger.debug("Leaving toNeo4JQuery");
         return result;
     }
@@ -266,13 +266,13 @@ public class Model implements PersistenceModel {
     @Override
     public void initVarMetaFile(String filepath) throws IOException {
         if (fileBased) {
-            writeFirstLineOfKeyUrlFile(filepath, "Entering initVarMetaFile", "Variable" + delimiter + "Metavariable" + delimiter + "Stichworte"
+            writeFirstLineOfKeyUrlFile(filepath, "Entering initVarMetaFile", "Variable" + delimiter + "Stichworte"
                     + delimiter + "Hochschule" + delimiter
                     + "Content" + delimiter + "SolrScore" + delimiter + "URL" + delimiter +
                     "Depth" + delimiter + "Lat" + delimiter + "Lon", "Leaving initVarMetaFile");
         } else {
             issueStatement(connextionString, "CREATE TABLE IF NOT EXISTS " + database + "_"
-                    + MagicStrings.varMetaSuffix + " (Variable TEXT, Metavariable TEXT, Stichworte TEXT,"
+                    + MagicStrings.varMetaSuffix + " (Variable TEXT, Stichworte TEXT,"
                     + "Hochschule TEXT, Content TEXT, SolrScore TEXT, URL TEXT, Depth TEXT, Lat DOUBLE, Lon Double);");
             issueStatement(connextionString, "TRUNCATE TABLE " + database + "_" + MagicStrings.varMetaSuffix + ";");
         }
@@ -336,8 +336,7 @@ public class Model implements PersistenceModel {
         try {
             if (
                 // (domain.contains("qualitaetspakt-lehre")) ||
-                    urls.isHochschule(domain) ||
-                            Integer.parseInt((String) doc.getFieldValue("pageDepth")) <= 3) {
+                    urls.isHochschule(domain) ) {
                 String hochschulname;
                 String latLon = "";
                 try {
@@ -356,7 +355,7 @@ public class Model implements PersistenceModel {
                 }
 
                 String col1 = key.replaceAll(delimiter, ":").replaceAll("'", "");
-                String col2 = StringUtils.join(varMeta.getElements().get(key).metaVar, ";").replaceAll(delimiter, ":").replaceAll(delimiter, ":").replaceAll("'", "");
+                //String col2 = StringUtils.join(varMeta.getElements().get(key).metaVar, ";").replaceAll(delimiter, ":").replaceAll(delimiter, ":").replaceAll("'", "");
                 String col3 = stich.replaceAll(delimiter, ":").replaceAll("'", "");
                 String col4 = hochschulname.replaceAll(delimiter, ":").replaceAll("'", "");
                 //TODO Wieder den Content einfügen
@@ -367,9 +366,9 @@ public class Model implements PersistenceModel {
                 String col8 = doc.getFieldValue("pageDepth").toString().replaceAll(delimiter, ":").replaceAll("'", "");
 
                 if (fileBased) {
-                    writeVarMetaToFile(filepath, lines, latLon, col1, col2, col3, col4, col5, col6, col7, col8);
+                    writeVarMetaToFile(filepath, lines, latLon, col1, col3, col4, col5, col6, col7, col8);
                 } else {
-                    writeVarMetaToDB(latLon, col1, col2, col3, col4, col5, col6, col7, col8);
+                    writeVarMetaToDB(latLon, col1, col3, col4, col5, col6, col7, col8);
                 }
             }
         } catch (Exception e) {
@@ -379,7 +378,7 @@ public class Model implements PersistenceModel {
 
     }
 
-    private void writeVarMetaToDB(String latLon, String col1, String col2, String col3, String col4, String col5, String col6, String col7, String col8) {
+    private void writeVarMetaToDB(String latLon, String col1, String col3, String col4, String col5, String col6, String col7, String col8) {
         MysqlConnect connect = new MysqlConnect();
         if (! latLon.contains(delimiter)) {
             return;
@@ -391,17 +390,16 @@ public class Model implements PersistenceModel {
         connect.connect(connextionString);
         connect.issueInsertOrDeleteStatement("use " + MagicStrings.UNIVERSITIESDBNAME + ";");
         connect.issueInsertOrDeleteStatement("INSERT INTO " + database + "_"
-                + MagicStrings.varMetaSuffix + " (`Variable`, `Metavariable`, `Stichworte`, `Hochschule`, `Content`,"
-                + "`SolrScore`, `URL`, `Depth`, `Lat`, `Lon`) VALUES (?,?,?,?,?,?,?,?,?,?)"
-                , col1, col2, col3, col4, col5, col6, col7, col8, latLon.split(delimiter)[0]
+                + MagicStrings.varMetaSuffix + " (`Variable`, `Stichworte`, `Hochschule`, `Content`,"
+                + "`SolrScore`, `URL`, `Depth`, `Lat`, `Lon`) VALUES (?,?,?,?,?,?,?,?,?)"
+                , col1, col3, col4, col5, col6, col7, col8, latLon.split(delimiter)[0]
                 , latLon.split(delimiter)[1]);
         connect.close();
     }
 
-    private void writeVarMetaToFile(String filepath, List<String> lines, String latLon, String col1, String col2, String col3, String col4, String col5, String col6, String col7, String col8) throws IOException {
+    private void writeVarMetaToFile(String filepath, List<String> lines, String latLon, String col1, String col3, String col4, String col5, String col6, String col7, String col8) throws IOException {
         logger.debug("Entering varMetaToCsv");
         lines.add(col1 + delimiter
-                + col2 + delimiter
                 + col3 + delimiter
                 + col4 + delimiter
                 + col5 + delimiter

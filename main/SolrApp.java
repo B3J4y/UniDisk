@@ -20,7 +20,7 @@ import java.util.Collection;
  */
 public class SolrApp {
     static private final Logger logger = LogManager.getLogger(SolrApp.class.getName());
-    static private final String solrUrl = "http://learnlib.soft.cs.uni-potsdam.de:80/solr/basic";
+    static private final String solrUrl = "http://learnlib.soft.cs.uni-potsdam.de:80/solr/up_crawl";
     private String database;
 
     public SolrApp(String database) {
@@ -98,7 +98,7 @@ public class SolrApp {
 
     }
     public static void main(String[] args) throws Exception {
-        SolrApp sapp = new SolrApp("ForschendesLernen");
+        SolrApp sapp = new SolrApp("up_test");
         sapp.excecute();
     }
 }
