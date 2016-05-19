@@ -28,7 +28,7 @@ public class SolrApp {
     }
 
     public  void excecute() throws Exception {
-        DOMConfigurator.configure(MagicStrings.LOG4JLOCATION);
+        //DOMConfigurator.configure(MagicStrings.LOG4JLOCATION);
         MysqlConnector mc = new MysqlConnector(MagicStrings.UNIVERSITIESDBNAME);
         if (mc.checkCampaignStatus(this.database) == 1) {
             logger.warn("Campaign is already computing");
