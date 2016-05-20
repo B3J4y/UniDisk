@@ -59,12 +59,10 @@ public class SolrApp {
             nj.queryMyStatements(model.toNeo4JQuery());
             logger.info("The model has been put into Neo4J");
             logger.info("Create Query");
-            //model.scoreStichwort(connector);
-            //model.initStichFile(MagicStrings.stichWortPath);
-            //model.initVarMetaFile(MagicStrings.varMetaPath);
-            //model.scoreStichwort(connector, MagicStrings.stichWortPath);
-            //model.scoreVariable(connector);
-            //model.scoreVariable(connector, MagicStrings.varMetaPath);
+            model.initStichFile("NOPATH");
+            model.initVarMetaFile("NOPATH");
+            model.scoreStichwort(connector, "NOPATH");
+            model.scoreVariable(connector, "NOPATH");
             logger.info("Get Score from Crawling");
             logger.info("Transform Scoring into results");
             //model.stichwortVarToCsv(MagicStrings.stichWortVarPath);
