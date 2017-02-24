@@ -12,7 +12,7 @@ public class SystemProperties {
 
   protected SystemProperties() throws IOException {
     properties = new Properties();
-    properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("./de/jbernoth/crawler/unidisk.properties"));
+    properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("./de/unidisk/crawler/unidisk.properties"));
   }
 
   public static Properties getInstance() {
