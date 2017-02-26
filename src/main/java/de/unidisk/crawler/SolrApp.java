@@ -1,15 +1,14 @@
 package de.unidisk.crawler;
 
 import de.unidisk.common.SystemProperties;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import de.unidisk.crawler.analysis.CrawlerDataAnalysis;
 import de.unidisk.crawler.datatype.Model;
-import de.unidisk.crawler.io.ReadCsv;
 import de.unidisk.crawler.io.ReadMysql;
 import de.unidisk.crawler.mysql.MysqlConnector;
 import de.unidisk.crawler.solr.SolrConnector;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.util.Collection;
 import java.util.Properties;
@@ -20,17 +19,17 @@ import java.util.Properties;
 public class SolrApp {
     static private final Logger logger = LogManager.getLogger(SolrApp.class.getName());
     private static Properties systemProperties = SystemProperties.getInstance();
-    static private final String solrUrl = "http://" + systemProperties.getProperty("solr.connection.name") + ":" +
-            systemProperties.getProperty("solr.connection." +
-                    "port") + "/solr/" + systemProperties.getProperty("solr.connection.db");
+    static private final String solrUrl = "http://" + systemProperties.getProperty("solr.connection.url") + ":" +
+            systemProperties.getProperty("solr.connection.port")
+            + "/solr/"
+            + systemProperties.getProperty("solr.connection.db");
     private String database;
 
     public SolrApp(String database) {
         this.database = database;
     }
 
-    public  void excecute() throws Exception {
-        //DOMConfigurator.configure(MagicStrings.LOG4JLOCATION);
+    public  void execute() throws Exception {
         MysqlConnector mc = new MysqlConnector(systemProperties.getProperty("uni.db.name"));
         if (mc.checkCampaignStatus(this.database) == 1) {
             logger.warn("Campaign is already computing");
@@ -95,6 +94,6 @@ public class SolrApp {
     }
     public static void main(String[] args) throws Exception {
         SolrApp sapp = new SolrApp("up_test");
-        sapp.excecute();
+        sapp.execute();
     }
 }

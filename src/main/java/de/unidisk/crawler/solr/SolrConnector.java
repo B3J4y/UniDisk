@@ -27,19 +27,10 @@ public class SolrConnector {
         logger.debug("Leaving SolrConnector Constructor");
     }
 
-    public SolrConnector(String serverUrl, int limit) {
-        logger.debug("Entering SolrConnector Constructor with serverUrl:" + serverUrl);
-        this.serverUrl = serverUrl;
-        client = new HttpSolrClient(serverUrl);
-        SolrConnector.limit = limit;
-        logger.debug("Leaving SolrConnector Constructor");
-    }
     static public int getLimit() {
         return limit;
     }
     public QueryResponse connectToSolr(String query) throws IOException, SolrServerException {
-        //query = "content\"" + StringUtils.join(query.split(" "), "\" AND \"") + "\"";
-
         //TODO Hacky exception
         if (! query.matches("\\*")) {
             logger.info("Match");
@@ -69,14 +60,4 @@ public class SolrConnector {
     public String getServerUrl(){
         return serverUrl;
     }
-    /*
-    private LinkedHashMap<String, ArrayList<LinkedHashMap<String, ArrayList<LinkedHashMap<String, ArrayList<String>>>>>> issueAbstractRequest(String payload) {
-        Client client2 = ClientBuilder.newClient();
-        WebTarget target2 = client2.target(txUri);
-        return target2.request(
-                MediaType.APPLICATION_JSON).post(
-                Entity.entity(payload,
-                        MediaType.APPLICATION_JSON), LinkedHashMap.class);
-    }
-    */
 }

@@ -1,5 +1,6 @@
 package de.unidisk.common;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -12,7 +13,8 @@ public class SystemProperties {
 
   protected SystemProperties() throws IOException {
     properties = new Properties();
-    properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("./de/unidisk/crawler/unidisk.properties"));
+    String[] pathToProperties = {".", "de", "unidisk", "crawler", "unidisk.properties"};
+    properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(String.join(File.separator, pathToProperties)));
   }
 
   public static Properties getInstance() {
