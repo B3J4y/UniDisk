@@ -1,5 +1,6 @@
 package de.unidisk.crawler.solr;
 
+import de.unidisk.common.SystemProperties;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
@@ -8,8 +9,10 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrInputDocument;
 
 import java.io.IOException;
+import java.util.Properties;
 
 /**
  * Created by carl on 07.01.16.
@@ -19,12 +22,20 @@ public class SolrConnector {
     private SolrClient client ;
     private final String serverUrl;
     private static int limit =1000000;
+    private static Properties systemProperties = SystemProperties.getInstance();
 
     public SolrConnector(String serverUrl) {
         logger.debug("Entering SolrConnector Constructor with serverUrl:" + serverUrl);
         this.serverUrl = serverUrl;
         client = new HttpSolrClient(serverUrl);
         logger.debug("Leaving SolrConnector Constructor");
+    }
+
+    public static String getStandardUrl() {
+        return "http://" + systemProperties.getProperty("solr.connection.url") + ":" +
+                systemProperties.getProperty("solr.connection.port")
+                + "/solr/"
+                + systemProperties.getProperty("solr.connection.db");
     }
 
     static public int getLimit() {
@@ -55,6 +66,16 @@ public class SolrConnector {
         }
         logger.debug("Leaving connectToSolr");
         return response;
+    }
+
+    public void insertDocument(SolrInputDocument document) throws IOException, SolrServerException {
+        client.add(document);
+        client.commit();
+    }
+
+    public void deleteDocument(SolrInputDocument document) throws IOException, SolrServerException {
+        client.deleteById((String) document.get("id").getValue());
+        client.commit();
     }
 
     public String getServerUrl(){

@@ -19,10 +19,6 @@ import java.util.Properties;
 public class SolrApp {
     static private final Logger logger = LogManager.getLogger(SolrApp.class.getName());
     private static Properties systemProperties = SystemProperties.getInstance();
-    static private final String solrUrl = "http://" + systemProperties.getProperty("solr.connection.url") + ":" +
-            systemProperties.getProperty("solr.connection.port")
-            + "/solr/"
-            + systemProperties.getProperty("solr.connection.db");
     private String database;
 
     public SolrApp(String database) {
@@ -43,7 +39,7 @@ public class SolrApp {
         try {
             //ReadCsv csv = new ReadCsv(MagicStrings.dataPath);
             ReadMysql mysql = new ReadMysql();
-            SolrConnector connector = new SolrConnector(solrUrl);
+            SolrConnector connector = new SolrConnector(SolrConnector.getStandardUrl());
 
             CrawlerDataAnalysis cda = new CrawlerDataAnalysis(Integer.valueOf(systemProperties.getProperty("values.percentile.min")),
                     Integer.valueOf(systemProperties.getProperty("values.percentile.max")), this.database);

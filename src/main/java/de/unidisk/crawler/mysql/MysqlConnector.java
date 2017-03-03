@@ -3,9 +3,10 @@ package de.unidisk.crawler.mysql;
 import de.unidisk.common.SystemProperties;
 import de.unidisk.common.mysql.MysqlConnect;
 import de.unidisk.common.mysql.VereinfachtesResultSet;
+import de.unidisk.crawler.exception.NoResultsException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import de.unidisk.crawler.exception.NoResultsException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -52,6 +53,28 @@ public class MysqlConnector {
         }
 
         //logger.debug("Leaving initHochschulen");
+    }
+
+    public void createNewCampaign(String campaign) {
+        try {
+            checkCampaignStatus(campaign);
+            logger.debug("Created new Campaign " + campaign);
+        } catch (NoResultsException e) {
+            String query = "INSERT INTO `overview` (`Id`, `Name`, `Count`, `Status`) VALUES (NULL, '" + campaign + "', '0', '0')";
+            connector.issueInsertOrDeleteStatement(query);
+            logger.debug("Campaign " + campaign + " already exists.");
+        }
+    }
+
+    public void deleteCampaing(String campaign) {
+        try {
+            checkCampaignStatus(campaign);
+            String query = "DELETE FROM `overview` WHERE `overview`.`Name` = \"" + campaign + "\" ";
+            connector.issueInsertOrDeleteStatement(query);
+            logger.debug("Deleted campaign " + campaign);
+        } catch (NoResultsException e) {
+            logger.debug("Campaign " + campaign + " doesn't exist.");
+        }
     }
 
     public MysqlResult searchDomain(String domain) throws NoResultsException {
