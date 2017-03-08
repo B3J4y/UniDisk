@@ -38,9 +38,17 @@ public class SolrConnector {
                 + systemProperties.getProperty("solr.connection.db");
     }
 
+    public static String getTestUrl() {
+        return "http://" + systemProperties.getProperty("solr.connection.url") + ":" +
+                systemProperties.getProperty("solr.connection.port")
+                + "/solr/"
+                + systemProperties.getProperty("solr.connection.testDb");
+    }
+
     static public int getLimit() {
         return limit;
     }
+
     public QueryResponse connectToSolr(String query) throws IOException, SolrServerException {
         //TODO Hacky exception
         if (! query.matches("\\*")) {
@@ -68,13 +76,19 @@ public class SolrConnector {
         return response;
     }
 
+    public QueryResponse queryAllDocuments() throws IOException, SolrServerException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.setRows(limit);
+        return client.query(solrQuery);
+    }
+
     public void insertDocument(SolrInputDocument document) throws IOException, SolrServerException {
         client.add(document);
         client.commit();
     }
 
     public void deleteDocument(SolrInputDocument document) throws IOException, SolrServerException {
-        client.deleteById((String) document.get("id").getValue());
+        client.deleteById(String.valueOf(document.get("id").getValue()));
         client.commit();
     }
 

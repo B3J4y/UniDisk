@@ -13,7 +13,7 @@ public class SystemProperties {
 
   protected SystemProperties() throws IOException {
     properties = new Properties();
-    String[] pathToProperties = {".", "de", "unidisk", "crawler", "unidisk.properties"};
+    String[] pathToProperties = {".", "de", "unidisk", "crawler", "unidisk_productiv.properties"};
     properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(String.join(File.separator, pathToProperties)));
   }
 

@@ -44,7 +44,7 @@ public class SolrAppTest {
         } catch (NoResultsException e) {
             throw new Error(e);
         }
-        SolrConnector connector = new SolrConnector(SolrConnector.getStandardUrl());
+        SolrConnector connector = new SolrConnector(SolrConnector.getTestUrl());
         try {
             QueryResponse response = connector.connectToSolr("Test");
             assertTrue(response.getResults().getNumFound() >= 0);
@@ -55,7 +55,7 @@ public class SolrAppTest {
 
     @Test
     public void testFieldInputAndQuery() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrConnector.getStandardUrl());
+        SolrConnector connector = new SolrConnector(SolrConnector.getTestUrl());
         List<SolrInputDocument> docs = new ArrayList<>();
         SolrInputDocument document = new SolrInputDocument();
         document.addField("id", "1");
