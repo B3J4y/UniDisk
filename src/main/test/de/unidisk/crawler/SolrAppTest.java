@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -74,5 +75,20 @@ public class SolrAppTest {
         for (SolrInputDocument doc : docs) {
             connector.deleteDocument(doc);
         }
+    }
+
+    @Test
+    public void testPropertyFiles() throws Exception {
+        String[] pathToProperties = {".", "de", "unidisk", "crawler", "unidisk.properties"};
+        Properties gitProps = new Properties();
+        gitProps.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(String.join(File.separator, pathToProperties)));
+
+        StringBuilder missingProps = new StringBuilder();
+        for (Object prop : gitProps.keySet()) {
+            if (systemProperties.getProperty(prop.toString()) == null) {
+                missingProps.append(prop.toString() + ", ");
+            }
+        }
+        assertTrue("Missing properties " + missingProps.toString(), missingProps.length() == 0);
     }
 }
