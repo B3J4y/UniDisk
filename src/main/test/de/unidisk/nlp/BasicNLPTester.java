@@ -1,13 +1,14 @@
 package de.unidisk.nlp;
 
 import de.unidisk.nlp.basics.EnhancedWithRegExp;
+import de.unidisk.nlp.basics.GermanStemming;
+import de.unidisk.nlp.datatype.Rule;
 import org.junit.Test;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by carl on 08.03.17.
@@ -44,5 +45,28 @@ public class BasicNLPTester {
         assertTrue(matcher.find());
         matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher(" test ");
         assertTrue(matcher.find());
+    }
+
+    @Test
+    public void testRules() throws Exception {
+        Rule rule = new Rule("en", "");
+        assertEquals("kauf", rule.transform("kaufen"));
+        rule = new Rule("ä", "a");
+        assertEquals("Hauser", rule.transform("Häuser"));
+        assertEquals("kauf", new Rule("er", "").transform(new Rule("ä", "a").transform("käufer")));
+        rule = new Rule("(en)$", "", 5);
+        assertEquals("lauf", rule.transform("laufen"));
+        assertEquals("chen", rule.transform("chen"));
+        rule = new Rule("ö", "o");
+        assertEquals("Käufer", rule.transform("Käufer"));
+    }
+
+    @Test
+    public void testStemGerman() throws Exception {
+        GermanStemming germanStemming = new GermanStemming();
+        assertEquals("Kauf", germanStemming.stem("Käufer"));
+        assertEquals("Handel", germanStemming.stem("Handeln"));
+        assertEquals("sei", germanStemming.stem("sein"));
+        assertEquals("Dat", germanStemming.stem("Daten"));
     }
 }
