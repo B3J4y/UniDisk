@@ -2,6 +2,11 @@ package de.unidisk.crawler.datatype;
 
 import de.unidisk.common.SystemProperties;
 import de.unidisk.common.mysql.MysqlConnect;
+import de.unidisk.crawler.exception.NoDomainFoundException;
+import de.unidisk.crawler.exception.NoHochschuleException;
+import de.unidisk.crawler.exception.NoResultsException;
+import de.unidisk.crawler.solr.SolrConnector;
+import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -9,10 +14,6 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import de.unidisk.crawler.exception.NoDomainFoundException;
-import de.unidisk.crawler.exception.NoHochschuleException;
-import de.unidisk.crawler.exception.NoResultsException;
-import de.unidisk.crawler.solr.SolrConnector;
 
 import java.io.IOException;
 import java.net.URI;
@@ -111,7 +112,7 @@ public class Model implements PersistenceModel {
 
     public void solrListToDB(String key, SolrDocumentList solrList) throws InterruptedException {
         logger.debug("Entering solrListToDB with " + key);
-        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConnector.getLimit());
+        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrStandardConfigurator.getLimit());
         MysqlConnect connect = new MysqlConnect();
         connect.connectToLocalhost();
         connect.issueInsertOrDeleteStatement("set global max_connections = 20000000000;");
@@ -158,7 +159,7 @@ public class Model implements PersistenceModel {
 
 
     public void solrListToFile(String key, SolrDocumentList solrList, String filepath) throws IOException {
-        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConnector.getLimit());
+        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrStandardConfigurator.getLimit());
         logger.debug("Entering solrListToFile");
         List<String> lines = new ArrayList<String>();
         for (int i = 0; i < sizeOfStichwortResult; i++) {
@@ -264,7 +265,7 @@ public class Model implements PersistenceModel {
     @Override
     public void varMetaToCsv(String key, SolrDocumentList solrList, String filepath, String stich) throws IOException, URISyntaxException, InterruptedException {
         List<String> lines = new ArrayList<>();
-        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConnector.getLimit());
+        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrStandardConfigurator.getLimit());
         for (int i = 0; i < sizeOfStichwortResult; i++) {
             if (Thread.interrupted()) {
                 logger.warn("Thread has been interrupted");

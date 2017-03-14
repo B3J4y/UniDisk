@@ -1,9 +1,12 @@
 package de.unidisk.crawler;
 
 import de.unidisk.common.SystemProperties;
+import de.unidisk.crawler.datatype.Stichwort;
+import de.unidisk.crawler.datatype.Variable;
 import de.unidisk.crawler.exception.NoResultsException;
 import de.unidisk.crawler.mysql.MysqlConnector;
 import de.unidisk.crawler.solr.SolrConnector;
+import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
@@ -16,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -45,9 +49,10 @@ public class SolrAppTest {
         } catch (NoResultsException e) {
             throw new Error(e);
         }
-        SolrConnector connector = new SolrConnector(SolrConnector.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
         try {
-            QueryResponse response = connector.connectToSolr("Test");
+            Stichwort stichwort = new Stichwort("Test");
+            QueryResponse response = connector.query(stichwort.buildQuery());
             assertTrue(response.getResults().getNumFound() >= 0);
         } catch (Exception e) {
             throw new Error(e);
@@ -56,22 +61,47 @@ public class SolrAppTest {
 
     @Test
     public void testFieldInputAndQuery() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrConnector.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
         List<SolrInputDocument> docs = new ArrayList<>();
         SolrInputDocument document = new SolrInputDocument();
-        document.addField("id", "1");
-        document.addField("name_ss", "First Document");
-        document.addField("content", "Hi, this is the very first document");
-        document.addField("date_dt", new Date());
+        document.addField(SolrStandardConfigurator.getFieldProperties().get("id"), "1");
+        document.addField(SolrStandardConfigurator.getFieldProperties().get("title"), "First Document");
+        document.addField(SolrStandardConfigurator.getFieldProperties().get("content"), "Hi, this is the very first document");
+        document.addField(SolrStandardConfigurator.getFieldProperties().get("date"), new Date());
         connector.insertDocument(document);
         docs.add(document.deepCopy());
         document = new SolrInputDocument();
-        document.addField("id", "2");
-        document.addField("name_ss", "Second Document");
-        document.addField("content", "Hi, this is the second document");
-        document.addField("date_dt", "2017-03-03T00:00:00Z");
+        document.addField(SolrStandardConfigurator.getFieldProperties().get("id"), "2");
+        document.addField(SolrStandardConfigurator.getFieldProperties().get("title"), "Second Document");
+        document.addField(SolrStandardConfigurator.getFieldProperties().get("content"), "Hi, this is the second document");
+        document.addField(SolrStandardConfigurator.getFieldProperties().get("date"), "2017-03-03T00:00:00Z");
         connector.insertDocument(document);
         docs.add(document.deepCopy());
+
+        Stichwort stichwort = new Stichwort("document");
+        QueryResponse response = connector.query(stichwort.buildQuery());
+        assertEquals(2, response.getResults().getNumFound());
+
+        stichwort = new Stichwort("doc[a-zA-Z]*");
+        response = connector.query(stichwort.buildQuery());
+        assertEquals(2, response.getResults().getNumFound());
+
+        stichwort = new Stichwort("second");
+        response = connector.query(stichwort.buildQuery());
+        assertEquals(1, response.getResults().getNumFound());
+
+        Variable variable = new Variable("Test Variable");
+        variable.addStichwort(new Stichwort("very"));
+        variable.addStichwort(new Stichwort("second"));
+        response = connector.query(variable.buildQuery());
+        assertEquals(2, response.getResults().getNumFound());
+
+        variable = new Variable("Test Variable");
+        variable.addStichwort(new Stichwort("none"));
+        variable.addStichwort(new Stichwort("second"));
+        response = connector.query(variable.buildQuery());
+        assertEquals(1, response.getResults().getNumFound());
+
         for (SolrInputDocument doc : docs) {
             connector.deleteDocument(doc);
         }

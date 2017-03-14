@@ -8,10 +8,12 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -29,24 +31,6 @@ public class SolrConnector {
         this.serverUrl = serverUrl;
         client = new HttpSolrClient(serverUrl);
         logger.debug("Leaving SolrConnector Constructor");
-    }
-
-    public static String getStandardUrl() {
-        return "http://" + systemProperties.getProperty("solr.connection.url") + ":" +
-                systemProperties.getProperty("solr.connection.port")
-                + "/solr/"
-                + systemProperties.getProperty("solr.connection.db");
-    }
-
-    public static String getTestUrl() {
-        return "http://" + systemProperties.getProperty("solr.connection.url") + ":" +
-                systemProperties.getProperty("solr.connection.port")
-                + "/solr/"
-                + systemProperties.getProperty("solr.connection.testDb");
-    }
-
-    static public int getLimit() {
-        return limit;
     }
 
     public QueryResponse connectToSolr(String query) throws IOException, SolrServerException {
@@ -76,6 +60,16 @@ public class SolrConnector {
         return response;
     }
 
+    public QueryResponse query(SolrQuery query) throws IOException, SolrServerException {
+        QueryResponse response = client.query(query);
+        SolrDocumentList docs = response.getResults();
+        logger.info("Quantitiv Result from query \"" + query.getQuery() + "\" is " + String.valueOf(docs.getNumFound()));
+        if (docs.getNumFound() > limit) {
+            logger.warn("Limit Exceeded. Found more Docs in solr than queried. Increase the limit if you want to get more Docs");
+        }
+        return response;
+    }
+
     public QueryResponse queryAllDocuments() throws IOException, SolrServerException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setRows(limit);
@@ -87,8 +81,22 @@ public class SolrConnector {
         client.commit();
     }
 
+    public void insertDocuments(List<SolrInputDocument> documents) throws IOException, SolrServerException {
+        client.add(documents);
+        client.commit();
+    }
+
     public void deleteDocument(SolrInputDocument document) throws IOException, SolrServerException {
         client.deleteById(String.valueOf(document.get("id").getValue()));
+        client.commit();
+    }
+
+    public void deleteDocuments(SolrDocumentList documents) throws IOException, SolrServerException {
+        for (int i = 0; i < documents.getNumFound(); i++) {
+            SolrDocument document = documents.get(i);
+            String idIdentifier = SolrStandardConfigurator.getFieldProperties().get("id");
+            client.deleteById((String) document.getFieldValue(idIdentifier));
+        }
         client.commit();
     }
 
