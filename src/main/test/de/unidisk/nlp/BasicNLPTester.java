@@ -45,6 +45,17 @@ public class BasicNLPTester {
         assertTrue(matcher.find());
         matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher(" test ");
         assertTrue(matcher.find());
+
+        enhanced.removeModifier(EnhancedWithRegExp.Modifier.START_OF_WORD);
+        enhanced.removeModifier(EnhancedWithRegExp.Modifier.END_OF_WORD);
+        enhanced.removeModifier(EnhancedWithRegExp.Modifier.NOT_CASE_SENSITIVE);
+
+        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("ThisTestIsGood");
+        assertFalse(matcher.matches());
+        enhanced.addModifier(EnhancedWithRegExp.Modifier.PART_OF_WORD);
+        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("ThisTestIsGood");
+        assertTrue(matcher.matches());
+
     }
 
     @Test

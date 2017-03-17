@@ -7,6 +7,7 @@ import de.unidisk.crawler.exception.NoResultsException;
 import de.unidisk.crawler.mysql.MysqlConnector;
 import de.unidisk.crawler.solr.SolrConnector;
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
+import de.unidisk.nlp.basics.EnhancedWithRegExp;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
@@ -82,7 +83,8 @@ public class SolrAppTest {
         QueryResponse response = connector.query(stichwort.buildQuery());
         assertEquals(2, response.getResults().getNumFound());
 
-        stichwort = new Stichwort("doc[a-zA-Z]*");
+        stichwort = new Stichwort("doc");
+        stichwort.addModifier(EnhancedWithRegExp.Modifier.PART_OF_WORD);
         response = connector.query(stichwort.buildQuery());
         assertEquals(2, response.getResults().getNumFound());
 
