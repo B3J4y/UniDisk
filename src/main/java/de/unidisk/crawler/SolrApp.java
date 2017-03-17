@@ -26,7 +26,7 @@ public class SolrApp {
     }
 
     public  void execute() throws Exception {
-        MysqlConnector mc = new MysqlConnector(systemProperties.getProperty("uni.db.name"));
+        MysqlConnector mc = new MysqlConnector();
         if (mc.checkCampaignStatus(this.database) == 1) {
             logger.warn("Campaign is already computing");
             return;

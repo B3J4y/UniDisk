@@ -1,54 +1,99 @@
 package de.unidisk.common.mysql;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.Properties;
-
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import de.unidisk.common.SystemProperties;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+
+import java.sql.*;
+import java.util.Date;
+import java.util.Properties;
 
 /**
  * 
  * @author Julian Dehne
  */
-public class MysqlConnect {
+public abstract class MysqlConnect {
 
+	public enum LoadedDatabase{
+		notLoaded, noDatabase, unidisk
+	}
+
+	LoadedDatabase state;
 	static final Logger logger = LogManager.getLogger(MysqlConnect.class.getName());
 	private static Properties systemProperties = SystemProperties.getInstance();
-	public Connection conn = null;
+	private Connection conn;
 
-	public static String getLocalhostConnection() {
-		return "jdbc:mysql://" + systemProperties.getProperty("database.localhost") +
-				"/%s" +
-				"?user=" + systemProperties.getProperty("database.root.name") +
-				"&password=" + systemProperties.getProperty("database.root.password");
+	public MysqlConnect() {
+		state = LoadedDatabase.notLoaded;
+	}
+
+	public static String getLocalhostConnection(LoadedDatabase database) {
+		switch (database) {
+			case noDatabase:
+				return "jdbc:mysql://" + systemProperties.getProperty("database.localhost") +
+								"?user=" + systemProperties.getProperty("database.root.name") +
+								"&password=" + systemProperties.getProperty("database.root.password");
+			case unidisk:
+				return "jdbc:mysql://" + systemProperties.getProperty("database.localhost") + "/" +
+								systemProperties.getProperty("uni.db.name") +
+								"?user=" + systemProperties.getProperty("database.root.name") +
+								"&password=" + systemProperties.getProperty("database.root.password");
+			default:
+				return null;
+		}
+
 	}
 
 	/**
 	 * Mit dieser Methode stellt man die Verbindung zu der Datenbank her.
 	 */
-	public void connect(String connectionString) {
+	public void connect(String connectionString, LoadedDatabase database) throws CommunicationsException {
 		try {
 			conn = DriverManager.getConnection(connectionString);
+		} catch (CommunicationsException ex) {
+			//Server not reachable
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+			throw ex;
+		} catch (SQLSyntaxErrorException ex){
+			//Schema not available
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+			String unnamed = getLocalhostConnection(LoadedDatabase.noDatabase);
+			if (!unnamed.equals(connectionString)){
+				connect(unnamed,LoadedDatabase.noDatabase);
+				state = LoadedDatabase.noDatabase;
+			}
+			createSchemaWithTables("unidisk");
 		} catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-			throw new Error("could not connect to mysql");
 		}
+
+	}
+
+	protected abstract void createSchemaWithTables(String name);
+
+	protected abstract void readDump(String dbName, String file);
+
+	private void ensureConnection() {
+
 	}
 
 	/**
 	 * Mit dieser Methode stellt man die Verbindung zu der Datenbank her.
 	 */
-	public void connectToLocalhost() {
-		String connection = String.format(getLocalhostConnection(), systemProperties.getProperty("uni.db.name"));
-		connect(connection);
+	public void connectToLocalhost() throws CommunicationsException {
+		String connection = getLocalhostConnection(LoadedDatabase.unidisk);
+		try {
+			connect(connection, LoadedDatabase.unidisk);
+		} catch (CommunicationsException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -115,7 +160,7 @@ public class MysqlConnect {
 	 */
 	public void otherStatements(final String statement) {
 		try {
-			this.conn.createStatement().execute(statement);
+			conn.createStatement().execute(statement);
 		} catch (SQLException ex) {
 			logger.error(ex);
 		}

@@ -1,7 +1,13 @@
 package de.unidisk.crawler.datatype;
 
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import de.unidisk.common.SystemProperties;
 import de.unidisk.common.mysql.MysqlConnect;
+import de.unidisk.crawler.exception.NoDomainFoundException;
+import de.unidisk.crawler.exception.NoHochschuleException;
+import de.unidisk.crawler.exception.NoResultsException;
+import de.unidisk.crawler.mysql.MysqlConnector;
+import de.unidisk.crawler.solr.SolrConnector;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -9,10 +15,6 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import de.unidisk.crawler.exception.NoDomainFoundException;
-import de.unidisk.crawler.exception.NoHochschuleException;
-import de.unidisk.crawler.exception.NoResultsException;
-import de.unidisk.crawler.solr.SolrConnector;
 
 import java.io.IOException;
 import java.net.URI;
@@ -37,23 +39,26 @@ public class Model implements PersistenceModel {
     private Boolean fileBased = false;
     private String database;
     private Properties systemProperties = SystemProperties.getInstance();
+    private MysqlConnect connect;
 
-    private final String connextionString = MysqlConnect.getLocalhostConnection();
+    private final String connextionString = MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.unidisk);
 
-    public Model() throws NoResultsException {
+    public Model() throws NoResultsException, CommunicationsException {
         stichwortVar = new StichwortVar();
         varMeta = new VarMeta();
         stichwortResult = new HashMap<>();
         urls = new Urls();
         this.database = "";
+        connect = new MysqlConnector();
     }
 
-   public Model(String database) throws NoResultsException {
+   public Model(String database) throws NoResultsException, CommunicationsException {
        stichwortVar = new StichwortVar();
        varMeta = new VarMeta();
        stichwortResult = new HashMap<>();
        urls = new Urls();
        this.database = database;
+       connect = new MysqlConnector();
    }
 
     public void addDate(String stichwort, String variable, String... metas){
@@ -112,8 +117,6 @@ public class Model implements PersistenceModel {
     public void solrListToDB(String key, SolrDocumentList solrList) throws InterruptedException {
         logger.debug("Entering solrListToDB with " + key);
         int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConnector.getLimit());
-        MysqlConnect connect = new MysqlConnect();
-        connect.connectToLocalhost();
         connect.issueInsertOrDeleteStatement("set global max_connections = 20000000000;");
         connect.issueInsertOrDeleteStatement("use " + systemProperties.getProperty("uni.db.name") + ";");
         for (int i = 0; i < sizeOfStichwortResult; i++) {
@@ -148,8 +151,6 @@ public class Model implements PersistenceModel {
 
 
     private void issueStatement(String connextionString, String statement2) {
-        MysqlConnect connect = new MysqlConnect();
-        connect.connectToLocalhost();
         connect.issueInsertOrDeleteStatement("set global max_connections = 20000000000;");
         connect.issueInsertOrDeleteStatement("use " + systemProperties.getProperty("uni.db.name") + ";");
         connect.issueInsertOrDeleteStatement(statement2);
@@ -224,8 +225,6 @@ public class Model implements PersistenceModel {
             logger.debug("Leaving stichwortVarToCsv");
         } else {
             for (String key : stichwortVar.getElements().keySet()) {
-                MysqlConnect connect = new MysqlConnect();
-                connect.connectToLocalhost();
                 connect.issueInsertOrDeleteStatement("use " + systemProperties.getProperty("uni.db.name") + ";");
                 //TODO change table name to dynamic topic
                 connect.issueInsertOrDeleteStatement("CREATE TABLE IF NOT EXISTS stichVariable (Stichworte TEXT, Variable TEXT);");
@@ -361,7 +360,6 @@ public class Model implements PersistenceModel {
     }
 
     private void writeVarMetaToDB(String latLon, String col1, String col3, String col4, String col5, String col6, String col7, String col8) {
-        MysqlConnect connect = new MysqlConnect();
         if (! latLon.contains(delimiter)) {
             return;
         }
@@ -369,7 +367,6 @@ public class Model implements PersistenceModel {
             //logger.debug("is " + latLon);
             return;
         }
-        connect.connectToLocalhost();
         connect.issueInsertOrDeleteStatement("use " + systemProperties.getProperty("uni.db.name") + ";");
         connect.issueInsertOrDeleteStatement("INSERT INTO " + database + "_"
                 + systemProperties.getProperty("suffix.varMeta") + " (`Variable`, `Stichworte`, `Hochschule`, `Content`,"

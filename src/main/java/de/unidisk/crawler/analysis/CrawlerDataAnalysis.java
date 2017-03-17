@@ -2,15 +2,15 @@ package de.unidisk.crawler.analysis;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import de.unidisk.common.SystemProperties;
+import de.unidisk.common.datastructures.Pair;
 import de.unidisk.common.mysql.VereinfachtesResultSet;
+import de.unidisk.crawler.mysql.MysqlConnector;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
-import de.unidisk.crawler.mysql.MysqlConnector;
-import de.unidisk.common.datastructures.Pair;
-
 
 import java.util.*;
 
@@ -25,7 +25,7 @@ public class CrawlerDataAnalysis {
     public HashMap<Double, String> inputData;
     private Properties systemProperties = SystemProperties.getInstance();
 
-    private MysqlConnector mysqlConnect = new MysqlConnector(systemProperties.getProperty("uni.db.name"));
+    private MysqlConnector mysqlConnect;
 
     static Logger logger = Logger.getLogger(CrawlerDataAnalysis.class);
 
@@ -33,7 +33,8 @@ public class CrawlerDataAnalysis {
 
     }
 
-    public CrawlerDataAnalysis(int minResults, int maxResults, String tableName) {
+    public CrawlerDataAnalysis(int minResults, int maxResults, String tableName) throws CommunicationsException {
+        mysqlConnect = new MysqlConnector();
         this.minResults = minResults;
         this.maxResults = maxResults;
         this.tableName = tableName;
@@ -46,7 +47,7 @@ public class CrawlerDataAnalysis {
                 + tableName + "_"
                 + systemProperties.getProperty("suffix.varMeta") + " Where Lat != -1 "
                 + "AND Variable=\"" + var + "\"";
-        VereinfachtesResultSet result = mysqlConnect.connector.issueSelectStatement(query);
+        VereinfachtesResultSet result = mysqlConnect.issueSelectStatement(query);
         inputData = new HashMap<>();
         HashMap<Pair<Double>, Double> latLongSolrMap = new HashMap<>();
         if (!result.isBeforeFirst()) {
@@ -123,6 +124,6 @@ public class CrawlerDataAnalysis {
         String query = "DELETE FROM `" + tableName + "_"
                 + systemProperties.getProperty("suffix.varMeta") + "` WHERE NOT (Hochschule) IN (\"" + str + "\") "
                 + "AND Variable=\"" + var + "\"";
-        mysqlConnect.connector.issueInsertOrDeleteStatement(query);
+        mysqlConnect.issueInsertOrDeleteStatement(query);
     }
 }

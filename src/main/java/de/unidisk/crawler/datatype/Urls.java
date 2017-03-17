@@ -1,6 +1,6 @@
 package de.unidisk.crawler.datatype;
 
-import de.unidisk.common.SystemProperties;
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import de.unidisk.crawler.exception.NoDomainFoundException;
 import de.unidisk.crawler.exception.NoHochschuleException;
 import de.unidisk.crawler.exception.NoResultsException;
@@ -9,16 +9,15 @@ import de.unidisk.crawler.mysql.MysqlResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Created by carl on 03.02.16.
  */
 public class Urls {
     private List<UrlHochschule> urls;
-    private Properties systemProperties = SystemProperties.getInstance();
-    private MysqlConnector mysqlConn = new MysqlConnector(systemProperties.getProperty("uni.db.name"));
-    public Urls() throws NoResultsException {
+    private MysqlConnector mysqlConn;
+    public Urls() throws NoResultsException, CommunicationsException {
+        mysqlConn = new MysqlConnector();
         urls = new ArrayList<>();
         mysqlConn.initHochschulen();
 
