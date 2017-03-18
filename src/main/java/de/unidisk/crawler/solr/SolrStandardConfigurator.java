@@ -1,6 +1,7 @@
 package de.unidisk.crawler.solr;
 
 import de.unidisk.common.SystemProperties;
+import org.apache.solr.client.solrj.SolrQuery;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +36,8 @@ public class SolrStandardConfigurator {
     public static String[] getStandardFields() {
         return new String[]{getFieldProperties().get("id"),
                 getFieldProperties().get("title"),
-                getFieldProperties().get("date")
+                getFieldProperties().get("date"),
+                getFieldProperties().get("score")
         };
     }
 
@@ -46,7 +48,15 @@ public class SolrStandardConfigurator {
             fieldProperties.put("title", "title_de");
             fieldProperties.put("content", "text_de");
             fieldProperties.put("date", "date_dt");
+            fieldProperties.put("score", "score");
         }
         return fieldProperties;
+    }
+
+    public static void configureSolrQuery(SolrQuery query) {
+        query.set("indent", "true");
+        query.set("rows", SolrStandardConfigurator.getLimit());
+        query.setFields(SolrStandardConfigurator.getStandardFields());
+        query.set("wt", "json");
     }
 }

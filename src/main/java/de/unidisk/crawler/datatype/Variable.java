@@ -10,8 +10,8 @@ import java.util.List;
  * Created by carl on 12.03.17.
  */
 public class Variable {
-    String name;
-    List<Stichwort> stichworte;
+    private String name;
+    private List<Stichwort> stichworte;
 
     public Variable(String name) {
         this.name = name;
@@ -20,6 +20,14 @@ public class Variable {
 
     public void addStichwort(Stichwort stichwort) {
         stichworte.add(stichwort);
+    }
+
+    public boolean hasStichwort(Stichwort stichwort) {
+        return stichworte.contains(stichwort);
+    }
+
+    public List<Stichwort> getStichworte() {
+        return stichworte;
     }
 
     public SolrQuery buildQuery() {
@@ -33,11 +41,16 @@ public class Variable {
         queryBuilder.append("/");
 
         SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperties().get("content") + ":" + queryBuilder.toString());
-        solrQuery.set("indent", "true");
-        solrQuery.set("rows", SolrStandardConfigurator.getLimit());
-        solrQuery.setFields(SolrStandardConfigurator.getStandardFields());
-        solrQuery.set("wt", "json");
-
+        SolrStandardConfigurator.configureSolrQuery(solrQuery);
         return solrQuery;
+    }
+
+    public int getStichwortCount() {
+        return stichworte.size();
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

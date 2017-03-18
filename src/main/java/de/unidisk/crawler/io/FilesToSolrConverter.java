@@ -29,6 +29,9 @@ public class FilesToSolrConverter {
         File directory = new File(dirPath);
         List<SolrInputDocument> solrInputDocuments = new ArrayList<>();
         for (File file : directory.listFiles()) {
+            if (file.getAbsolutePath().endsWith(".ignore")) {
+                continue;
+            }
             try {
                 SolrFile solrFile = new SolrFile(file.getAbsolutePath());
                 solrInputDocuments.add(solrFile.getSolrInputDocument());

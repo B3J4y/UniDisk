@@ -4,6 +4,9 @@ import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import de.unidisk.nlp.basics.EnhancedWithRegExp;
 import org.apache.solr.client.solrj.SolrQuery;
 
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * Created by carl on 12.03.17.
  */
@@ -12,6 +15,11 @@ public class Stichwort extends EnhancedWithRegExp {
 
     public Stichwort(String name) {
         this.name = name;
+    }
+
+    public Stichwort(String name, List<Modifier> modifiers) {
+        this.name = name;
+        this.modifiers = new HashSet<>(modifiers);
     }
 
     public String buildRegExp() {
@@ -29,10 +37,12 @@ public class Stichwort extends EnhancedWithRegExp {
             regexp += "/";
         }
         SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperties().get("content") + ":" + regexp);
-        solrQuery.set("indent", "true");
-        solrQuery.set("rows", SolrStandardConfigurator.getLimit());
-        solrQuery.setFields(SolrStandardConfigurator.getStandardFields());
-        solrQuery.set("wt", "json");
+        SolrStandardConfigurator.configureSolrQuery(solrQuery);
         return solrQuery;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
