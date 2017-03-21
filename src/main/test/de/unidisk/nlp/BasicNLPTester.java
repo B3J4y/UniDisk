@@ -1,10 +1,14 @@
 package de.unidisk.nlp;
 
-import de.unidisk.nlp.basics.EnhancedWithRegExp;
+import de.unidisk.crawler.datatype.Stichwort;
+import de.unidisk.crawler.datatype.StichwortModifier;
 import de.unidisk.nlp.basics.GermanStemming;
+import de.unidisk.nlp.datatype.RegExpStichwort;
 import de.unidisk.nlp.datatype.Rule;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,44 +20,45 @@ import static org.junit.Assert.*;
 public class BasicNLPTester {
     @Test
     public void testEnhancedWithRegExp() throws Exception {
-        EnhancedWithRegExp enhanced = new EnhancedWithRegExp();
-        Matcher matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("Test");
+        List<StichwortModifier> modifiers = new ArrayList<>();
+        Stichwort regexStichwort = new RegExpStichwort("Test");
+        Matcher matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("Test");
         assertTrue(matcher.find());
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("Tester");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("Tester");
         assertTrue(matcher.find());
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("tester");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("tester");
         assertFalse(matcher.find());
 
-        enhanced.addModifier(EnhancedWithRegExp.Modifier.NOT_CASE_SENSITIVE);
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("tester");
+        modifiers.add(StichwortModifier.NOT_CASE_SENSITIVE);
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("tester");
         assertTrue(matcher.find());
 
-        enhanced.addModifier(EnhancedWithRegExp.Modifier.END_OF_WORD);
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("tester");
+        modifiers.add(StichwortModifier.END_OF_WORD);
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("tester");
         assertFalse(matcher.find());
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("test ");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("test ");
         assertTrue(matcher.find());
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("test");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("test");
         assertTrue(matcher.find());
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("Atest");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("Atest");
         assertTrue(matcher.find());
 
-        enhanced.addModifier(EnhancedWithRegExp.Modifier.START_OF_WORD);
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("Atest");
+        modifiers.add(StichwortModifier.START_OF_WORD);
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("Atest");
         assertFalse(matcher.find());
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("test");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("test");
         assertTrue(matcher.find());
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher(" test ");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher(" test ");
         assertTrue(matcher.find());
 
-        enhanced.removeModifier(EnhancedWithRegExp.Modifier.START_OF_WORD);
-        enhanced.removeModifier(EnhancedWithRegExp.Modifier.END_OF_WORD);
-        enhanced.removeModifier(EnhancedWithRegExp.Modifier.NOT_CASE_SENSITIVE);
+        modifiers.remove(StichwortModifier.START_OF_WORD);
+        modifiers.remove(StichwortModifier.END_OF_WORD);
+        modifiers.remove(StichwortModifier.NOT_CASE_SENSITIVE);
 
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("ThisTestIsGood");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("ThisTestIsGood");
         assertFalse(matcher.matches());
-        enhanced.addModifier(EnhancedWithRegExp.Modifier.PART_OF_WORD);
-        matcher = Pattern.compile(enhanced.buildRegExp("Test")).matcher("ThisTestIsGood");
+        modifiers.add(StichwortModifier.PART_OF_WORD);
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("ThisTestIsGood");
         assertTrue(matcher.matches());
 
     }

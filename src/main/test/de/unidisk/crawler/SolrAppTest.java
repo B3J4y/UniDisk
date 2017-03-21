@@ -2,12 +2,13 @@ package de.unidisk.crawler;
 
 import de.unidisk.common.SystemProperties;
 import de.unidisk.crawler.datatype.Stichwort;
+import de.unidisk.crawler.datatype.StichwortModifier;
 import de.unidisk.crawler.datatype.Variable;
 import de.unidisk.crawler.exception.NoResultsException;
 import de.unidisk.crawler.mysql.MysqlConnector;
 import de.unidisk.crawler.solr.SolrConnector;
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
-import de.unidisk.nlp.basics.EnhancedWithRegExp;
+import de.unidisk.nlp.datatype.RegExpStichwort;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
@@ -52,8 +53,8 @@ public class SolrAppTest {
         }
         SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
         try {
-            Stichwort stichwort = new Stichwort("Test");
-            QueryResponse response = connector.query(stichwort.buildQuery());
+            Stichwort stichwort = new RegExpStichwort("Test");
+            QueryResponse response = connector.query(stichwort.buildQuery(new ArrayList<>()));
             assertTrue(response.getResults().getNumFound() >= 0);
         } catch (Exception e) {
             throw new Error(e);
@@ -79,29 +80,33 @@ public class SolrAppTest {
         connector.insertDocument(document);
         docs.add(document.deepCopy());
 
-        Stichwort stichwort = new Stichwort("document");
-        QueryResponse response = connector.query(stichwort.buildQuery());
+        Stichwort regexStichwort = new RegExpStichwort("document");
+        QueryResponse response = connector.query(regexStichwort.buildQuery(new ArrayList<>()));
         assertEquals(2, response.getResults().getNumFound());
 
-        stichwort = new Stichwort("doc");
-        stichwort.addModifier(EnhancedWithRegExp.Modifier.PART_OF_WORD);
-        response = connector.query(stichwort.buildQuery());
+        regexStichwort = new RegExpStichwort("doc");
+        List<StichwortModifier> modifiers = new ArrayList<>();
+        modifiers.add(StichwortModifier.PART_OF_WORD);
+        response = connector.query(regexStichwort.buildQuery(modifiers));
         assertEquals(2, response.getResults().getNumFound());
 
-        stichwort = new Stichwort("second");
-        response = connector.query(stichwort.buildQuery());
+        regexStichwort = new RegExpStichwort("second");
+        response = connector.query(regexStichwort.buildQuery(new ArrayList<>()));
         assertEquals(1, response.getResults().getNumFound());
 
-        Variable variable = new Variable("Test Variable");
-        variable.addStichwort(new Stichwort("very"));
-        variable.addStichwort(new Stichwort("second"));
-        response = connector.query(variable.buildQuery());
+        List<RegExpStichwort> stichworte = new ArrayList<>();
+        stichworte.add(new RegExpStichwort("very"));
+        stichworte.add(new RegExpStichwort("second"));
+        Variable<RegExpStichwort> variable = new Variable("Test Variable", stichworte);
+        modifiers = new ArrayList<>();
+        response = connector.query(variable.buildQuery(modifiers));
         assertEquals(2, response.getResults().getNumFound());
 
-        variable = new Variable("Test Variable");
-        variable.addStichwort(new Stichwort("none"));
-        variable.addStichwort(new Stichwort("second"));
-        response = connector.query(variable.buildQuery());
+        stichworte = new ArrayList<>();
+        stichworte.add(new RegExpStichwort("none"));
+        stichworte.add(new RegExpStichwort("second"));
+        variable = new Variable("Test Variable", stichworte);
+        response = connector.query(variable.buildQuery(modifiers));
         assertEquals(1, response.getResults().getNumFound());
 
         for (SolrInputDocument doc : docs) {
