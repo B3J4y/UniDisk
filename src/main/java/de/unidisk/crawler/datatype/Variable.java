@@ -40,7 +40,7 @@ public class Variable {
         queryBuilder.deleteCharAt(queryBuilder.length() - 1);
         queryBuilder.append("/");
 
-        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperties().get("content") + ":" + queryBuilder.toString());
+        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperties("content") + ":" + queryBuilder.toString());
         SolrStandardConfigurator.configureSolrQuery(solrQuery);
         return solrQuery;
     }

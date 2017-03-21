@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
 
 /**
  * Data representation of a convertible solr file
@@ -48,11 +47,10 @@ public class SolrFile {
 
     public SolrInputDocument getSolrInputDocument() {
         SolrInputDocument document = new SolrInputDocument();
-        Map<String, String> solrFieldProps = SolrStandardConfigurator.getFieldProperties();
-        document.setField(solrFieldProps.get("id"), id);
-        document.setField(solrFieldProps.get("title"), title);
-        document.setField(solrFieldProps.get("content"), content);
-        document.setField(solrFieldProps.get("date"), modifiedDate);
+        document.setField(SolrStandardConfigurator.getFieldProperties("id"), id);
+        document.setField(SolrStandardConfigurator.getFieldProperties("title"), title);
+        document.setField(SolrStandardConfigurator.getFieldProperties("content"), content);
+        document.setField(SolrStandardConfigurator.getFieldProperties("date"), modifiedDate);
         return document;
     }
 }

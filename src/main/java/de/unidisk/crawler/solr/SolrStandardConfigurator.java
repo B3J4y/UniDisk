@@ -34,14 +34,14 @@ public class SolrStandardConfigurator {
     }
 
     public static String[] getStandardFields() {
-        return new String[]{getFieldProperties().get("id"),
-                getFieldProperties().get("title"),
-                getFieldProperties().get("date"),
-                getFieldProperties().get("score")
+        return new String[]{getFieldProperties("id"),
+                getFieldProperties("title"),
+                getFieldProperties("date"),
+                getFieldProperties("score")
         };
     }
 
-    public static Map<String, String> getFieldProperties() {
+    public static String getFieldProperties(String field) {
         if (fieldProperties == null) {
             fieldProperties = new HashMap<>();
             fieldProperties.put("id", "id");
@@ -50,7 +50,7 @@ public class SolrStandardConfigurator {
             fieldProperties.put("date", "date_dt");
             fieldProperties.put("score", "score");
         }
-        return fieldProperties;
+        return fieldProperties.get(field);
     }
 
     public static void configureSolrQuery(SolrQuery query) {

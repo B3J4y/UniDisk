@@ -94,7 +94,7 @@ public class SolrConnector {
     public void deleteDocuments(SolrDocumentList documents) throws IOException, SolrServerException {
         for (int i = 0; i < documents.getNumFound(); i++) {
             SolrDocument document = documents.get(i);
-            String idIdentifier = SolrStandardConfigurator.getFieldProperties().get("id");
+            String idIdentifier = SolrStandardConfigurator.getFieldProperties("id");
             client.deleteById((String) document.getFieldValue(idIdentifier));
         }
         client.commit();

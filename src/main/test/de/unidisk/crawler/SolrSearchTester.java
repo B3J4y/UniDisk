@@ -83,10 +83,9 @@ public class SolrSearchTester {
         out.close();
 
         SolrFile solrFile = new SolrFile(file.getAbsolutePath());
-        Map<String, String> solrFields = SolrStandardConfigurator.getFieldProperties();
-        assertEquals("Id from testfile", 1, solrFile.getSolrInputDocument().get(solrFields.get("id")).getValue());
-        assertEquals("Title of testfile", "FirstBook", solrFile.getSolrInputDocument().get(solrFields.get("title")).getValue());
-        assertEquals("Content from testfile", content, solrFile.getSolrInputDocument().get(solrFields.get("content")).getValue());
+        assertEquals("Id from testfile", 1, solrFile.getSolrInputDocument().get(SolrStandardConfigurator.getFieldProperties("id")).getValue());
+        assertEquals("Title of testfile", "FirstBook", solrFile.getSolrInputDocument().get(SolrStandardConfigurator.getFieldProperties("title")).getValue());
+        assertEquals("Content from testfile", content, solrFile.getSolrInputDocument().get(SolrStandardConfigurator.getFieldProperties("content")).getValue());
 
         assertTrue("File couldn't be deleted", file.delete());
     }
@@ -149,10 +148,10 @@ public class SolrSearchTester {
                     continue;
                 }
                 for (int i = 0; i < results.getNumFound(); i++) {
-                    resultTitles.add((String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties().get("title")));
+                    resultTitles.add((String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties("title")));
                 }
                 SolrDocument firstResult = results.get(0);
-                String titleBestResult = (String) firstResult.getFieldValue(SolrStandardConfigurator.getFieldProperties().get("title"));
+                String titleBestResult = (String) firstResult.getFieldValue(SolrStandardConfigurator.getFieldProperties("title"));
                 logger.debug(String.format("Stichwort: %s; BestResult: %s, MaxScore: %f", searchStichwort, titleBestResult, results.getMaxScore()));
                 assertEquals("RegExp Queries has usually a score of 1.0", Float.valueOf(1), results.getMaxScore());
             }
@@ -163,7 +162,7 @@ public class SolrSearchTester {
                 continue;
             }
             for (int i = 0; i < results.getNumFound(); i++) {
-                String resultTitle = (String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties().get("title"));
+                String resultTitle = (String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties("title"));
                 assertTrue("For the regex variable query is a title which couldn't found in Stichworte", resultTitles.contains(resultTitle));
                 resultTitles.remove(resultTitle);
             }

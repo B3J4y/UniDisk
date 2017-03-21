@@ -65,17 +65,17 @@ public class SolrAppTest {
         SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
         List<SolrInputDocument> docs = new ArrayList<>();
         SolrInputDocument document = new SolrInputDocument();
-        document.addField(SolrStandardConfigurator.getFieldProperties().get("id"), "1");
-        document.addField(SolrStandardConfigurator.getFieldProperties().get("title"), "First Document");
-        document.addField(SolrStandardConfigurator.getFieldProperties().get("content"), "Hi, this is the very first document");
-        document.addField(SolrStandardConfigurator.getFieldProperties().get("date"), new Date());
+        document.addField(SolrStandardConfigurator.getFieldProperties("id"), "1");
+        document.addField(SolrStandardConfigurator.getFieldProperties("title"), "First Document");
+        document.addField(SolrStandardConfigurator.getFieldProperties("content"), "Hi, this is the very first document");
+        document.addField(SolrStandardConfigurator.getFieldProperties("date"), new Date());
         connector.insertDocument(document);
         docs.add(document.deepCopy());
         document = new SolrInputDocument();
-        document.addField(SolrStandardConfigurator.getFieldProperties().get("id"), "2");
-        document.addField(SolrStandardConfigurator.getFieldProperties().get("title"), "Second Document");
-        document.addField(SolrStandardConfigurator.getFieldProperties().get("content"), "Hi, this is the second document");
-        document.addField(SolrStandardConfigurator.getFieldProperties().get("date"), "2017-03-03T00:00:00Z");
+        document.addField(SolrStandardConfigurator.getFieldProperties("id"), "2");
+        document.addField(SolrStandardConfigurator.getFieldProperties("title"), "Second Document");
+        document.addField(SolrStandardConfigurator.getFieldProperties("content"), "Hi, this is the second document");
+        document.addField(SolrStandardConfigurator.getFieldProperties("date"), "2017-03-03T00:00:00Z");
         connector.insertDocument(document);
         docs.add(document.deepCopy());
 
@@ -118,7 +118,7 @@ public class SolrAppTest {
         StringBuilder missingProps = new StringBuilder();
         for (Object prop : gitProps.keySet()) {
             if (systemProperties.getProperty(prop.toString()) == null) {
-                missingProps.append(prop.toString() + ", ");
+                missingProps.append(prop.toString()).append(", ");
             }
         }
         assertTrue("Missing properties " + missingProps.toString(), missingProps.length() == 0);

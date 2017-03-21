@@ -36,7 +36,7 @@ public class Stichwort extends EnhancedWithRegExp {
         if (!regexp.endsWith("/")) {
             regexp += "/";
         }
-        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperties().get("content") + ":" + regexp);
+        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperties("content") + ":" + regexp);
         SolrStandardConfigurator.configureSolrQuery(solrQuery);
         return solrQuery;
     }
