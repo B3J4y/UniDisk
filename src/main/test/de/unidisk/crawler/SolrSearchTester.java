@@ -1,12 +1,12 @@
 package de.unidisk.crawler;
 
 import de.unidisk.crawler.datatype.SolrFile;
-import de.unidisk.crawler.datatype.Stichwort;
+import de.unidisk.crawler.datatype.StichwortModifier;
 import de.unidisk.crawler.datatype.Variable;
 import de.unidisk.crawler.io.FilesToSolrConverter;
 import de.unidisk.crawler.solr.SolrConnector;
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
-import de.unidisk.nlp.basics.EnhancedWithRegExp;
+import de.unidisk.nlp.datatype.RegExpStichwort;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -104,14 +104,17 @@ public class SolrSearchTester {
         assertEquals("Size of documents in directory differs to solr",
                 Math.min(documents.size(), SolrStandardConfigurator.getLimit()), actualNumbers);
 
-        List<Variable> variables = new ArrayList<>();
-        List<Stichwort> stichworts = new ArrayList<>();
-        for (File file : new File(path).listFiles()) {
+        List<Variable<RegExpStichwort>> variables = new ArrayList<>();
+        List<StichwortModifier> mods = new ArrayList<>();
+        mods.add(StichwortModifier.NOT_CASE_SENSITIVE);
+        mods.add(StichwortModifier.PART_OF_WORD);
+        File testDir = new File(path);
+        if (testDir == null && !testDir.isDirectory()) {
+            return;
+        }
+        for (File file : testDir.listFiles()) {
             if (file.getName().endsWith(".ignore")) {
                 logger.info("Found a config File: " + file.getName());
-                List<EnhancedWithRegExp.Modifier> mods = new ArrayList<>();
-                mods.add(EnhancedWithRegExp.Modifier.NOT_CASE_SENSITIVE);
-                mods.add(EnhancedWithRegExp.Modifier.PART_OF_WORD);
                 BufferedReader bufferedReader;
                 bufferedReader = new BufferedReader(new FileReader(file.getAbsolutePath()));
                 String currentLine;
@@ -122,13 +125,14 @@ public class SolrSearchTester {
                         logger.error("currentLine: " + currentLine);
                         return;
                     }
-                    Variable variable = new Variable("FavDoc " + semicolonSplit[0]);
                     String[] commaSplit = semicolonSplit[1].split(",");
+                    List<RegExpStichwort> regExpStichworts = new ArrayList<>();
                     for (String stichwort : commaSplit) {
-                        Stichwort configuredStichwort = new Stichwort(stichwort, mods);
-                        variable.addStichwort(configuredStichwort);
-                        stichworts.add(configuredStichwort);
+                        RegExpStichwort configuredStichwort = new RegExpStichwort(stichwort);
+                        regExpStichworts.add(configuredStichwort);
                     }
+                    Variable<RegExpStichwort> variable = new Variable("FavDoc " + semicolonSplit[0], regExpStichworts);
+
                     assertTrue("Too little count of Stichworte",variable.getStichwortCount() >= 3);
                     variables.add(variable);
                 }
@@ -138,10 +142,10 @@ public class SolrSearchTester {
         logger.debug(String.format("Got %d variables", variables.size()));
 
         //Checks if the regex results for single stichworte are the same as for stichworte bundled in variables
-        for (Variable variable : variables) {
+        for (Variable<RegExpStichwort> variable : variables) {
             Set<String> resultTitles = new HashSet<>();
-            for (Stichwort searchStichwort : variable.getStichworte()) {
-                QueryResponse response = connector.query(searchStichwort.buildQuery());
+            for (RegExpStichwort searchStichwort : variable.getStichworte()) {
+                QueryResponse response = connector.query(searchStichwort.buildQuery(mods));
                 SolrDocumentList results = response.getResults();
                 if (results.getNumFound() <= 0) {
                     logger.debug("No Result for Stichwort " + searchStichwort);
@@ -155,7 +159,7 @@ public class SolrSearchTester {
                 logger.debug(String.format("Stichwort: %s; BestResult: %s, MaxScore: %f", searchStichwort, titleBestResult, results.getMaxScore()));
                 assertEquals("RegExp Queries has usually a score of 1.0", Float.valueOf(1), results.getMaxScore());
             }
-            QueryResponse response = connector.query(variable.buildQuery());
+            QueryResponse response = connector.query(variable.buildQuery(mods));
             SolrDocumentList results = response.getResults();
             if (results.getNumFound() <= 0) {
                 logger.debug("No Result for Variable " + variable.toString());
