@@ -16,4 +16,6 @@ public interface Stichwort {
 
     String getEnd();
 
+    String getSeparator();
+
 }

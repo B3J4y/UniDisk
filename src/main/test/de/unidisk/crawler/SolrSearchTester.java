@@ -1,14 +1,13 @@
 package de.unidisk.crawler;
 
-import de.unidisk.crawler.datatype.SolrFile;
-import de.unidisk.crawler.datatype.StichwortModifier;
-import de.unidisk.crawler.datatype.Variable;
+import de.unidisk.crawler.datatype.*;
 import de.unidisk.crawler.io.FilesToSolrConverter;
 import de.unidisk.crawler.solr.SolrConnector;
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import de.unidisk.nlp.datatype.RegExpStichwort;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -18,10 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -98,15 +94,19 @@ public class SolrSearchTester {
         assertEquals("Size of documents in directory differs to solr",
                 Math.min(documents.size(), SolrStandardConfigurator.getLimit()), actualNumbers);
 
-        List<Variable<RegExpStichwort>> variables = new ArrayList<>();
+        List<Variable<RegExpStichwort>> regExpVariables = new ArrayList<>();
+        List<Variable<SolrStichwort>> solrVariables = new ArrayList<>();
+
         List<StichwortModifier> mods = new ArrayList<>();
         mods.add(StichwortModifier.NOT_CASE_SENSITIVE);
         mods.add(StichwortModifier.PART_OF_WORD);
         File testDir = new File(path);
-        if (testDir == null && !testDir.isDirectory()) {
+        File[] listFiles = testDir.listFiles();
+        if (listFiles == null) {
+            logger.debug("Nothing to do here");
             return;
         }
-        for (File file : testDir.listFiles()) {
+        for (File file : listFiles) {
             if (file.getName().endsWith(".ignore")) {
                 logger.info("Found a config File: " + file.getName());
                 BufferedReader bufferedReader;
@@ -120,22 +120,47 @@ public class SolrSearchTester {
                         return;
                     }
                     String[] commaSplit = semicolonSplit[1].split(",");
-                    List<RegExpStichwort> regExpStichworts = new ArrayList<>();
-                    Arrays.stream(commaSplit).map(RegExpStichwort::new).forEach(regExpStichworts::add);
-                    Variable<RegExpStichwort> variable = new Variable<>("FavDoc " + semicolonSplit[0], regExpStichworts);
 
-                    assertTrue("Too little count of Stichworte",variable.getStichwortCount() >= 3);
-                    variables.add(variable);
+                    List<RegExpStichwort> regExpStichworts = new ArrayList<>();
+                    List<SolrStichwort> solrStichworts = new ArrayList<>();
+
+                    Arrays.stream(commaSplit).map(RegExpStichwort::new).forEach(regExpStichworts::add);
+                    Arrays.stream(commaSplit).map(SolrStichwort::new).forEach(solrStichworts::add);
+
+                    Variable<RegExpStichwort> regExpVariable = new Variable<>("FavDoc " + semicolonSplit[0], regExpStichworts);
+                    Variable<SolrStichwort> solrVariable = new Variable<>("FavDoc " + semicolonSplit[0], solrStichworts);
+
+                    assertTrue("Too little count of Stichworte", regExpVariable.getStichwortCount() >= 3);
+                    assertTrue("Too little count of Stichworte", solrVariable.getStichwortCount() >= 3);
+                    regExpVariables.add(regExpVariable);
+                    solrVariables.add(solrVariable);
                 }
             }
         }
 
-        logger.debug(String.format("Got %d variables", variables.size()));
+        logger.debug(String.format("Got %d variables", regExpVariables.size()));
 
-        //Checks if the regex results for single stichworte are the same as for stichworte bundled in variables
-        for (Variable<RegExpStichwort> variable : variables) {
+        logger.info("----------------------- Check Regex ---------------------------------");
+        compareVariableWithStichwort(regExpVariables, connector, mods);
+        logger.info("----------------------- Check Solr ---------------------------------");
+        compareVariableWithStichwort(solrVariables, connector, mods);
+
+        for (SolrInputDocument document : documents) {
+            connector.deleteDocument(document);
+        }
+        queryResponse = connector.queryAllDocuments();
+        actualNumbers = queryResponse.getResults().getNumFound();
+        assertEquals("No documents should be left in solr",
+                0, actualNumbers);
+    }
+
+    private <K extends Stichwort> void compareVariableWithStichwort(
+            List<Variable<K>> variables,
+            SolrConnector connector,
+            List<StichwortModifier> mods) throws IOException, SolrServerException {
+        for (Variable<K> variable : variables) {
             Set<String> resultTitles = new HashSet<>();
-            for (RegExpStichwort searchStichwort : variable.getStichworte()) {
+            for (K searchStichwort : variable.getStichworte()) {
                 QueryResponse response = connector.query(searchStichwort.buildQuery(mods));
                 SolrDocumentList results = response.getResults();
                 if (results.getNumFound() <= 0) {
@@ -144,32 +169,31 @@ public class SolrSearchTester {
                 }
 
                 for (int i = 0; i < results.getNumFound(); i++) {
-                    resultTitles.add((String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties("title")));
+                    String title = (String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties("title"));
+                    float score = (float) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties("score"));
+                    resultTitles.add(title);
+                    logger.debug(String.format("Title: %s, Score: %f", title, score));
                 }
                 SolrDocument firstResult = results.get(0);
                 String titleBestResult = (String) firstResult.getFieldValue(SolrStandardConfigurator.getFieldProperties("title"));
                 logger.debug(String.format("Stichwort: %s; BestResult: %s, MaxScore: %f", searchStichwort, titleBestResult, results.getMaxScore()));
-                assertEquals("RegExp Queries has usually a score of 1.0", Float.valueOf(1), results.getMaxScore());
             }
             QueryResponse response = connector.query(variable.buildQuery(mods));
             SolrDocumentList results = response.getResults();
             if (results.getNumFound() <= 0) {
                 logger.debug("No Result for Variable " + variable.toString());
+                assertTrue(String.format("Titles found as Stichwort but not as Variable") , resultTitles.size() == 0);
                 continue;
             }
             for (int i = 0; i < results.getNumFound(); i++) {
                 String resultTitle = (String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties("title"));
+                float score = (float) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties("score"));
                 assertTrue("For the regex variable query is a title which couldn't found in Stichworte", resultTitles.contains(resultTitle));
+                logger.debug(String.format("Title: %s, Score: %f", resultTitle, score));
                 resultTitles.remove(resultTitle);
             }
             assertTrue("More titles found as stichwort than in variable", resultTitles.size() == 0);
         }
-        for (SolrInputDocument document : documents) {
-            connector.deleteDocument(document);
-        }
-        queryResponse = connector.queryAllDocuments();
-        actualNumbers = queryResponse.getResults().getNumFound();
-        assertEquals("No documents should be left in solr",
-                0, actualNumbers);
+
     }
 }

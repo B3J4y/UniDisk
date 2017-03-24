@@ -37,7 +37,7 @@ public class Variable<K extends Stichwort> {
 
         for (Stichwort stichwort : stichworte) {
             queryBuilder.append(stichwort.buildExpression(modifiers));
-            queryBuilder.append("|");
+            queryBuilder.append(stichwort.getSeparator());
         }
         queryBuilder.deleteCharAt(queryBuilder.length() - 1);
         queryBuilder.append(stichworte.get(0).getEnd());
