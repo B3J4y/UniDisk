@@ -48,14 +48,8 @@ public class SolrSearchTester {
     public static Collection<Object[]> data() {
         File[] files = new File(String.join(File.separator, new String[]{".", "src", "main", "resources", "test", "solr"})).listFiles();
         Collection<Object[]> result = new ArrayList<>();
-        for (File file : files) {
-            if (file.isDirectory()) {
-                result.add(new Object[]{
-                        file.getAbsolutePath(),
-                        file.getName()
-                });
-            }
-        }
+        Arrays.stream(files).filter(File::isDirectory).map(dir -> new Object[]{dir.getAbsolutePath(), dir.getName()})
+                .forEach(result::add);
         return result;
     }
 
@@ -127,11 +121,8 @@ public class SolrSearchTester {
                     }
                     String[] commaSplit = semicolonSplit[1].split(",");
                     List<RegExpStichwort> regExpStichworts = new ArrayList<>();
-                    for (String stichwort : commaSplit) {
-                        RegExpStichwort configuredStichwort = new RegExpStichwort(stichwort);
-                        regExpStichworts.add(configuredStichwort);
-                    }
-                    Variable<RegExpStichwort> variable = new Variable("FavDoc " + semicolonSplit[0], regExpStichworts);
+                    Arrays.stream(commaSplit).map(RegExpStichwort::new).forEach(regExpStichworts::add);
+                    Variable<RegExpStichwort> variable = new Variable<>("FavDoc " + semicolonSplit[0], regExpStichworts);
 
                     assertTrue("Too little count of Stichworte",variable.getStichwortCount() >= 3);
                     variables.add(variable);
@@ -151,6 +142,7 @@ public class SolrSearchTester {
                     logger.debug("No Result for Stichwort " + searchStichwort);
                     continue;
                 }
+
                 for (int i = 0; i < results.getNumFound(); i++) {
                     resultTitles.add((String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperties("title")));
                 }
@@ -172,7 +164,6 @@ public class SolrSearchTester {
             }
             assertTrue("More titles found as stichwort than in variable", resultTitles.size() == 0);
         }
-
         for (SolrInputDocument document : documents) {
             connector.deleteDocument(document);
         }

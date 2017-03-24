@@ -121,11 +121,8 @@ public class SolrAppTest {
         gitProps.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(String.join(File.separator, pathToProperties)));
 
         StringBuilder missingProps = new StringBuilder();
-        for (Object prop : gitProps.keySet()) {
-            if (systemProperties.getProperty(prop.toString()) == null) {
-                missingProps.append(prop.toString()).append(", ");
-            }
-        }
+        gitProps.entrySet().stream().filter(map -> systemProperties.getProperty(map.getKey().toString()) == null)
+            .forEach(map -> missingProps.append(map.getKey().toString()).append(","));
         assertTrue("Missing properties " + missingProps.toString(), missingProps.length() == 0);
     }
 }
