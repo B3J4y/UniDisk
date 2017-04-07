@@ -47,10 +47,10 @@ public class SolrFile {
 
     public SolrInputDocument getSolrInputDocument() {
         SolrInputDocument document = new SolrInputDocument();
-        document.setField(SolrStandardConfigurator.getFieldProperties("id"), id);
-        document.setField(SolrStandardConfigurator.getFieldProperties("title"), title);
-        document.setField(SolrStandardConfigurator.getFieldProperties("content"), content);
-        document.setField(SolrStandardConfigurator.getFieldProperties("date"), modifiedDate);
+        document.setField(SolrStandardConfigurator.getFieldProperty("id"), id);
+        document.setField(SolrStandardConfigurator.getFieldProperty("title"), title);
+        document.setField(SolrStandardConfigurator.getFieldProperty("content"), content);
+        document.setField(SolrStandardConfigurator.getFieldProperty("date"), modifiedDate);
         return document;
     }
 }

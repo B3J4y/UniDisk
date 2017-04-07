@@ -12,24 +12,28 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Created by carl on 07.01.16.
  */
 public class SolrConnector {
     static private final Logger logger = LogManager.getLogger(SolrConnector.class.getName());
+    private final String dbName;
     private SolrClient client ;
     private final String serverUrl;
     private static int limit =1000000;
     private static Properties systemProperties = SystemProperties.getInstance();
 
-    public SolrConnector(String serverUrl) {
+    public SolrConnector(String serverUrl, String dbName) {
         logger.debug("Entering SolrConnector Constructor with serverUrl:" + serverUrl);
         this.serverUrl = serverUrl;
         client = new HttpSolrClient(serverUrl);
+        this.dbName = dbName;
         logger.debug("Leaving SolrConnector Constructor");
     }
 
@@ -94,10 +98,44 @@ public class SolrConnector {
     public void deleteDocuments(SolrDocumentList documents) throws IOException, SolrServerException {
         for (int i = 0; i < documents.getNumFound(); i++) {
             SolrDocument document = documents.get(i);
-            String idIdentifier = SolrStandardConfigurator.getFieldProperties("id");
+            String idIdentifier = SolrStandardConfigurator.getFieldProperty("id");
             client.deleteById((String) document.getFieldValue(idIdentifier));
         }
         client.commit();
+    }
+
+    public void addToWordlist(String word) {
+        File file = SolrStandardConfigurator.getCompoundedWordsFile(dbName);
+        if (file == null) {
+            return;
+        }
+        Set<String> words = new HashSet<>();
+        BufferedReader bufferedReader;
+        try {
+            bufferedReader = new BufferedReader(new FileReader(file.getAbsolutePath()));
+            String currentLine;
+            while ((currentLine = bufferedReader.readLine()) != null) {
+                String singleWord = currentLine.replace("\n", "").replace(";", "");
+                words.add(singleWord);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (!words.contains(word)) {
+            words.add(word);
+            BufferedWriter writer;
+            try {
+                writer = new BufferedWriter(new FileWriter(file.getAbsolutePath()));
+                for (String writableWords : words) {
+                    writer.write(writableWords + "\n");
+                }
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public String getServerUrl(){

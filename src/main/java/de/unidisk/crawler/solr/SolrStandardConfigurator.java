@@ -3,6 +3,8 @@ package de.unidisk.crawler.solr;
 import de.unidisk.common.SystemProperties;
 import org.apache.solr.client.solrj.SolrQuery;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -34,14 +36,14 @@ public class SolrStandardConfigurator {
     }
 
     public static String[] getStandardFields() {
-        return new String[]{getFieldProperties("id"),
-                getFieldProperties("title"),
-                getFieldProperties("date"),
-                getFieldProperties("score")
+        return new String[]{getFieldProperty("id"),
+                getFieldProperty("title"),
+                getFieldProperty("date"),
+                getFieldProperty("score")
         };
     }
 
-    public static String getFieldProperties(String field) {
+    public static String getFieldProperty(String field) {
         if (fieldProperties == null) {
             fieldProperties = new HashMap<>();
             fieldProperties.put("id", "id");
@@ -51,6 +53,25 @@ public class SolrStandardConfigurator {
             fieldProperties.put("score", "score");
         }
         return fieldProperties.get(field);
+    }
+
+    public static File getCompoundedWordsFile(String solrDb) {
+        String[] path = new String[]{"server", "solr", solrDb, "germanwords.txt"};
+        File compundedWordsFile = new File(systemProperties.getProperty("solr.system.path")
+                + File.separator + String.join(File.separator, path));
+        if (compundedWordsFile.isFile()) {
+            return compundedWordsFile;
+        }
+        if (!compundedWordsFile.exists()) {
+            try {
+                if (compundedWordsFile.createNewFile()) {
+                    return compundedWordsFile;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
     public static void configureSolrQuery(SolrQuery query) {

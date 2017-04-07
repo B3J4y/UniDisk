@@ -29,7 +29,7 @@ public abstract class AbstractStichwort implements Stichwort {
         if (!expression.endsWith(getEnd())) {
             expression += getEnd();
         }
-        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperties("content") + ":" + expression);
+        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperty("content") + ":" + expression);
         SolrStandardConfigurator.configureSolrQuery(solrQuery);
         return solrQuery;
     }

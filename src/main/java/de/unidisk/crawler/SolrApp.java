@@ -40,7 +40,8 @@ public class SolrApp {
         try {
             //ReadCsv csv = new ReadCsv(MagicStrings.dataPath);
             ReadMysql mysql = new ReadMysql();
-            SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getStandardUrl());
+            SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getStandardUrl(),
+                    systemProperties.getProperty("solr.connection.db"));
 
             CrawlerDataAnalysis cda = new CrawlerDataAnalysis(Integer.valueOf(systemProperties.getProperty("values.percentile.min")),
                     Integer.valueOf(systemProperties.getProperty("values.percentile.max")), this.database);

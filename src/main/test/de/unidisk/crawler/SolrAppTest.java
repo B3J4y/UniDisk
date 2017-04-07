@@ -15,11 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -51,7 +48,8 @@ public class SolrAppTest {
         } catch (NoResultsException e) {
             throw new Error(e);
         }
-        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl(),
+                systemProperties.getProperty("solr.connection.testDb"));
         try {
             Stichwort stichwort = new RegExpStichwort("Test");
             QueryResponse response = connector.query(stichwort.buildQuery(new ArrayList<>()));
@@ -63,20 +61,21 @@ public class SolrAppTest {
 
     @Test
     public void testFieldInputAndQuery() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl(),
+                systemProperties.getProperty("solr.connection.testDb"));
         List<SolrInputDocument> docs = new ArrayList<>();
         SolrInputDocument document = new SolrInputDocument();
-        document.addField(SolrStandardConfigurator.getFieldProperties("id"), "1");
-        document.addField(SolrStandardConfigurator.getFieldProperties("title"), "First Document");
-        document.addField(SolrStandardConfigurator.getFieldProperties("content"), "Hi, this is the very first document");
-        document.addField(SolrStandardConfigurator.getFieldProperties("date"), new Date());
+        document.addField(SolrStandardConfigurator.getFieldProperty("id"), "1");
+        document.addField(SolrStandardConfigurator.getFieldProperty("title"), "First Document");
+        document.addField(SolrStandardConfigurator.getFieldProperty("content"), "Hi, this is the very first document");
+        document.addField(SolrStandardConfigurator.getFieldProperty("date"), new Date());
         connector.insertDocument(document);
         docs.add(document.deepCopy());
         document = new SolrInputDocument();
-        document.addField(SolrStandardConfigurator.getFieldProperties("id"), "2");
-        document.addField(SolrStandardConfigurator.getFieldProperties("title"), "Second Document");
-        document.addField(SolrStandardConfigurator.getFieldProperties("content"), "Hi, this is the second document");
-        document.addField(SolrStandardConfigurator.getFieldProperties("date"), "2017-03-03T00:00:00Z");
+        document.addField(SolrStandardConfigurator.getFieldProperty("id"), "2");
+        document.addField(SolrStandardConfigurator.getFieldProperty("title"), "Second Document");
+        document.addField(SolrStandardConfigurator.getFieldProperty("content"), "Hi, this is the second document");
+        document.addField(SolrStandardConfigurator.getFieldProperty("date"), "2017-03-03T00:00:00Z");
         connector.insertDocument(document);
         docs.add(document.deepCopy());
 
@@ -97,7 +96,7 @@ public class SolrAppTest {
         List<RegExpStichwort> stichworte = new ArrayList<>();
         stichworte.add(new RegExpStichwort("very"));
         stichworte.add(new RegExpStichwort("second"));
-        Variable<RegExpStichwort> variable = new Variable("Test Variable", stichworte);
+        Variable<RegExpStichwort> variable = new Variable<>("Test Variable", stichworte);
         modifiers = new ArrayList<>();
         response = connector.query(variable.buildQuery(modifiers));
         assertEquals(2, response.getResults().getNumFound());
@@ -105,7 +104,7 @@ public class SolrAppTest {
         stichworte = new ArrayList<>();
         stichworte.add(new RegExpStichwort("none"));
         stichworte.add(new RegExpStichwort("second"));
-        variable = new Variable("Test Variable", stichworte);
+        variable = new Variable<>("Test Variable", stichworte);
         response = connector.query(variable.buildQuery(modifiers));
         assertEquals(1, response.getResults().getNumFound());
 
@@ -124,5 +123,44 @@ public class SolrAppTest {
         gitProps.entrySet().stream().filter(map -> systemProperties.getProperty(map.getKey().toString()) == null)
             .forEach(map -> missingProps.append(map.getKey().toString()).append(","));
         assertTrue("Missing properties " + missingProps.toString(), missingProps.length() == 0);
+    }
+
+    @Test
+    public void testAddAWord() {
+        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl(),
+                systemProperties.getProperty("solr.connection.testDb"));
+        String testWord = "test";
+        File file = SolrStandardConfigurator.getCompoundedWordsFile(systemProperties.getProperty("solr.connection.testDb"));
+        assertTrue("No compoundedWords File", file.isFile());
+        assertTrue("CompoundedWords File is not readable", file.canRead());
+        assertTrue("CompoundedWords File is not writable", file.canWrite());
+        connector.addToWordlist(testWord);
+
+        Set<String> words = new HashSet<>();
+        BufferedReader bufferedReader;
+        try {
+            bufferedReader = new BufferedReader(new FileReader(file.getAbsolutePath()));
+            String currentLine;
+            while ((currentLine = bufferedReader.readLine()) != null) {
+                String singleWord = currentLine.replace("\n", "").replace(";", "");
+                words.add(singleWord);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assertTrue("Testword is not in List", words.contains(testWord));
+        words.remove(testWord);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file.getAbsolutePath()));
+            for (String writableWords : words) {
+                writer.write(writableWords + "\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assertTrue("File has to be deletable", file.delete());
     }
 }

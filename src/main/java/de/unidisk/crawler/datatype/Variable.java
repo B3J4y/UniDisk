@@ -42,7 +42,7 @@ public class Variable<K extends Stichwort> {
         queryBuilder.deleteCharAt(queryBuilder.length() - 1);
         queryBuilder.append(stichworte.get(0).getEnd());
 
-        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperties("content") + ":" + queryBuilder.toString());
+        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperty("content") + ":" + queryBuilder.toString());
         SolrStandardConfigurator.configureSolrQuery(solrQuery);
         return solrQuery;
     }
