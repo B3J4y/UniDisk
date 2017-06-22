@@ -1,6 +1,5 @@
 package de.unidisk.crawler.mysql;
 
-import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import de.unidisk.common.SystemProperties;
 import de.unidisk.common.mysql.MysqlConnect;
 import de.unidisk.common.mysql.VereinfachtesResultSet;
@@ -23,10 +22,18 @@ public class MysqlConnector extends MysqlConnect {
     private List<MysqlResult> mysqlResults;
 
     static private final Logger logger = LogManager.getLogger(MysqlConnector.class.getName());
+    private static MysqlConnector connectionUnidisk;
 
-    public MysqlConnector() throws CommunicationsException {
+    public MysqlConnector() {
         super();
         connectToLocalhost();
+    }
+
+    public static MysqlConnector getInstance() {
+        if(connectionUnidisk == null) {
+            connectionUnidisk = new MysqlConnector();
+        }
+        return connectionUnidisk;
     }
 
 
@@ -58,7 +65,7 @@ public class MysqlConnector extends MysqlConnect {
             logger.debug("Created new Campaign " + campaign);
         } catch (NoResultsException e) {
             String query = "INSERT INTO `overview` (`Id`, `Name`, `Count`, `Status`) VALUES (NULL, '" + campaign + "', '0', '0')";
-            connector.issueInsertOrDeleteStatement(query);
+            connectionUnidisk.issueInsertOrDeleteStatement(query);
             logger.debug("Campaign " + campaign + " already exists.");
         }
     }
@@ -67,7 +74,7 @@ public class MysqlConnector extends MysqlConnect {
         try {
             checkCampaignStatus(campaign);
             String query = "DELETE FROM `overview` WHERE `overview`.`Name` = \"" + campaign + "\" ";
-            connector.issueInsertOrDeleteStatement(query);
+            connectionUnidisk.issueInsertOrDeleteStatement(query);
             logger.debug("Deleted campaign " + campaign);
         } catch (NoResultsException e) {
             logger.debug("Campaign " + campaign + " doesn't exist.");
@@ -126,13 +133,11 @@ public class MysqlConnector extends MysqlConnect {
     }
 
     @Override
-    protected void createSchemaWithTables(String name) {
+    protected void createSchema(String name) {
         logger.debug("Entering createSchemaWithTables - "+name);
         //utf8mb4 requires MySQL 5.5.3 (released in early 2010)
         String query = "CREATE DATABASE `"+name+"` DEFAULT CHARACTER SET utf8mb4 ;";
         otherStatements(query);
-
-        readDump(name,"db_overview.sql");
         logger.debug("Leaving createSchemaWithTables -"+name);
     }
 
@@ -147,14 +152,13 @@ public class MysqlConnector extends MysqlConnect {
         if(file.exists() && !file.isDirectory()) {
             Runtime rt = Runtime.getRuntime();
             try {
-                String ex = "mysql --user=" + systemProperties.getProperty("database.root.name") + " --password=" + systemProperties.getProperty("database.root.password")+ " " + systemProperties.getProperty("uni.db.name") + " < \"" + file.getAbsolutePath() + "\" ";
+                String ex = "mysql --user=" + systemProperties.getProperty("database.root.name") + " --password=" + systemProperties.getProperty("database.root.password")+ " " + systemProperties.getProperty("uni.db.name") + " source \"" + file.getAbsolutePath() + "\" ";
                 Process pr = rt.exec(ex);
                 logger.debug("MSQLServer import file exit value: " + String.valueOf(pr.exitValue()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
 
         logger.debug("Leaving readDump DB: "+dbName+" File: "+fileName);
     }
