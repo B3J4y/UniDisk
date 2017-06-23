@@ -8,6 +8,7 @@ import de.unidisk.crawler.exception.NoHochschuleException;
 import de.unidisk.crawler.exception.NoResultsException;
 import de.unidisk.crawler.mysql.MysqlConnector;
 import de.unidisk.crawler.solr.SolrConnector;
+import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -41,7 +42,7 @@ public class Model implements PersistenceModel {
     private Properties systemProperties = SystemProperties.getInstance();
     private MysqlConnect connect;
 
-    private final String connextionString = MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.unidisk);
+    private final String connextionString = MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.loaded);
 
     public Model() throws NoResultsException, CommunicationsException {
         stichwortVar = new StichwortVar();

@@ -35,25 +35,28 @@ public abstract class MysqlConnect {
 	}
 
 	public static String getLocalhostConnection(LoadedDatabase database) {
+		//todo jb einen Strang für die TestDb
 		switch (database) {
 			case noDatabase:
-				return String.format("jdbc:mysql://%s?user=%s&password=%s&useSSL=%s&requireSSL=%s&verifyServerCertificate=%s",
+				return String.format("jdbc:mysql://%s?user=%s&password=%s&useSSL=%s&requireSSL=%s&verifyServerCertificate=%s&serverTimezone=%s",
 						systemProperties.getProperty("database.localhost"),
 						systemProperties.getProperty("database.root.name"),
 						systemProperties.getProperty("database.root.password"),
 						systemProperties.getProperty("database.sec.useSSL"),
 						systemProperties.getProperty("database.sec.requireSSL"),
-						systemProperties.getProperty("database.sec.verifyServerCertificate"));
+						systemProperties.getProperty("database.sec.verifyServerCertificate"),
+						systemProperties.getProperty("database.server.timezone"));
 
 			case loaded:
-				return String.format("jdbc:mysql://%s/%s?user=%s&password=%s&useSSL=%s&requireSSL=%s&verifyServerCertificate=%s",
+				return String.format("jdbc:mysql://%s/%s?user=%s&password=%s&useSSL=%s&requireSSL=%s&verifyServerCertificate=%s&serverTimezone=%s",
 						systemProperties.getProperty("database.localhost"),
 						systemProperties.getProperty("uni.db.name"),
 						systemProperties.getProperty("database.root.name"),
 						systemProperties.getProperty("database.root.password"),
 						systemProperties.getProperty("database.sec.useSSL"),
 						systemProperties.getProperty("database.sec.requireSSL"),
-						systemProperties.getProperty("database.sec.verifyServerCertificate"));
+						systemProperties.getProperty("database.sec.verifyServerCertificate"),
+						systemProperties.getProperty("database.server.timezone"));
 
 			default:
 				return null;
@@ -64,7 +67,7 @@ public abstract class MysqlConnect {
 	/**
 	 * Mit dieser Methode stellt man die Verbindung zu der Datenbank her.
 	 */
-	public void connect(String connectionString, LoadedDatabase database) throws CommunicationsException {
+	public void connect(String connectionString) throws CommunicationsException {
 		try {
 			conn = DriverManager.getConnection(connectionString);
 			state = LoadedDatabase.loaded;
@@ -81,7 +84,7 @@ public abstract class MysqlConnect {
 			System.out.println("VendorError: " + ex.getErrorCode());
 			String newConnectionString = getLocalhostConnection(LoadedDatabase.noDatabase);
 			if (!newConnectionString.equals(connectionString)){
-				connect(newConnectionString,LoadedDatabase.noDatabase);
+				connect(newConnectionString);
 				state = LoadedDatabase.noDatabase;
 			}
 			createSchema("unidisk");
@@ -171,7 +174,7 @@ public abstract class MysqlConnect {
 		//TODO yw Loaded Database und connect to Database sind nicht das gleiche!!!!!1111elf
 		String connection = getLocalhostConnection(LoadedDatabase.loaded);
 		try {
-			connect(connection, LoadedDatabase.loaded);
+			connect(connection);
 		} catch (CommunicationsException e) {
 			e.printStackTrace();
 		}
@@ -201,7 +204,7 @@ public abstract class MysqlConnect {
 	 */
 	private PreparedStatement addParameters(final String statement, final Object[] args) {
 		try {
-			final PreparedStatement ps = conn.prepareStatement(statement);
+			final PreparedStatement ps = getConnection().prepareStatement(statement);
 			if (args != null) {
 				for (int i = 0; i < args.length; i++) {
 					final Object arg = args[i];
@@ -309,7 +312,10 @@ public abstract class MysqlConnect {
 		}
 	}
 
-	public Connection getConnection() {
+	public Connection getConnection() throws CommunicationsException {
+		if (conn == null) {
+			connect(getLocalhostConnection(LoadedDatabase.noDatabase));
+		}
 		return conn;
 	}
 
