@@ -1,8 +1,10 @@
 package de.unidisk.crawler.geomapper;
 
 
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import de.unidisk.common.mysql.MysqlConnect;
 import de.unidisk.common.mysql.VereinfachtesResultSet;
+import de.unidisk.crawler.mysql.MysqlConnector;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -19,18 +21,19 @@ import java.util.List;
  */
 public class Geocoordinator {
 
-    private static final String connextionString = MysqlConnect.getLocalhostConnection();
+    private static MysqlConnect connect;
 
-    public static void updateDBWithGeoData() {
+    public Geocoordinator() throws CommunicationsException {
+        connect = new MysqlConnector();
+    }
+
+    public void updateDBWithGeoData() {
         List<HochschulResultSet> hochschulResultSetList = getHochResultSetFromDB();
         updateSet(hochschulResultSetList);
         updateDatabase(hochschulResultSetList);
     }
 
-    private static void updateDatabase(List<HochschulResultSet> hochschulResultSetList) {
-        MysqlConnect conn = new MysqlConnect();
-        conn.connect(connextionString);
-        conn.issueUpdateStatement("Use hochschulen;");
+    private void updateDatabase(List<HochschulResultSet> hochschulResultSetList) {
         /*try {
             conn.issueUpdateStatement("ALTER TABLE hochschulen_copy ADD lat double");
             conn.issueUpdateStatement("ALTER TABLE hochschulen_copy ADD lon double");
@@ -38,35 +41,33 @@ public class Geocoordinator {
 
         }*/
         for (HochschulResultSet hochschulResultSet : hochschulResultSetList) {
-            conn.issueUpdateStatement("UPDATE hochschulen_copy SET lon = ? WHERE `HS-Nr` = ?", hochschulResultSet.getLon(), hochschulResultSet.getId());
-            conn.issueUpdateStatement("UPDATE hochschulen_copy SET lat = ? WHERE `HS-Nr` = ?", hochschulResultSet.getLat(), hochschulResultSet.getId());
+            connect.issueUpdateStatement("UPDATE hochschulen_copy SET lon = ? WHERE `HS-Nr` = ?", hochschulResultSet.getLon(), hochschulResultSet.getId());
+            connect.issueUpdateStatement("UPDATE hochschulen_copy SET lat = ? WHERE `HS-Nr` = ?", hochschulResultSet.getLat(), hochschulResultSet.getId());
         }
-        conn.close();
+        connect.close();
     }
 
-    private static List<HochschulResultSet> getHochResultSetFromDB() {
-        MysqlConnect mysqlConnect = new MysqlConnect();
-        mysqlConnect.connect(connextionString);
-        mysqlConnect.issueUpdateStatement("Use hochschulen;");
-        VereinfachtesResultSet mysqlResult = mysqlConnect.issueSelectStatement("SELECT `HS-Nr`,`Straße`,`Ort` FROM `hochschulen_copy`");
+    private List<HochschulResultSet> getHochResultSetFromDB() {
+        connect.issueUpdateStatement("Use hochschulen;");
+        VereinfachtesResultSet mysqlResult = connect.issueSelectStatement("SELECT `HS-Nr`,`Straße`,`Ort` FROM `hochschulen_copy`");
         java.util.List<HochschulResultSet> hochschulResultSetList = new LinkedList<>();
         while (!mysqlResult.isLast()) {
             mysqlResult.next();
             HochschulResultSet elem = new HochschulResultSet(mysqlResult.getInt("HS-Nr"), mysqlResult.getString("Straße"), mysqlResult.getString("Ort"));
             hochschulResultSetList.add(elem);
         }
-        mysqlConnect.close();
+        connect.close();
         return hochschulResultSetList;
     }
 
-    private static List<HochschulResultSet> updateSet(List<HochschulResultSet> input) {
+    private List<HochschulResultSet> updateSet(List<HochschulResultSet> input) {
         for (HochschulResultSet hochschulResultSet : input) {
             updateSingleSet(hochschulResultSet);
         }
         return input;
     }
 
-    private static void updateSingleSet(HochschulResultSet input) {
+    private void updateSingleSet(HochschulResultSet input) {
         Client client2 = ClientBuilder.newClient();
         input.setCity(input.getCity().replaceAll(" ", "+"));
         input.setStreet(input.getStreet().replaceAll(" ", "+"));

@@ -7,6 +7,8 @@ import de.unidisk.crawler.exception.NoResultsException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -14,28 +16,30 @@ import java.util.Properties;
 /**
  * Created by carl on 03.02.16.
  */
-public class MysqlConnector {
+public class MysqlConnector extends MysqlConnect {
     private Properties systemProperties = SystemProperties.getInstance();
-    String connectionString = "jdbc:mysql://" + systemProperties.getProperty("database.localhost") +
-      "/%s" +
-      "?user=" + systemProperties.getProperty("database.root.name") +
-      "&password=" + systemProperties.getProperty("database.root.password");
     private VereinfachtesResultSet hochschulen;
     private List<MysqlResult> mysqlResults;
-    public MysqlConnect connector;
 
     static private final Logger logger = LogManager.getLogger(MysqlConnector.class.getName());
+    private static MysqlConnector connectionUnidisk;
 
-    public MysqlConnector(String database) {
-        connector = new MysqlConnect();
+    public MysqlConnector() {
+        super();
+        connectToLocalhost();
+    }
 
-        connector.connectToLocalhost();
+    public static MysqlConnector getInstance() {
+        if(connectionUnidisk == null) {
+            connectionUnidisk = new MysqlConnector();
+        }
+        return connectionUnidisk;
     }
 
 
     public void initHochschulen() throws NoResultsException {
         //logger.debug("Entering initHochschulen");
-        hochschulen = connector.issueSelectStatement("Select * from " + systemProperties.getProperty("uni.db.init"));
+        hochschulen = issueSelectStatement("Select * from " + systemProperties.getProperty("uni.db.init"));
         if ((hochschulen == null) || (! hochschulen.isBeforeFirst()) ) {
             logger.debug("Leaving queryDomain with 0 fetches");
             throw new NoResultsException("No Results where fetched");
@@ -61,7 +65,7 @@ public class MysqlConnector {
             logger.debug("Created new Campaign " + campaign);
         } catch (NoResultsException e) {
             String query = "INSERT INTO `overview` (`Id`, `Name`, `Count`, `Status`) VALUES (NULL, '" + campaign + "', '0', '0')";
-            connector.issueInsertOrDeleteStatement(query);
+            connectionUnidisk.issueInsertOrDeleteStatement(query);
             logger.debug("Campaign " + campaign + " already exists.");
         }
     }
@@ -70,7 +74,7 @@ public class MysqlConnector {
         try {
             checkCampaignStatus(campaign);
             String query = "DELETE FROM `overview` WHERE `overview`.`Name` = \"" + campaign + "\" ";
-            connector.issueInsertOrDeleteStatement(query);
+            connectionUnidisk.issueInsertOrDeleteStatement(query);
             logger.debug("Deleted campaign " + campaign);
         } catch (NoResultsException e) {
             logger.debug("Campaign " + campaign + " doesn't exist.");
@@ -89,24 +93,11 @@ public class MysqlConnector {
         //logger.debug("Leaving queryDomain with 0 fetches");
         throw new NoResultsException("No Domain found");
     }
-    public VereinfachtesResultSet queryDomain(String domain) throws NoResultsException {
-        //logger.debug("Entering queryDomain with domain:" + domain);
-        MysqlConnect connector = new MysqlConnect();
-        connector.connectToLocalhost();
-        String query = "Select * from Hochschulen where Homepage like ?";
-        VereinfachtesResultSet result = connector.issueSelectStatement(query, "%" + domain + "%");
-        if ((result == null) || (! result.isBeforeFirst()) ) {
-            //logger.debug("Leaving queryDomain with 0 fetches");
-            throw new NoResultsException("No Results where fetched");
-        }
-        //logger.debug("Leaving queryDomain with >0 fetches");
-        return result;
-    }
 
     public VereinfachtesResultSet queryStichwortTable(String table) throws NoResultsException {
         logger.debug("Entering queryDomain with domain:" + table);
         String query = "Select * from " + table + "_" + systemProperties.getProperty("suffix.stickWort");
-        VereinfachtesResultSet result = connector.issueSelectStatement(query );
+        VereinfachtesResultSet result = issueSelectStatement(query );
         if ((result == null) || (! result.isBeforeFirst()) ) {
             logger.debug("Leaving queryDomain with 0 fetches");
             throw new NoResultsException("No Results where fetched");
@@ -121,7 +112,7 @@ public class MysqlConnector {
         logger.debug("Entering setCampaignStatus with camp:" + camp + ", status:" + String.valueOf(status));
         String query = "UPDATE overview SET Status=" + String.valueOf(status) + " WHERE Name=\""
                 + camp +"\"";
-        connector.issueUpdateStatement(query);
+        issueUpdateStatement(query);
         logger.debug("Leaving setCampaignStatus");
 
     }
@@ -130,7 +121,7 @@ public class MysqlConnector {
         logger.debug("Entering checkCampaignStatus with camp:" + camp);
         int res;
         String query = "SELECT Status from overview where Name=\"" + camp + "\"";
-        VereinfachtesResultSet result = connector.issueSelectStatement(query);
+        VereinfachtesResultSet result = issueSelectStatement(query);
         if ((result == null) || (! result.isBeforeFirst()) ) {
             logger.debug("Leaving queryDomain with 0 fetches");
             throw new NoResultsException("No Results where fetched");
@@ -139,5 +130,36 @@ public class MysqlConnector {
         res = result.getInt("Status");
         logger.debug("Leaving checkCampaignStatus with " + String.valueOf(res));
         return res;
+    }
+
+    @Override
+    protected void createSchema(String name) {
+        logger.debug("Entering createSchemaWithTables - "+name);
+        //utf8mb4 requires MySQL 5.5.3 (released in early 2010)
+        String query = "CREATE DATABASE `"+name+"` DEFAULT CHARACTER SET utf8mb4 ;";
+        otherStatements(query);
+        logger.debug("Leaving createSchemaWithTables -"+name);
+    }
+
+    @Override
+    protected void readDump(String dbName, String fileName) {
+        logger.debug("Entering readDump DB: "+dbName+" File: "+fileName);
+
+        String[] path = {".", "src", "main", "resources", "sql_dumps", fileName};
+        String filePath = String.join(File.separator, path);
+
+        File file = new File(filePath);
+        if(file.exists() && !file.isDirectory()) {
+            Runtime rt = Runtime.getRuntime();
+            try {
+                String ex = "mysql --user=" + systemProperties.getProperty("database.root.name") + " --password=" + systemProperties.getProperty("database.root.password")+ " " + systemProperties.getProperty("uni.db.name") + " source \"" + file.getAbsolutePath() + "\" ";
+                Process pr = rt.exec(ex);
+                logger.debug("MSQLServer import file exit value: " + String.valueOf(pr.exitValue()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        logger.debug("Leaving readDump DB: "+dbName+" File: "+fileName);
     }
 }

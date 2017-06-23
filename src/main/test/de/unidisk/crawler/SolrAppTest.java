@@ -1,5 +1,6 @@
 package de.unidisk.crawler;
 
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
 import de.unidisk.common.SystemProperties;
 import de.unidisk.crawler.datatype.Stichwort;
 import de.unidisk.crawler.datatype.StichwortModifier;
@@ -29,19 +30,19 @@ public class SolrAppTest {
 
     @Before
     public void setUp() throws Exception {
-        MysqlConnector mc = new MysqlConnector(systemProperties.getProperty("uni.db.name"));
+        MysqlConnector mc = new MysqlConnector();
         mc.createNewCampaign("Unit_Test");
     }
 
     @After
     public void tearDown() throws Exception {
-        MysqlConnector mc = new MysqlConnector(systemProperties.getProperty("uni.db.name"));
+        MysqlConnector mc = new MysqlConnector();
         mc.deleteCampaing("Unit_Test");
     }
 
     @Test
-    public void smokeTest() {
-        MysqlConnector mc = new MysqlConnector(systemProperties.getProperty("uni.db.name"));
+    public void smokeTest() throws CommunicationsException {
+        MysqlConnector mc = new MysqlConnector();
         try {
             int campaignStatus = mc.checkCampaignStatus("Unit_Test");
             assertTrue(campaignStatus != 1);
