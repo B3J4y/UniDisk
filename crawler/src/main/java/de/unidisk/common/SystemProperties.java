@@ -13,8 +13,7 @@ public class SystemProperties {
 
   protected SystemProperties() throws IOException {
     properties = new Properties();
-    String[] pathToProperties = {".", "de", "unidisk", "crawler", "unidisk_productiv.properties"};
-    //todo jb könnte problematisch werden, mit dem Tomcat deploy
+    String[] pathToProperties = {"unidisk_productiv.properties"};
     properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(String.join(File.separator, pathToProperties)));
   }
 
