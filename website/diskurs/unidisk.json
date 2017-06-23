@@ -1,0 +1,11 @@
+{"database": {
+		"overview": "overview",
+		"varMeta": "varMeta",
+		"stichWort": "Stichwort",
+		"hochschuldb": "Hochschulen",
+		"scoreStich": "ScoreStich"
+	},
+	"endpoints": {
+		"crawler": "http://fleckenroller.cs.uni-potsdam.de/app/competence-database-dev/"
+	}
+}

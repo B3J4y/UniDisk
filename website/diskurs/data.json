@@ -1,0 +1,42 @@
+{
+  "categoryList": [
+    {
+      "variable": "Lernen",
+      "coordinates": [
+        {
+          "latlon": [
+            52.522613,
+            13.404782
+          ],
+          "solr": 1.234
+        },
+        {
+          "latlon": [
+            51.438086,
+            7.970213
+          ],
+          "solr": 0.00022
+        }
+      ]
+    },
+    {
+      "variable": "Beruf",
+      "coordinates": [
+        {
+          "latlon": [
+            48.654686,
+            11.189575
+          ],
+          "solr": 1.234
+        },
+        {
+          "latlon": [
+            50.110922,
+            8.682127
+          ],
+          "solr": 0.00022
+        }
+      ]
+    }
+  ]
+}

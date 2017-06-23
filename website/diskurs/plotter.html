@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>OpenLayers Example</title>
+    <script type="application/javascript" src="lib/jquery2.2.1.js"></script>
+    <script type="text/javascript"
+            src="lib/ol2/lib/OpenLayers.js"></script>
+    <link rel="stylesheet" href="lib/ol2/theme/default/style.css" type="text/css">
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <script type="application/javascript" src="mapper.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Markers für OpenStreetMap-Karten mit OpenLayers</title>
+</head>
+<body onload="init()">
+<div id="map"></div>
+
+<div id="legend">
+    <table>
+        <tr>
+            <td>
+                <img src="icons/category1.png">
+            </td>
+            <td>
+                <label id="category1Label">Kategorie1</label>
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                <img src="icons/category2.png">
+            </td>
+            <td>
+                <label id="category2Label">Kategorie2</label>
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+</body>
+</html>
