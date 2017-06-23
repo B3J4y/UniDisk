@@ -309,6 +309,7 @@ function fireInTheHole() {
 	$("#cancelButton").show();
 	$.ajax(props["endpoints"]["crawler"] + "crawler/start?campaign=" + active, {
 		type:"post",
+		contentType: 'application/json',
 		success: function (res) {
 			console.log(res);
 		},
@@ -360,6 +361,7 @@ function cancelTheThing() {
 	$("#cancelButton").hide();
 	$.ajax(props["endpoints"]["crawler"] + "crawler/stop?campaign=" + active, {
 		type:"post",
+		contentType: 'application/json',
 		success: function (res) {
 			console.log(res);
 		},
