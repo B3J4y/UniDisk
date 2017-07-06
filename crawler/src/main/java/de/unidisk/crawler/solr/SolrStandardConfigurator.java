@@ -48,7 +48,7 @@ public class SolrStandardConfigurator {
             fieldProperties = new HashMap<>();
             fieldProperties.put("id", "id");
             fieldProperties.put("title", "title_de");
-            fieldProperties.put("content", "text_de");
+            fieldProperties.put("content", "content");
             fieldProperties.put("date", "date_dt");
             fieldProperties.put("score", "score");
         }

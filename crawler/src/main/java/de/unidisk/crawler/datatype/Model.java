@@ -101,7 +101,7 @@ public class Model implements PersistenceModel {
                 throw new InterruptedException("Thread interruption forced");
             }
             i++;
-            QueryResponse response = connector.connectToSolr(key);
+            QueryResponse response = connector.query(new SolrStichwort(key).buildQuery(new ArrayList<>()));
             SolrDocumentList solrList = response.getResults();
             logger.debug("Key:" + key + " got " + solrList.getNumFound() + " Results");
 
@@ -117,6 +117,7 @@ public class Model implements PersistenceModel {
 
     public void solrListToDB(String key, SolrDocumentList solrList) throws InterruptedException {
         logger.debug("Entering solrListToDB with " + key);
+        connect.connect(MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.loaded));
         int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrStandardConfigurator.getLimit());
         connect.issueInsertOrDeleteStatement("set global max_connections = 20000000000;");
         connect.issueInsertOrDeleteStatement("use " + systemProperties.getProperty("uni.db.name") + ";");
@@ -152,6 +153,7 @@ public class Model implements PersistenceModel {
 
 
     private void issueStatement(String connextionString, String statement2) {
+        connect.connect(MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.loaded));
         connect.issueInsertOrDeleteStatement("set global max_connections = 20000000000;");
         connect.issueInsertOrDeleteStatement("use " + systemProperties.getProperty("uni.db.name") + ";");
         connect.issueInsertOrDeleteStatement(statement2);
@@ -185,9 +187,9 @@ public class Model implements PersistenceModel {
                 throw new InterruptedException("Thread interruption forced");
             }
             i++;
-            QueryResponse response = connector.connectToSolr(varStich.get(key));
+            QueryResponse response = connector.query(new SolrStichwort(varStich.get(key)).buildQuery(new ArrayList<>()));
             SolrDocumentList solrList = response.getResults();
-            logger.debug("Key:" + key + " got " + solrList.getNumFound() + " Results");
+            logger.debug("Key:" + varStich.get(key) + " got " + solrList.getNumFound() + " Results");
             varMetaToCsv(key, solrList, filepath,
                     StringUtils.join(varStich.get(key).split("\" OR \""), ", "));
         }
@@ -226,6 +228,7 @@ public class Model implements PersistenceModel {
             logger.debug("Leaving stichwortVarToCsv");
         } else {
             for (String key : stichwortVar.getElements().keySet()) {
+                connect.connect(MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.loaded));
                 connect.issueInsertOrDeleteStatement("use " + systemProperties.getProperty("uni.db.name") + ";");
                 //TODO change table name to dynamic topic
                 connect.issueInsertOrDeleteStatement("CREATE TABLE IF NOT EXISTS stichVariable (Stichworte TEXT, Variable TEXT);");
@@ -368,6 +371,7 @@ public class Model implements PersistenceModel {
             //logger.debug("is " + latLon);
             return;
         }
+        connect.connect(MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.loaded));
         connect.issueInsertOrDeleteStatement("use " + systemProperties.getProperty("uni.db.name") + ";");
         connect.issueInsertOrDeleteStatement("INSERT INTO " + database + "_"
                 + systemProperties.getProperty("suffix.varMeta") + " (`Variable`, `Stichworte`, `Hochschule`, `Content`,"

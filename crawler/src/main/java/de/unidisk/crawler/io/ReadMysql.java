@@ -22,7 +22,7 @@ public class ReadMysql {
         MysqlConnector mc = new MysqlConnector();
         VereinfachtesResultSet mr = mc.queryStichwortTable(database);
         while (mr.next()) {
-            m.addDate(mr.getString("Stichwort"), mr.getString("Variable"), mr.getString("Metavariable"));
+            m.addDate(mr.getString("Stichwort"), mr.getString("Variable"));
         }
         logger.debug("Leaving convertToModel");
         return m;

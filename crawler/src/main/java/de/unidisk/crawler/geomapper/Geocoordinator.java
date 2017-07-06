@@ -40,6 +40,7 @@ public class Geocoordinator {
         } catch( Exception e) {
 
         }*/
+        connect.connect(MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.loaded));
         for (HochschulResultSet hochschulResultSet : hochschulResultSetList) {
             connect.issueUpdateStatement("UPDATE hochschulen_copy SET lon = ? WHERE `HS-Nr` = ?", hochschulResultSet.getLon(), hochschulResultSet.getId());
             connect.issueUpdateStatement("UPDATE hochschulen_copy SET lat = ? WHERE `HS-Nr` = ?", hochschulResultSet.getLat(), hochschulResultSet.getId());
@@ -48,6 +49,7 @@ public class Geocoordinator {
     }
 
     private List<HochschulResultSet> getHochResultSetFromDB() {
+        connect.connect(MysqlConnect.getLocalhostConnection(MysqlConnect.LoadedDatabase.loaded));
         connect.issueUpdateStatement("Use hochschulen;");
         VereinfachtesResultSet mysqlResult = connect.issueSelectStatement("SELECT `HS-Nr`,`Straße`,`Ort` FROM `hochschulen_copy`");
         java.util.List<HochschulResultSet> hochschulResultSetList = new LinkedList<>();
