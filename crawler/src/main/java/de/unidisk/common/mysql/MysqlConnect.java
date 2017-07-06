@@ -67,16 +67,18 @@ public abstract class MysqlConnect {
 	/**
 	 * Mit dieser Methode stellt man die Verbindung zu der Datenbank her.
 	 */
-	public void connect(String connectionString) throws CommunicationsException {
+	public void connect(String connectionString) {
 		try {
+			Class.forName("com.mysql.jdbc.Driver");
 			conn = DriverManager.getConnection(connectionString);
 			state = LoadedDatabase.loaded;
+		} catch (ClassNotFoundException ex) {
+			logger.error(ex);
 		} catch (CommunicationsException ex) {
 			//Server not reachable
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
 			System.out.println("VendorError: " + ex.getErrorCode());
-			throw ex;
 		} catch (SQLSyntaxErrorException ex){
 			//Schema not available
 			System.out.println("SQLException: " + ex.getMessage());
@@ -173,11 +175,8 @@ public abstract class MysqlConnect {
 	public void connectToLocalhost() {
 		//TODO yw Loaded Database und connect to Database sind nicht das gleiche!!!!!1111elf
 		String connection = getLocalhostConnection(LoadedDatabase.loaded);
-		try {
-			connect(connection);
-		} catch (CommunicationsException e) {
-			e.printStackTrace();
-		}
+		connect(connection);
+
 	}
 
 	/**

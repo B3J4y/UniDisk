@@ -2,6 +2,11 @@ package de.unidisk;
 
 
 
+import de.unidisk.crawler.SolrApp;
+import de.unidisk.crawler.mysql.MysqlConnector;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -16,7 +21,7 @@ public class CrawlerServiceRest {
     //static private List<Thread> threads = new ArrayList<Thread>();
     static private final int MAXTHREAD = 4;
     static private int CURRENTTHREADS = 0;
-    //static private final Logger logger = LogManager.getLogger(CrawlerServiceRest.class.getName());
+    static private final Logger logger = LogManager.getLogger(CrawlerServiceRest.class.getName());
     static private ThreadGroup tg = new ThreadGroup("SolrApps");
 
     // TODO comment in the following and adapt to the current project situation
@@ -28,7 +33,6 @@ public class CrawlerServiceRest {
         return "Hello Jan!";
     }
 
-    /*
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/start")
@@ -46,7 +50,7 @@ public class CrawlerServiceRest {
                     logger.debug("Thread is running");
                     SolrApp solrApp = new SolrApp(campaignOs);
                     try {
-                        solrApp.excecute();
+                        solrApp.execute();
                     } catch (Exception e) {
                         e.printStackTrace();
                         logger.error(e.getMessage());
@@ -83,7 +87,7 @@ public class CrawlerServiceRest {
         for (Thread t : threads) {
             logger.debug(t.getName() + " from " + threads.length + " Threads");
             if (t.getName().equals(campaign)) {
-                MysqlConnector mc = new MysqlConnector(MagicStrings.UNIVERSITIESDBNAME);
+                MysqlConnector mc = new MysqlConnector();
                 if (mc.checkCampaignStatus(campaign) == 4) {
                     return Response.ok("thread is already in closing process").build();
                 }
@@ -99,12 +103,4 @@ public class CrawlerServiceRest {
         }
         return Response.ok("thread doesn't exists").build();
     }
-
-
-    */
-
-
-
-
-
 }

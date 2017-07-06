@@ -65,7 +65,7 @@ public class MysqlConnector extends MysqlConnect {
             logger.debug("Created new Campaign " + campaign);
         } catch (NoResultsException e) {
             String query = "INSERT INTO `overview` (`Id`, `Name`, `Count`, `Status`) VALUES (NULL, '" + campaign + "', '0', '0')";
-            connectionUnidisk.issueInsertOrDeleteStatement(query);
+            getInstance().issueInsertOrDeleteStatement(query);
             logger.debug("Campaign " + campaign + " already exists.");
         }
     }

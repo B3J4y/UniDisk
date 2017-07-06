@@ -48,7 +48,7 @@ public class BasicNLPTester {
         assertFalse(matcher.find());
         matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("test");
         assertTrue(matcher.find());
-        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher(" test ");
+        matcher = Pattern.compile(regexStichwort.buildExpression(modifiers)).matcher("test ");
         assertTrue(matcher.find());
 
         modifiers.remove(StichwortModifier.START_OF_WORD);

@@ -116,9 +116,8 @@ public class SolrAppTest {
 
     @Test
     public void testPropertyFiles() throws Exception {
-        String[] pathToProperties = {".", "de", "unidisk", "crawler", "unidisk.properties"};
         Properties gitProps = new Properties();
-        gitProps.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(String.join(File.separator, pathToProperties)));
+        gitProps.load(new FileInputStream(new File("/development/UniDisk/crawler/src/main/webapp/WEB-INF/classes/unidisk.properties")));
 
         StringBuilder missingProps = new StringBuilder();
         gitProps.entrySet().stream().filter(map -> systemProperties.getProperty(map.getKey().toString()) == null)
@@ -162,6 +161,6 @@ public class SolrAppTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        assertTrue("File has to be deletable", file.delete());
+        assertTrue("File is not empty", file.length() == 0);
     }
 }
