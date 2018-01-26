@@ -39,9 +39,12 @@ public class VarMeta {
         }
         HashMap<String, String> swvElements = swv.getElements();
         for (String stich : swvElements.keySet()) {
-            List<String> stichList = varStich.get(swvElements.get(stich));
-            stichList.add(stich);
-            varStich.put(swvElements.get(stich), stichList);
+            String swvKey = swvElements.get(stich);
+            if (varStich.containsKey(swvKey)) {
+                List<String> stichList = varStich.get(swvKey);
+                stichList.add(stich);
+                varStich.put(swvKey, stichList);
+            }
         }
         for (String key : varStich.keySet()) {
             q += key + ", ";
