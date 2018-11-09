@@ -1,0 +1,268 @@
+<html>
+<head>
+    <script src="js/jquery/jquery-2.1.4.min.js"></script>
+    <script src="js/jquery/jquery-2.1.4.js"></script>
+    <script src="js/jquery/jquery.csv-0.71.js"></script>
+    <script src="js/jquery/highlight.js"></script>
+    <!--
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+         <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>-->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link href="http://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <script type="text/javascript" src="lib/ol2/lib/OpenLayers.js"></script>
+    <link rel="stylesheet" href="lib/ol2/theme/default/style.css" type="text/css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="js/interact.js"></script>
+    <script src="js/loadData.js"></script>
+    <script src="js/mapper.js"></script>
+    <script src="js/campaign.js"></script>
+    <!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script-->
+    <script>
+        $(document).ready(function () {
+            loadJsonFile("unidisk.json");
+            init();
+            $('.collapse').on('shown.bs.collapse', function () {
+                console.log("show");
+                console.log(this);
+                if (this.id == "mapPanel") {
+                    map.updateSize();
+                    map.zoomToExtent(layer.getDataExtent());
+                }
+            }).on('hidden.bs.collapse', function () {
+                console.log("hide");
+            });
+            map.updateSize();
+        });
+
+
+    </script>
+
+</head>
+<body>
+<div id="pluswrap">
+    <div class="plus">
+        Loading...
+    </div>
+</div>
+<div class="alerts">
+    <div id="overviewError" class="alert alert-danger ">Couldn't find any data. Overview is unreachable.</div>
+</div>
+<div id="content" class="container">
+    <div class="jumbotron" style="background-color: #2e6da4">
+        <h1 style="color:#FFF">
+            <center>UniDisk</center>
+        </h1>
+        <h3 style="color:#FFF">
+            <center>Das Tool zur Stichwortsuche auf Hochschulseiten</center>
+        </h3>
+    </div>
+</div> <!-- /container -->
+<div class="container">
+    <div class="row">
+        <!--div class="col-sm-12" style=" padding-bottom: 10px;">
+            <div class="col-sm-6" style="padding-left: 0px;">
+                <input id="jobName" type="text" class="form-control" placeholder="Name for project" />
+            </div>
+            <div class="col-sm-6">
+                <button class="btn btn-primary" onclick="addJob(this);">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div-->
+        <div class="col-sm-3">
+            <div class="sidebar-nav">
+                <div class="navbar navbar-default" role="navigation">
+                    <div class="navbar-header">
+                        <button type="button" class="navbar-toggle" data-toggle="collapse"
+                                data-target=".sidebar-navbar-collapse">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>
+                        <span class="visible-xs navbar-brand">Sidebar menu</span>
+                    </div>
+                    <div class="nav navbar-collapse collapse sidebar-navbar-collapse">
+                        <ul id="jobOverview" class="nav navbar-nav">
+                        </ul>
+                        <h2>
+                            <center>Legende
+                                <center>
+                        </h2>
+                        <ul id="legend" class="nav navbar-nav">
+                            <li>
+									<span class="badge" style="background-color: #0000FF">
+										<span class="glyphicon glyphicon-leaf" aria-hidden="true"
+                                              style="color:#FFFFFF"></span>
+									</span>
+                                <span class="">Nicht gestartet</span>
+                            </li>
+                            <li>
+									<span class="badge" style="background-color: #FFFF00">
+										<span class="glyphicon glyphicon-plane" aria-hidden="true"
+                                              style="color:#000000"></span>
+									</span>
+                                <span class="">Im Prozess</span>
+                            </li>
+                            <li>
+									<span class="badge" style="background-color: #FFFF00">
+										<span class="glyphicon glyphicon-scissors" aria-hidden="true"
+                                              style="color:#000000"></span>
+									</span>
+                                <span class="">Wird gestoppt</span>
+                            </li>
+                            <li>
+									<span class="badge" style="background-color: #00FF40">
+										<span class="glyphicon glyphicon-ok" aria-hidden="true"
+                                              style="color:#000000"></span>
+									</span>
+                                <span class="">Erfolgreich beendet</span>
+                            </li>
+                            <li>
+									<span class="badge" style="background-color: #FF0000">
+										<span class="glyphicon glyphicon-fire" aria-hidden="true"
+                                              style="color:#FFFFFF"></span>
+									</span>
+                                <span class="">Fehler aufgetreten / Prozess abgebrochen</span>
+                            </li>
+                            <li>
+									<span class="badge">
+										10
+									</span>
+                                <span class="">Eingetragene Stichw&ouml;rter</span>
+                            </li>
+                            <li>
+									<span class="badge" style="background-color: #AEB404">
+										10
+									</span>
+                                <span class="">Ergebnisse der Stichw&ouml;rter</span>
+                            </li>
+                            <li>
+									<span class="badge" style="background-color: #04B404">
+										10
+									</span>
+                                <span class="">Ergebnisse der Variablen</span>
+                            </li>
+                        </ul>
+                    </div><!--/.nav-collapse -->
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9">
+            <div class="col-md-12">
+                <div class="panel-group" id="accordion" style="display: none;">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#stichPan">
+                                    Stichworte
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="stichPan" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                <table id="varMetaTable" class="table table-striped table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th> #</th>
+                                        <th> Stichwort</th>
+                                        <th> Variable</th>
+                                        <th></th>
+                                    </tr>
+                                    <tr id='addr0' name="">
+                                        <td>
+                                            0
+                                        </td>
+                                        <td>
+                                            <input type="text" name='stich0' placeholder='Stichwort'
+                                                   class="form-control"/>
+                                        </td>
+                                        <td>
+                                            <input type="text" name='var0' placeholder='Variable' class="form-control"/>
+                                        </td>
+                                        <td style="min-width:110px">
+                                            <button class="btn btn-primary"
+                                                    onclick="addStichVar(this.parentNode.parentNode);">
+                                                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                                            </button>
+                                            <button id="fireButton" class="btn btn-success" onclick="fireInTheHole()">
+                                                <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+                                            </button>
+                                            <button id="cancelButton" class="btn btn-danger" onclick="cancelTheThing()">
+                                                <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="resTables" class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#resTab">
+                                    Result Tables
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="resTab" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <table id="scoreStichTab" class="table table-striped table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th> #</th>
+                                        <th> Stichwort</th>
+                                        <th> Summe der Scores</th>
+                                        <th> Anzahl der Einträge</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                                <table id="scoreVarTab" class="table table-striped table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th> #</th>
+                                        <th> Variable</th>
+                                        <th> Summe der Scores</th>
+                                        <th> Anzahl der Einträge</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="mapTab" class="panel panel-primary">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#mapPanel">
+                                    Ergebnis Visualisierung
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="mapPanel" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div id="map" style="height:100%; width:100%"></div>
+                                <br/>
+                                <h3>
+                                    <center>Legende</center>
+                                </h3>
+                                <table id="mapLegend" class="table table-hover">
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</body>
+<script>
+</script>
+</html>
