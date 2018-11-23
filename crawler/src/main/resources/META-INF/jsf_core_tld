@@ -1,0 +1,3 @@
+<listener>
+   <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
+</listener>
