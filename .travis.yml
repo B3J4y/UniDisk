@@ -6,3 +6,6 @@ script:
   - cd crawler
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
   - mvn test -B
+
+after_failure:
+  - cat target/surefire-reports/*.txt

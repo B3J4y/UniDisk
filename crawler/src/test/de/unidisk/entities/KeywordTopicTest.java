@@ -1,11 +1,7 @@
 package de.unidisk.entities;
 
-import de.unidisk.HibernateUtil;
 import de.unidisk.dao.KeywordDAO;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.*;
@@ -14,13 +10,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeywordTopicTest {
-    @AfterEach
-    public void afterEach() {
-        HibernateUtil.truncateTable(Keyword.class);
-        HibernateUtil.truncateTable(Topic.class);
-    }
-
+class KeywordTopicTest implements HibernateLifecycle{
     @Test
     void createH2Database() throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:h2:mem:", "sa", "");
@@ -33,45 +23,6 @@ class KeywordTopicTest {
             String name = rset.getString(1);
             System.out.println(name);
         }
-    }
-
-    @Test
-    void testKeyword() {
-        Session session = HibernateUtil.getSesstionFactory().openSession();
-
-        Transaction transaction = session.beginTransaction();
-        Topic topic = new Topic();
-        topic.setName("Test Keywords");
-        Keyword kw = new Keyword();
-        kw.setName("Hallo");
-        kw.getTopics().add(topic);
-        session.save(kw);
-        session.save(topic);
-        Keyword kworld = new Keyword();
-        kworld.setName("World");
-        session.save(kworld);
-        Keyword keyword = session.find(Keyword.class, 1);
-        transaction.commit();
-        assertAll("Test keyword",
-                () -> assertEquals("Hallo", keyword.getName(), "Name of keyword is wrong"),
-                () -> assertEquals(1, keyword.getTopics().size(), "Size of topics is wrong"),
-                () -> assertEquals("Test Keywords", keyword.getTopics()
-                        .get(0)
-                        .getName(), "name of first topic is wrong"));
-        session.close();
-
-        //load a new session to check if it is persisted
-        session = HibernateUtil.getSesstionFactory().openSession();
-        session.getTransaction().begin();
-        Keyword keyword2 = session.find(Keyword.class, 1);
-        session.getTransaction().commit();
-        assertAll("Test keyword",
-                () -> assertEquals("Hallo", keyword2.getName(), "Name of keyword is wrong"),
-                () -> assertEquals(1, keyword2.getTopics().size(), "Size of topics is wrong"),
-                () -> assertEquals("Test Keywords", keyword2.getTopics()
-                        .get(0)
-                        .getName(), "name of first topic is wrong"));
-        session.close();
     }
 
     @Test
