@@ -7,7 +7,6 @@ import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import java.io.Serializable;
@@ -21,13 +20,13 @@ public class EditView implements Serializable {
     private List<Project> cars1;
     private List<Project> cars2;
 
-    @ManagedProperty("#{carService}")
-    private CarService service;
+    @ManagedProperty("#{projectService}")
+    private ProjectService service;
 
     @PostConstruct
     public void init() {
-        cars1 = service.createCars(10);
-        cars2 = service.createCars(10);
+        cars1 = service.getProjects(10);
+        cars2 = service.getProjects(10);
     }
 
     public List<Project> getCars1() {
@@ -46,7 +45,7 @@ public class EditView implements Serializable {
         return service.getStatuss();
     }
 
-    public void setService(CarService service) {
+    public void setService(ProjectService service) {
         this.service = service;
     }
 
