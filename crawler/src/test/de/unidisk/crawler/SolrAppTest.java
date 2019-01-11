@@ -14,6 +14,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
@@ -25,6 +26,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by carl on 03.03.17.
  */
+@Ignore
 public class SolrAppTest {
     private static Properties systemProperties = SystemProperties.getInstance();
 

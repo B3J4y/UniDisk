@@ -14,6 +14,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -28,6 +29,7 @@ import static org.junit.Assert.assertTrue;
  * This unit test is used to test all directories in {PROJECT_ROOT}/src/main/resources/test/solr with the solr connector.
  * Solr will index all files in each directory and all text searching algorithms can be tested in separate solr cores
  */
+@Ignore
 @RunWith(Parameterized.class)
 public class SolrSearchTester {
     static private final Logger logger = LogManager.getLogger(SolrSearchTester.class);

@@ -2,14 +2,12 @@ package de.unidisk.mySQL;
 
 import de.unidisk.common.mysql.MysqlConnect;
 import de.unidisk.crawler.mysql.MysqlConnector;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 /**
  * Created by user on 17.03.2017.
  */
+@Ignore
 public class ConnectionTest {
 
     @Before
