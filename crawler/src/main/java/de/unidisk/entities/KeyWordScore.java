@@ -5,14 +5,14 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 @Entity
-public class KeyWordScore {
+public class KeyWordScore implements ScoredInput {
     @Id
     private int id;
     @OneToOne
     private SearchMetaData searchMetaData;
     @OneToOne
     private Keyword keyword;
-    private Double score;
+    private double score;
 
     public KeyWordScore() {
     }
@@ -25,6 +25,12 @@ public class KeyWordScore {
         return searchMetaData;
     }
 
+    @Override
+    public Input getInput() {
+        return keyword;
+    }
+
+    @Override
     public void setSearchMetaData(SearchMetaData searchMetaData) {
         this.searchMetaData = searchMetaData;
     }
@@ -37,11 +43,13 @@ public class KeyWordScore {
         this.keyword = keyword;
     }
 
-    public Double getScore() {
+    @Override
+    public double getScore() {
         return score;
     }
 
-    public void setScore(Double score) {
+    @Override
+    public void setScore(double score) {
         this.score = score;
     }
 }

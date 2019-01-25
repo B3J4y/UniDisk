@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 @Entity
-public class TopicScore {
+public class TopicScore implements ScoredInput {
     @Id
     @GeneratedValue
     private int id;
@@ -14,7 +14,14 @@ public class TopicScore {
     private SearchMetaData searchMetaData;
     @OneToOne
     private Topic topic;
-    private Double score;
+    private double score;
+
+    public TopicScore() {
+    }
+
+    public TopicScore(Topic topic) {
+        this.topic = topic;
+    }
 
     public int getId() {
         return id;
@@ -24,10 +31,17 @@ public class TopicScore {
         this.id = id;
     }
 
+    @Override
     public SearchMetaData getSearchMetaData() {
         return searchMetaData;
     }
 
+    @Override
+    public Input getInput() {
+        return topic;
+    }
+
+    @Override
     public void setSearchMetaData(SearchMetaData searchMetaData) {
         this.searchMetaData = searchMetaData;
     }
@@ -40,11 +54,13 @@ public class TopicScore {
         this.topic = topic;
     }
 
-    public Double getScore() {
+    @Override
+    public double getScore() {
         return score;
     }
 
-    public void setScore(Double score) {
+    @Override
+    public void setScore(double score) {
         this.score = score;
     }
 }

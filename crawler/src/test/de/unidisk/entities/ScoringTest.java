@@ -1,9 +1,6 @@
 package de.unidisk.entities;
 
-import de.unidisk.dao.KeywordDAO;
-import de.unidisk.dao.KeywordScoreDAO;
-import de.unidisk.dao.SearchMetaDataDAO;
-import de.unidisk.dao.UniversityDAO;
+import de.unidisk.dao.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
@@ -17,8 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ScoringTest implements HibernateLifecycle {
+
     @Test
     void testKeywordScoring() throws MalformedURLException {
+        UniversityDAO universityDAO = new UniversityDAO();
+        University up = universityDAO.addUniversity("Uni Potsdam");
         KeywordDAO kDao = new KeywordDAO();
         List<Pair<String, String>> keyTop = new ArrayList<>();
 
@@ -27,23 +27,40 @@ public class ScoringTest implements HibernateLifecycle {
 
         List<Keyword> expKeywords = kDao.addKeywords(keyTop);
 
+        SearchMetaDataDAO smdDAO = new SearchMetaDataDAO();
+        SearchMetaData metaData = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), up,
+                ZonedDateTime.now().toEpochSecond());
+        KeywordScoreDAO scoreDAO = new KeywordScoreDAO();
+        ScoredInput halloScore = scoreDAO.addScore(expKeywords.get(0), .1, metaData);
+        assertAll("keyword score is wrong",
+                () -> assertEquals("Hallo", halloScore.getInputName(), "Keyword is wrong"),
+                () -> assertEquals(0.1, halloScore.getScore(), "Score is wrong"),
+                () -> assertEquals("Uni Potsdam", halloScore.getUniName()));
+
+        ScoredInput weltScore = scoreDAO.addScore(expKeywords.get(1), .2, metaData);
+        assertAll("keyword score is wrong",
+                () -> assertEquals("Welt", weltScore.getInputName(), "Keyword is wrong"),
+                () -> assertEquals(0.2, weltScore.getScore(), "Score is wrong"),
+                () -> assertEquals("Uni Potsdam", weltScore.getUniName()));
+    }
+
+    @Test
+    void testTopicScoring() throws MalformedURLException {
         UniversityDAO universityDAO = new UniversityDAO();
         University up = universityDAO.addUniversity("Uni Potsdam");
+        createHalloWeltTopic();
+        TopicDAO topicDAO = new TopicDAO();
+        Topic topic = topicDAO.findTopic("Hallo Welt").orElse(new Topic());
 
         SearchMetaDataDAO smdDAO = new SearchMetaDataDAO();
-        SearchMetaData metaData = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), up, ZonedDateTime.now()
-                .toEpochSecond());
-        KeywordScoreDAO scoreDAO = new KeywordScoreDAO();
-        KeyWordScore halloScore = scoreDAO.addScore(expKeywords.get(0), .1, metaData);
-        assertAll("keyword score is wrong",
-                () -> assertEquals("Hallo", halloScore.getKeyword().getName(), "Keyword is wrong"),
-                () -> assertEquals(new Double(0.1), halloScore.getScore(), "Score is wrong"),
-                () -> assertEquals("Uni Potsdam", halloScore.getSearchMetaData().getUniversity().getName()));
+        SearchMetaData metaData = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), up,
+                ZonedDateTime.now().toEpochSecond());
 
-        KeyWordScore weltScore = scoreDAO.addScore(expKeywords.get(1), .2, metaData);
-        assertAll("keyword score is wrong",
-                () -> assertEquals("Welt", weltScore.getKeyword().getName(), "Keyword is wrong"),
-                () -> assertEquals(new Double(0.2), weltScore.getScore(), "Score is wrong"),
-                () -> assertEquals("Uni Potsdam", weltScore.getSearchMetaData().getUniversity().getName()));
+        TopicScoreDAO scoreDAO = new TopicScoreDAO();
+        ScoredInput scoredInput = scoreDAO.addScore(topic, .5, metaData);
+        assertAll("Topic score is wrong",
+                () -> assertEquals("Hallo Welt", scoredInput.getInputName()),
+                () -> assertEquals(.5, scoredInput.getScore()),
+                () -> assertEquals("Uni Potsdam", scoredInput.getUniName()));
     }
 }

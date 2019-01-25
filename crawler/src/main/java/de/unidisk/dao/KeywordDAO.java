@@ -26,8 +26,9 @@ public class KeywordDAO {
                     .setParameter("name", keyTop.getKey())
                     .uniqueResultOptional()
                     .orElse(new Keyword(keyTop.getKey()));
-            Topic topicPojo = new Topic();
-            topicPojo.setName(keyTop.getValue());
+            Topic topicPojo = currentSession.createQuery("select t from Topic t where t.name like :name", Topic.class)
+                    .setParameter("name", keyTop.getRight())
+                    .uniqueResultOptional().orElse(new Topic(keyTop.getValue()));
             keyword.getTopics().add(topicPojo);
             try {
                 currentSession.save(topicPojo);
@@ -45,7 +46,7 @@ public class KeywordDAO {
     /**
      * Find keywords by topic name
      */
-    public List<Keyword> findKeyWords(String topic) {
+    public List<Keyword> findKeyWordsByTopic(String topic) {
         Session currentSession = HibernateUtil.getSesstionFactory().openSession();
         Transaction transaction = currentSession.getTransaction();
         transaction.begin();

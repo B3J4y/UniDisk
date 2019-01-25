@@ -1,6 +1,7 @@
 package de.unidisk.entities;
 
 import de.unidisk.dao.KeywordDAO;
+import de.unidisk.dao.TopicDAO;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
@@ -28,19 +29,24 @@ class KeywordTopicTest implements HibernateLifecycle{
     @Test
     void testKeywordDao() {
         KeywordDAO kDao = new KeywordDAO();
-        List<Pair<String, String>> keyTop = new ArrayList<>();
-
-        keyTop.add(Pair.of("Hallo", "Hallo Welt"));
-        keyTop.add(Pair.of("Welt", "Hallo Welt"));
-
-        List<Keyword> expKeywords = kDao.addKeywords(keyTop);
-
-        List<Keyword> keywords = kDao.findKeyWords("Hallo Welt");
+        List<Keyword> expKeywords = createHalloWeltTopic();
+        List<Keyword> keywords = kDao.findKeyWordsByTopic("Hallo Welt");
         assertAll("Something went wrong with the keywords from DAO",
                 () -> assertEquals(2, keywords.size(), "Size of keywords is wrong"),
                 () -> assertTrue(keywords.contains(expKeywords.get(0)), "\"Hallo\" not found"),
                 () -> assertTrue(keywords.contains(expKeywords.get(1)), "\"Welt\" not found")
         );
+    }
+
+    @Test
+    void testTopicDAO() {
+        createHalloWeltTopic();
+        TopicDAO topicDAO = new TopicDAO();
+        Topic topic = topicDAO.findTopic("Hallo Welt").orElse(new Topic());
+        KeywordDAO kDao = new KeywordDAO();
+        List<Keyword> keyWordsByTopic = kDao.findKeyWordsByTopic("Hallo Welt");
+        Topic extpectedTopic = keyWordsByTopic.get(0).getTopics().get(0);
+        assertEquals(extpectedTopic, topic, "Topics has to be equal");
     }
 
     @Test
@@ -55,14 +61,14 @@ class KeywordTopicTest implements HibernateLifecycle{
 
 
         List<Keyword> expKeywords = kDao.addKeywords(keyTop);
-        List<Keyword> keywords = kDao.findKeyWords("Hallo Welt");
+        List<Keyword> keywords = kDao.findKeyWordsByTopic("Hallo Welt");
 
         assertAll("Something went wrong with the keywords from DAO",
                 () -> assertEquals(2, keywords.size(), "Size of keywords is wrong"),
                 () -> assertTrue(keywords.contains(expKeywords.get(0)), "\"Hallo\" not found"),
                 () -> assertTrue(keywords.contains(expKeywords.get(1)), "\"Welt\" not found")
         );
-        List<Keyword> keywords2 = kDao.findKeyWords("Hallo Du");
+        List<Keyword> keywords2 = kDao.findKeyWordsByTopic("Hallo Du");
         assertAll("Something went wrong with the keywords from DAO",
                 () -> assertEquals(2, keywords2.size(), "Size of keywords is wrong"),
                 () -> assertTrue(keywords2.contains(expKeywords.get(0)), "\"Hallo\" not found"),

@@ -14,7 +14,7 @@ public class SearchMetaDataDAO {
     }
 
     public SearchMetaData createMetaData(URL url, University university, Long timestamp) {
-        Session currentSession = HibernateUtil.getSesstionFactory().openSession();
+        Session currentSession = HibernateUtil.getSesstionFactory().getCurrentSession();
         Transaction tnx = currentSession.beginTransaction();
         Optional<SearchMetaData> optSMD = currentSession.createQuery("select s from SearchMetaData s where s.university.name like :name AND s.timestamp = :time AND s.url like :url", SearchMetaData.class)
                 .setParameter("name", university.getName())

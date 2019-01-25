@@ -6,11 +6,18 @@ import javax.persistence.Id;
 import java.util.Objects;
 
 @Entity(name = "Topic")
-public class Topic {
+public class Topic implements Input {
     @Id
     @GeneratedValue
     private int id;
     private String name;
+
+    public Topic() {
+    }
+
+    public Topic(String name) {
+        this.name = name;
+    }
 
     public int getId() {
         return id;
@@ -20,6 +27,7 @@ public class Topic {
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }

@@ -1,19 +1,16 @@
 package de.unidisk.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "Keyword")
-public class Keyword {
+public class Keyword implements Input {
     @Id
     @GeneratedValue
     int id;
     private String name;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Topic> topics;
 
     public Keyword() {
@@ -32,6 +29,7 @@ public class Keyword {
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
