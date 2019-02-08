@@ -1,5 +1,6 @@
 package de.unidisk.view.variables;
 
+import de.unidisk.view.project.Project;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
@@ -13,6 +14,8 @@ import java.util.List;
 public class VariableService {
 
     private PodamFactory factory = new PodamFactoryImpl();
+
+
 
     public List<Variable> getVariables(int i) {
         ArrayList<Variable> variables = new ArrayList<>();
