@@ -9,7 +9,7 @@ import java.util.Optional;
 
 
 public class TopicDAO {
-    public Optional<Topic> findTopic(String name) {
+    public Optional<Topic> findOrCreateTopic(String name) {
         Session currentSession = HibernateUtil.getSesstionFactory().getCurrentSession();
         Transaction transaction = currentSession.getTransaction();
         if (!transaction.isActive()) {

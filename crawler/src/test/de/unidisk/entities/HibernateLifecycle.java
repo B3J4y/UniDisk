@@ -16,6 +16,7 @@ interface HibernateLifecycle {
         HibernateUtil.truncateTable(KeyWordScore.class);
         HibernateUtil.truncateTable(TopicScore.class);
         HibernateUtil.truncateTable(Keyword.class);
+        HibernateUtil.truncateTable(Project.class);
         HibernateUtil.truncateTable(Topic.class);
         HibernateUtil.truncateTable(SearchMetaData.class);
         HibernateUtil.truncateTable(University.class);
@@ -23,10 +24,14 @@ interface HibernateLifecycle {
 
     default List<Keyword> createHalloWeltTopic() {
         List<Pair<String, String>> keyTop = new ArrayList<>();
-        keyTop.add(Pair.of("Hallo", "Hallo Welt"));
-        keyTop.add(Pair.of("Welt", "Hallo Welt"));
+        keyTop.add(Pair.of("Hallo", getHWTopicName()));
+        keyTop.add(Pair.of("Welt", getHWTopicName()));
 
         KeywordDAO kDao = new KeywordDAO();
         return kDao.addKeywords(keyTop);
+    }
+
+    default String getHWTopicName() {
+        return "Hallo Welt";
     }
 }

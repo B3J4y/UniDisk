@@ -1,9 +1,7 @@
 package de.unidisk.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,8 +9,16 @@ public class Project {
     @Id
     @GeneratedValue
     private int id;
-    @OneToMany
+    private String name;
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Topic> topics;
+
+    public Project() {
+    }
+
+    public Project(String name) {
+        this.name = name;
+    }
 
     public int getId() {
         return id;
@@ -28,5 +34,22 @@ public class Project {
 
     public void setTopics(List<Topic> topics) {
         this.topics = topics;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void addTopic(Topic topic) {
+        if (topics == null) {
+            topics = new ArrayList<>();
+        }
+        if (!topics.contains(topic)) {
+            topics.add(topic);
+        }
     }
 }

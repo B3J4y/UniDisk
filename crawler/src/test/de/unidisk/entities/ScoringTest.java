@@ -50,7 +50,7 @@ public class ScoringTest implements HibernateLifecycle {
         University up = universityDAO.addUniversity("Uni Potsdam");
         createHalloWeltTopic();
         TopicDAO topicDAO = new TopicDAO();
-        Topic topic = topicDAO.findTopic("Hallo Welt").orElse(new Topic());
+        Topic topic = topicDAO.findOrCreateTopic("Hallo Welt").orElse(new Topic());
 
         SearchMetaDataDAO smdDAO = new SearchMetaDataDAO();
         SearchMetaData metaData = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), up,

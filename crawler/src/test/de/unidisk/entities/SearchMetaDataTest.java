@@ -12,7 +12,8 @@ import java.time.ZonedDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-public class SearchMetaDataTest implements HibernateLifecycle{
+public class SearchMetaDataTest implements HibernateLifecycle {
+
     @Test
     void testDifferentURL() throws MalformedURLException {
         SearchMetaDataDAO smdDAO = new SearchMetaDataDAO();

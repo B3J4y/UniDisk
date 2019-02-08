@@ -11,7 +11,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeywordTopicTest implements HibernateLifecycle{
+class KeywordTopicTest implements HibernateLifecycle {
+
     @Test
     void createH2Database() throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:h2:mem:", "sa", "");
@@ -22,7 +23,6 @@ class KeywordTopicTest implements HibernateLifecycle{
         ResultSet rset = stmt.executeQuery("select name from customer");
         while (rset.next()) {
             String name = rset.getString(1);
-            System.out.println(name);
         }
     }
 
@@ -42,7 +42,7 @@ class KeywordTopicTest implements HibernateLifecycle{
     void testTopicDAO() {
         createHalloWeltTopic();
         TopicDAO topicDAO = new TopicDAO();
-        Topic topic = topicDAO.findTopic("Hallo Welt").orElse(new Topic());
+        Topic topic = topicDAO.findOrCreateTopic("Hallo Welt").orElse(new Topic());
         KeywordDAO kDao = new KeywordDAO();
         List<Keyword> keyWordsByTopic = kDao.findKeyWordsByTopic("Hallo Welt");
         Topic extpectedTopic = keyWordsByTopic.get(0).getTopics().get(0);
