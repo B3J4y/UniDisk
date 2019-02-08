@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 out/
-.idea/
 *.iml
 **/target/
+/.idea/*
+/crawler/*.iml
+/website/*.iml
+
+*.class
+/crawler/.idea/workspace.xml
+/crawler/target/*

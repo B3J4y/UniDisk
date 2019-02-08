@@ -1,4 +1,4 @@
-package de.unidisk.view;
+package de.unidisk.view.variables;
 
 import org.primefaces.event.CloseEvent;
 import org.primefaces.event.ToggleEvent;
@@ -8,7 +8,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
 
 @ManagedBean
-public class PanelView {
+public class VariablePanelView {
 
     public void onClose(CloseEvent event) {
         FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Panel Closed", "Closed panel id:'" + event.getComponent().getId() + "'");

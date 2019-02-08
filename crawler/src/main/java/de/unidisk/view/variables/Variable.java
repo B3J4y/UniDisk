@@ -1,21 +1,21 @@
-package de.unidisk.view;
+package de.unidisk.view.variables;
 
 import javax.faces.bean.ManagedBean;
 import java.io.Serializable;
 import java.util.Objects;
 
 @ManagedBean
-public class Project implements Serializable {
+public class Variable implements Serializable {
     private String name;
     private String status;
 
 
-    public Project(String name, String status) {
+    public Variable(String name, String status) {
         this.name = name;
         this.status = status;
     }
 
-    public Project() {
+    public Variable() {
     }
 
     public String getName() {
@@ -40,8 +40,8 @@ public class Project implements Serializable {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        Project project = (Project) o;
-        return Objects.equals(getName(), project.getName());
+        Variable variable = (Variable) o;
+        return Objects.equals(getName(), variable.getName());
     }
 
     @Override

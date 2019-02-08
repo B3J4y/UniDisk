@@ -1,0 +1,106 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <meta charset="utf-8"></meta>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no"></meta>
+    <title>UniDisk</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css"></link>
+    <link rel="stylesheet" href="/assets/css/styles.min.css?h=c1c875adbe3423b81e6840c89217b6d0"></link>
+
+</h:head>
+
+<body>
+<!-- the navigation header -->
+<div>
+    <nav class="navbar navbar-light navbar-expand-md navigation-clean">
+        <div class="container"><a class="navbar-brand" href="#">UNIDISK - Stichwortsuche auf Hochschulseiten</a>
+            <button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span
+                    class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navcol-1">
+                <ul class="nav navbar-nav ml-auto">
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="index_p.xhtml">Übersicht</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link active" href="#">Variablen</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="results.xhtml">Ergebnisse</a></li>
+                    <li class="dropdown nav-item">
+                        <a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="geo-vis.html">Visualisierung</a>
+                        <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First Item</a>
+                            <a class="dropdown-item" role="presentation" href="#">Second Item</a>
+                            <a class="dropdown-item" role="presentation" href="#">Third Item</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<!-- the data table -->
+<div class="row">
+    <div class="col-3 text-left d-md-flex flex-column justify-content-md-start justify-content-lg-start align-items-lg-start"></div>
+    <div class="col-9">
+        <h:form id="dataTableForm">
+            <p:growl id="msgs" showDetail="true"/>
+
+            <p:dataTable id="variables1" widgetVar="variables1" var="variable" value="#{variablesAddRowView.variables}"
+                         editable="false"
+                         style="margin-bottom:20px">
+
+                <p:column headerText="Name">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{variable.name}"/></f:facet>
+                        <f:facet name="input">
+                            <h:selectOneMenu value="#{variable.name}" style="width:100%">
+                                <f:selectItems value="#{variablesEditView.names}" var="name" itemLabel="#{name}"
+                                               itemValue="#{name}"/>
+                            </h:selectOneMenu>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Status">
+                    <p:cellEditor>
+                        <f:facet name="output"><h:outputText value="#{variable.status}"/></f:facet>
+                        <f:facet name="input">
+                            <h:selectOneMenu value="#{variable.status}" style="width:100%">
+                                <f:selectItems value="#{variablesEditView.statuss}" var="status" itemLabel="#{status}"
+                                               itemValue="#{status}"/>
+                            </h:selectOneMenu>
+                        </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column>
+                    <!--<button class="" type="button">löschen</button>-->
+                    <p:commandButton value="löschen" id="deleteButton"
+                                     update=":dataTableForm"
+                                     action="#{variablesAddRowView.deleteRow(variable)}" style="margin-right:20px;"
+                                     styleClass="ui-priority-primary"/>
+                </p:column>
+
+            </p:dataTable>
+        </h:form>
+
+        <h:form>
+            <div class="ui-g">
+                <div class="ui-g-12">
+                    <p:inputText id="newProjectField" value="#{dtAddRowView.newProjectText}"/>
+                    <p:commandButton value="Add new row" styleClass="ui-priority-primary"
+                                     update="@(#dataTableForm)"
+                                     action="#{variablesAddRowView.onAddNew(dtAddRowView.newProjectText)}"/>
+                </div>
+            </div>
+
+        </h:form>
+
+    </div>
+</div>
+<!--</div>-->
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/bootstrap/js/bootstrap.min.js"></script>
+</body>
+
+</html>

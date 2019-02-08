@@ -1,4 +1,4 @@
-package de.unidisk.view;
+package de.unidisk.view.variables;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -7,16 +7,16 @@ import javax.faces.bean.ViewScoped;
 import java.io.Serializable;
 
 
-@ManagedBean(name = "dtAddRowView")
+@ManagedBean(name = "variablesAddRowView")
 @ViewScoped
-public class AddRowView implements Serializable {
+public class VariablesAddRowView implements Serializable {
 
-    private java.util.List<Project> projects;
+    private java.util.List<Variable> variables;
 
     // here the input from new project is bound
     private String newProjectText;
 
-    public AddRowView() {
+    public VariablesAddRowView() {
     }
 
     public String getNewProjectText() {
@@ -27,29 +27,29 @@ public class AddRowView implements Serializable {
         this.newProjectText = newProjectText;
     }
 
-    @ManagedProperty("#{projectService}")
-    private ProjectService service;
+    @ManagedProperty("#{variableService}")
+    private VariableService service;
 
     @PostConstruct
     public void init() {
         // TODO @Jan :: populate projects with exisiting projects from db
         newProjectText = "neues Projekt";
-        projects = service.getProjects(15);
+        variables = service.getVariables(15);
     }
 
-    public java.util.List<Project> getProjects() {
-        return projects;
+    public java.util.List<Variable> getVariables() {
+        return variables;
     }
 
     public java.util.List<String> getNames() {
         return service.getNames();
     }
 
-    public ProjectService getService() {
+    public VariableService getService() {
         return service;
     }
 
-    public void setService(ProjectService service) {
+    public void setService(VariableService service) {
         this.service = service;
     }
 
@@ -75,13 +75,13 @@ public class AddRowView implements Serializable {
     public void onAddNew(String projectName) {
         // TODO @JAN sync projects with db
         System.out.println(projectName + " entered");
-        projects.add(projects.get(0));
+        variables.add(variables.get(0));
     }
 
-    public void deleteRow(de.unidisk.view.Project project) {
+    public void deleteRow(Variable project) {
         // TODO @JAN delete projects in db
         System.out.println("hi");
-        projects.remove(project);
+        variables.remove(project);
 
     }
 
