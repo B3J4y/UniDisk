@@ -1,12 +1,14 @@
 package de.unidisk.view.results;
 
 import de.unidisk.view.project.Project;
+import de.unidisk.view.variables.VariablesView;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,8 @@ public class ResultService {
     }
 
     public List<ResultBean> getResultBeans(int i) {
+
+
         ArrayList<ResultBean> resultBeans = new ArrayList<>();
         for (int j = 0; j < i; j++) {
             ResultBean result = factory.manufacturePojo(ResultBean.class);
