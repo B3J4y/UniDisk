@@ -6,6 +6,7 @@ import de.unidisk.entities.Topic;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.List;
 import java.util.Optional;
 
 public class ProjectDAO {
@@ -60,5 +61,17 @@ public class ProjectDAO {
         currentSession.update(project);
         transaction.commit();
         currentSession.close();
+    }
+
+    public List<Project> getAll() {
+        Session currentSession = HibernateUtil.getSesstionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+        List<Project> project = currentSession.createQuery("select p from Project p", Project.class).list();
+        transaction.commit();
+        currentSession.close();
+        return project;
     }
 }
