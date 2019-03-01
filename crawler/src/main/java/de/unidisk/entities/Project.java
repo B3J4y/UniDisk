@@ -44,6 +44,14 @@ public class Project {
         this.name = name;
     }
 
+    /**
+     * TODO @Jan: implement state
+     * @return
+     */
+    public ProjectState getStatus() {
+        return ProjectState.RUNNING;
+    }
+
     public void addTopic(Topic topic) {
         if (topics == null) {
             topics = new ArrayList<>();
