@@ -18,17 +18,20 @@ public class ProjectService {
 
     public List<Project> getProjects(int i) {
 
-        ProjectDAO projectDAO = new ProjectDAO();
+        /*    ProjectDAO projectDAO = new ProjectDAO();
 
         ArrayList<Project> projects = new ArrayList<>();
         for (int j = 0; j < i; j++) {
             Project project = factory.manufacturePojo(Project.class);
             projects.add(project);
-        }
+        }*/
 
-        /*List<Project> projects = projectDAO.getAll().stream()
+        //ArrayList<Project> projects = new ArrayList<>();
+
+        ProjectDAO projectDAO = new ProjectDAO();
+        List<Project> projects = projectDAO.getAll().stream()
                 .map(project -> new Project(project.getName(), project.getStatus().toString()))
-                .collect(Collectors.toList());*/
+                .collect(Collectors.toList());
         return projects;
     }
 

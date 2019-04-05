@@ -7,12 +7,12 @@ import java.util.Objects;
 @ManagedBean
 public class Variable implements Serializable {
     private String name;
-    private String status;
+    private String keyword;
 
 
     public Variable(String name, String status) {
         this.name = name;
-        this.status = status;
+        this.keyword = keyword;
     }
 
     public Variable() {
@@ -26,12 +26,12 @@ public class Variable implements Serializable {
         this.name = name;
     }
 
-    public String getStatus() {
-        return status;
+    public String getKeyword() {
+        return keyword;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setKeyword(String status) {
+        this.keyword = status;
     }
 
     @Override
@@ -41,11 +41,11 @@ public class Variable implements Serializable {
         if (o == null || getClass() != o.getClass())
             return false;
         Variable variable = (Variable) o;
-        return Objects.equals(getName(), variable.getName());
+        return Objects.equals(getName(), variable.getName()) && Objects.equals(getKeyword(), variable.getKeyword());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName());
+        return Objects.hash(getName(), getKeyword());
     }
 }

@@ -1,10 +1,14 @@
 package de.unidisk.view.variables;
 
+import de.unidisk.dao.ProjectDAO;
+import de.unidisk.dao.TopicDAO;
+import de.unidisk.entities.Topic;
 import de.unidisk.view.project.Project;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +20,18 @@ public class VariableService {
     private PodamFactory factory = new PodamFactoryImpl();
 
 
+    @ManagedProperty("#{variablesView}")
+    private VariablesView variablesView;
 
     public List<Variable> getVariables(int i) {
+
+        ProjectDAO projectDAO = new ProjectDAO();
+        de.unidisk.entities.Project project = projectDAO
+                .findProject(variablesView.getProjectSelected())
+                .orElseThrow(IllegalStateException::new);
+        //List<Topic> topics = project.getTopics();
+        //topics.get(0).get
+
         ArrayList<Variable> variables = new ArrayList<>();
         for (int j = 0; j<i;j++) {
             Variable variable = factory.manufacturePojo(Variable.class);
@@ -26,11 +40,11 @@ public class VariableService {
         return variables;
     }
 
-    public List<String> getStatuss() {
+    public List<String> getKeywordss() {
         ArrayList<String> arrayList = new ArrayList<>();
         List<Variable> variables = getVariables(12);
         for (Variable variable : variables) {
-            arrayList.add(variable.getStatus());
+            arrayList.add(variable.getKeyword());
         }
         return arrayList;
     }
@@ -42,5 +56,13 @@ public class VariableService {
             arrayList.add(project.getName());
         }
         return arrayList;
+    }
+
+    public VariablesView getVariablesView() {
+        return variablesView;
+    }
+
+    public void setVariablesView(VariablesView variablesView) {
+        this.variablesView = variablesView;
     }
 }

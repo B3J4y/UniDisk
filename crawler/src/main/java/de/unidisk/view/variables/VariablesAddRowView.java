@@ -28,13 +28,13 @@ public class VariablesAddRowView implements Serializable {
     }
 
     @ManagedProperty("#{variableService}")
-    private VariableService service;
+    private VariableService variableService;
 
     @PostConstruct
     public void init() {
         // TODO @Jan :: populate projects with exisiting projects from db
         newProjectText = "neues Projekt";
-        variables = service.getVariables(15);
+        variables = variableService.getVariables(15);
     }
 
     public java.util.List<Variable> getVariables() {
@@ -42,16 +42,10 @@ public class VariablesAddRowView implements Serializable {
     }
 
     public java.util.List<String> getNames() {
-        return service.getNames();
+        return variableService.getNames();
     }
 
-    public VariableService getService() {
-        return service;
-    }
 
-    public void setService(VariableService service) {
-        this.service = service;
-    }
 
     /* public void setService(CarService service) {
         this.service = service;
@@ -85,4 +79,11 @@ public class VariablesAddRowView implements Serializable {
 
     }
 
+    public void setVariableService(VariableService variableService) {
+        this.variableService = variableService;
+    }
+
+    public VariableService getVariableService() {
+        return variableService;
+    }
 }

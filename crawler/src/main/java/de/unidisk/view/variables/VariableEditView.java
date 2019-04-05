@@ -1,18 +1,13 @@
 package de.unidisk.view.variables;
 
-import org.primefaces.event.CellEditEvent;
-import org.primefaces.event.RowEditEvent;
-
 import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
 import java.io.Serializable;
 import java.util.List;
 
-@ManagedBean(name="variablesEditView")
+@ManagedBean(name = "variablesEditView")
 @ViewScoped
 public class VariableEditView implements Serializable {
 
@@ -20,12 +15,12 @@ public class VariableEditView implements Serializable {
     private List<Variable> cars2;
 
     @ManagedProperty("#{variableService}")
-    private VariableService service;
+    private VariableService variableService;
 
     @PostConstruct
     public void init() {
-        cars1 = service.getVariables(10);
-        cars2 = service.getVariables(10);
+        cars1 = variableService.getVariables(10);
+        cars2 = variableService.getVariables(10);
     }
 
     public List<Variable> getCars1() {
@@ -37,16 +32,14 @@ public class VariableEditView implements Serializable {
     }
 
     public List<String> getNames() {
-        return service.getNames();
+        return variableService.getNames();
     }
 
-    public List<String> getStatuss() {
-        return service.getStatuss();
+    public List<String> getKeywordss() {
+        return variableService.getKeywordss();
     }
 
-    public void setService(VariableService service) {
-        this.service = service;
-    }
+
 
  /*   public void onRowEdit(RowEditEvent event) {
         FacesMessage msg = new FacesMessage("Project Edited", ((Variable) event.getObject()).getStatus());
@@ -67,4 +60,12 @@ public class VariableEditView implements Serializable {
             FacesContext.getCurrentInstance().addMessage(null, msg);
         }
     }*/
+
+    public VariableService getVariableService() {
+        return variableService;
+    }
+
+    public void setVariableService(VariableService variableService) {
+        this.variableService = variableService;
+    }
 }

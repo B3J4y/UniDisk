@@ -1,10 +1,13 @@
 package de.unidisk.view.project;
 
+import de.unidisk.dao.ProjectDAO;
+
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import java.io.Serializable;
+import java.util.Optional;
 
 
 @ManagedBean(name = "dtAddRowView")
@@ -73,9 +76,15 @@ public class AddRowView implements Serializable {
     }*/
 
     public void onAddNew(String projectName) {
+
+        ProjectDAO projectDAO = new ProjectDAO();
+        projectDAO.createProject(projectName);
+        de.unidisk.entities.Project project = projectDAO.findProject(projectName).orElseThrow(IllegalStateException::new);
+        projects.add(new Project(project.getName(), project.getStatus().toString()));
+
         // TODO @JAN sync projects with db
         System.out.println(projectName + " entered");
-        projects.add(projects.get(0));
+        //projects.add(projects.get(0));
     }
 
     public void deleteRow(Project project) {

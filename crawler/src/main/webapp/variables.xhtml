@@ -24,10 +24,13 @@
                 <ul class="nav navbar-nav ml-auto">
                     <li class="nav-item" role="presentation"><a class="nav-link" href="index_p.xhtml">Übersicht</a></li>
                     <li class="nav-item" role="presentation"><a class="nav-link active" href="#">Variablen</a></li>
-                    <li class="nav-item" role="presentation"><a class="nav-link" href="results.xhtml">Ergebnisse</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="results.xhtml">Ergebnisse</a>
+                    </li>
                     <li class="dropdown nav-item">
-                        <a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="geo-vis.html">Visualisierung</a>
-                        <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation" href="#">First Item</a>
+                        <a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false"
+                           href="geo-vis.html">Visualisierung</a>
+                        <div class="dropdown-menu" role="menu"><a class="dropdown-item" role="presentation"
+                                                                  href="#">First Item</a>
                             <a class="dropdown-item" role="presentation" href="#">Second Item</a>
                             <a class="dropdown-item" role="presentation" href="#">Third Item</a>
                         </div>
@@ -64,7 +67,7 @@
                          editable="false"
                          style="margin-bottom:20px">
 
-                <p:column headerText="Name">
+                <p:column headerText="Variable">
                     <p:cellEditor>
                         <f:facet name="output"><h:outputText value="#{variable.name}"/></f:facet>
                         <f:facet name="input">
@@ -76,13 +79,14 @@
                     </p:cellEditor>
                 </p:column>
 
-                <p:column headerText="Status">
+                <p:column headerText="Schlagwort">
                     <p:cellEditor>
-                        <f:facet name="output"><h:outputText value="#{variable.status}"/></f:facet>
+                        <f:facet name="output"><h:outputText value="#{variable.keyword}"/></f:facet>
                         <f:facet name="input">
-                            <h:selectOneMenu value="#{variable.status}" style="width:100%">
-                                <f:selectItems value="#{variablesEditView.statuss}" var="status" itemLabel="#{status}"
-                                               itemValue="#{status}"/>
+                            <h:selectOneMenu value="#{variable.keyword}" style="width:100%">
+                                <f:selectItems value="#{variablesEditView.keywordss}" var="keyword"
+                                               itemLabel="#{keyword}"
+                                               itemValue="#{keyword}"/>
                             </h:selectOneMenu>
                         </f:facet>
                     </p:cellEditor>
