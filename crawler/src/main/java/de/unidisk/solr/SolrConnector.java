@@ -1,5 +1,6 @@
-package de.unidisk.crawler.solr;
+package de.unidisk.solr;
 
+import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
@@ -11,57 +12,26 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
-import java.io.*;
-import java.util.HashSet;
+import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by carl on 07.01.16.
  */
 public class SolrConnector {
     static private final Logger logger = LogManager.getLogger(SolrConnector.class.getName());
-    private final String dbName;
     private SolrClient client ;
     private final String serverUrl;
     private static int limit =1000000;
 
-    public SolrConnector(String serverUrl, String dbName) {
+    public SolrConnector(String serverUrl) {
         logger.debug("Entering SolrConnector Constructor with serverUrl:" + serverUrl);
         this.serverUrl = serverUrl;
         client = new HttpSolrClient.Builder(serverUrl)
                 .withConnectionTimeout(10000)
                 .withSocketTimeout(60000)
                 .build();
-        this.dbName = dbName;
         logger.debug("Leaving SolrConnector Constructor");
-    }
-
-    public QueryResponse connectToSolr(String query) throws IOException, SolrServerException {
-        //TODO Hacky exception
-        if (! query.matches("\\*")) {
-            logger.info("Match");
-            query = "\"" + query + "\"";
-        }
-        logger.debug("Entering connectToSolr with query:" + query);
-        SolrQuery solrQuery = new SolrQuery("content:" + query);
-        solrQuery.set("indent", "true");
-        solrQuery.set("rows", limit);
-        solrQuery.setFields("id", "content", "title", "score", "url", "pageDepth");
-        solrQuery.set("wt", "json");
-        if (query.toLowerCase().matches("forsch[a-z]* lern[a-z]*") || query.toLowerCase().matches("entdeckend[a-z]* lern[a-z]*")) {
-            solrQuery.set("defType", "edismax");
-            solrQuery.set("qs", "10");
-        }
-
-        QueryResponse response = client.query(solrQuery);
-        SolrDocumentList docs = response.getResults();
-        logger.info("Quantitiv Result from " + query + ":" + docs.getNumFound());
-        if (docs.getNumFound() > limit) {
-            logger.warn("Limit Exceeded. Found more Docs in solr than queried. Increase the limit if you want to get more Docs");
-        }
-        logger.debug("Leaving connectToSolr");
-        return response;
     }
 
     public QueryResponse query(SolrQuery query) throws IOException, SolrServerException {
@@ -103,7 +73,7 @@ public class SolrConnector {
         }
         client.commit();
     }
-
+/*
     public void addToWordlist(String word) {
         File file = SolrStandardConfigurator.getCompoundedWordsFile(dbName);
         if (file == null) {
@@ -138,6 +108,7 @@ public class SolrConnector {
         }
     }
 
+ */
     public String getServerUrl(){
         return serverUrl;
     }

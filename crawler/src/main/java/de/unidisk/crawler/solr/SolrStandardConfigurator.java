@@ -1,20 +1,18 @@
 package de.unidisk.crawler.solr;
 
-import de.unidisk.common.SystemProperties;
+import de.unidisk.config.SolrConfiguration;
 import org.apache.solr.client.solrj.SolrQuery;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Created by carl on 12.03.17.
  */
 public class SolrStandardConfigurator {
     private static int limit =1000000;
-    private static Properties systemProperties = SystemProperties.getInstance();
     private static Map<String, String> fieldProperties;
 
     static public int getLimit() {
@@ -22,17 +20,11 @@ public class SolrStandardConfigurator {
     }
 
     public static String getStandardUrl() {
-        return "http://" + systemProperties.getProperty("solr.connection.url") + ":" +
-                systemProperties.getProperty("solr.connection.port")
-                + "/solr/"
-                + systemProperties.getProperty("solr.connection.db");
+        return getTestUrl();
     }
 
     public static String getTestUrl() {
-        return "http://" + systemProperties.getProperty("solr.connection.url") + ":" +
-                systemProperties.getProperty("solr.connection.port")
-                + "/solr/"
-                + systemProperties.getProperty("solr.connection.testDb");
+        return "http://" + SolrConfiguration.SERVER_NAME + ":" + SolrConfiguration.PORT + "/solr/" + SolrConfiguration.CORE;
     }
 
     public static String[] getStandardFields() {
@@ -57,8 +49,10 @@ public class SolrStandardConfigurator {
 
     public static File getCompoundedWordsFile(String solrDb) {
         String[] path = new String[]{"server", "solr", solrDb, "germanwords.txt"};
-        File compundedWordsFile = new File(systemProperties.getProperty("solr.system.path")
-                + File.separator + String.join(File.separator, path));
+        //todo hier nochmal nachgucken
+        //File compundedWordsFile = new File(systemProperties.getProperty("solr.system.path")
+        //        + File.separator + String.join(File.separator, path));
+        File compundedWordsFile = new File("germanword.txt");
         if (compundedWordsFile.isFile()) {
             return compundedWordsFile;
         }
