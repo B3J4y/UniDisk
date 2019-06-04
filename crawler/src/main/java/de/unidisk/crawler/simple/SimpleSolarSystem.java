@@ -18,35 +18,52 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public class SimpleSolarSystem {
+import static de.unidisk.crawler.simple.SimpleCarlConfig.collectionName;
+import static de.unidisk.crawler.simple.SimpleCarlConfig.solrUrl;
 
-    public final static String collectionName = "mycollection";
-    final String solrUrl = "http://localhost:8983/solr";
+public class SimpleSolarSystem {
 
     public SimpleSolarSystem() {
 
     }
 
-    public void sendPageToTheMoon(String content) throws IOException, SolrServerException {
-
+    public void sendPageToTheMoon(SimpleCarlDocument content) throws IOException, SolrServerException {
         HttpSolrClient client =
                 new HttpSolrClient.Builder(solrUrl).withConnectionTimeout(10000).withSocketTimeout(60000).build();
 
-        final SimpleSolarSystem.SimpleCarlDocument kindle = new SimpleSolarSystem.SimpleCarlDocument(UUID.randomUUID().toString(),
-                content);
-        final UpdateResponse response = client.addBean(SimpleSolarSystem.collectionName, kindle);
-        client.commit(SimpleSolarSystem.collectionName);
+        final UpdateResponse response = client.addBean(collectionName, content);
+        client.commit(collectionName);
     }
 
     public static class SimpleCarlDocument {
         @Field
         public String id;
-        @Field public String name;
 
-        public SimpleCarlDocument(String id, String name) {
-            this.id = id;  this.name = name;
+        @Field
+        public String url;
+        @Field
+        public String name;
+
+        @Field
+        public String title;
+
+        @Field
+        public String content;
+
+        @Field
+        public Long datum;
+
+
+
+        public SimpleCarlDocument(String id, String url, String title, String content, Long datum) {
+            this.id = id;
+            this.title = title;
+            this.content = content;
+            this.datum = datum;
+            this.url = url;
         }
 
-        public SimpleCarlDocument() {}
+
+
     }
 }

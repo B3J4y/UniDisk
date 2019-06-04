@@ -6,11 +6,14 @@ import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
+import java.util.ArrayList;
+
+import static de.unidisk.crawler.simple.SimpleCarlConfig.crawledShitPlace;
+
 public class SimpleCrawl {
 
 
-    private static String whiteList = "https://uni-potsdam.de";
-    private static String crawledShitPlace = "C:\\Users\\dehne\\Desktop\\crawledshit";
+
 
     public void crawlCarlCrawl() throws Exception {
 
@@ -29,7 +32,10 @@ public class SimpleCrawl {
         // For each crawl, you need to add some seed urls. These are the first
         // URLs that are fetched and then the crawler starts following links
         // which are found in these pages
-        controller.addSeed(whiteList);
+        String[] seedList = SimpleCarlConfig.seedList;
+        for (String s : seedList) {
+            controller.addSeed(s);
+        }
 
         // The factory which creates instances of crawlers.
         CrawlController.WebCrawlerFactory<SimpleCarl> factory = SimpleCarl::new;
