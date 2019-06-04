@@ -7,12 +7,13 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.solr.client.solrj.SolrServerException;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class SimpleCarl extends WebCrawler {
 
-    private static String whiteList = "uni-potsdam.de";
 
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
             + "|png|mp3|mp4|zip|gz))$");
@@ -23,7 +24,20 @@ public class SimpleCarl extends WebCrawler {
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
         return !FILTERS.matcher(href).matches()
-                && href.contains(whiteList);
+                && checkWhiteList(url);
+    }
+
+    public Boolean checkWhiteList(WebURL url) {
+        String urlString = url.toString();
+        String[] whiteListe = SimpleCarlConfig.whitelist;
+        boolean result = false;
+        for (String s : whiteListe) {
+            if (urlString.contains(s)){
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 
 
@@ -44,8 +58,11 @@ public class SimpleCarl extends WebCrawler {
                 System.out.println("Number of outgoing links: " + links.size());
                 System.out.println("---------------------------------------------------------");
 
+                SimpleSolarSystem.SimpleCarlDocument simpleCarlDocument =
+                        new SimpleSolarSystem.SimpleCarlDocument(UUID.randomUUID().toString(), page.getWebURL().toString(),
+                                ((HtmlParseData) page.getParseData()).getTitle(), text, System.currentTimeMillis());
                 //if required write content to file
-                simpleSolarSystem.sendPageToTheMoon(text);
+                simpleSolarSystem.sendPageToTheMoon(simpleCarlDocument);
             }
         } catch (IOException e) {
             e.printStackTrace();

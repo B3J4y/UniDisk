@@ -17,6 +17,8 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.junit.Test;
+import uk.co.jemos.podam.api.PodamFactory;
+import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +28,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class SimpleCrawlTest {
+
+    PodamFactory podamFactory = new PodamFactoryImpl();
 
     /*
      * automatically create a solr collection
@@ -57,7 +61,7 @@ public class SimpleCrawlTest {
     @Test
     public void testFieldInputAndQuery() throws Exception {
         SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem();
-        simpleSolarSystem.sendPageToTheMoon("hello world");
+        simpleSolarSystem.sendPageToTheMoon(podamFactory.manufacturePojo(SimpleSolarSystem.SimpleCarlDocument.class));
     }
 
     @Test
