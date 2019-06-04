@@ -1,9 +1,9 @@
 package de.unidisk.dao;
 
-import de.unidisk.entities.Input;
-import de.unidisk.entities.ScoredInput;
-import de.unidisk.entities.Topic;
-import de.unidisk.entities.TopicScore;
+import de.unidisk.entities.hibernate.Input;
+import de.unidisk.entities.hibernate.ScoredInput;
+import de.unidisk.entities.hibernate.Topic;
+import de.unidisk.entities.hibernate.TopicScore;
 import org.hibernate.Session;
 
 public class TopicScoreDAO implements Scoring {

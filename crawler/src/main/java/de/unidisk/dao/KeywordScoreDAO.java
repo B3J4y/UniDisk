@@ -1,9 +1,9 @@
 package de.unidisk.dao;
 
-import de.unidisk.entities.Input;
-import de.unidisk.entities.KeyWordScore;
-import de.unidisk.entities.Keyword;
-import de.unidisk.entities.ScoredInput;
+import de.unidisk.entities.hibernate.Input;
+import de.unidisk.entities.hibernate.KeyWordScore;
+import de.unidisk.entities.hibernate.Keyword;
+import de.unidisk.entities.hibernate.ScoredInput;
 import org.hibernate.Session;
 
 public class KeywordScoreDAO implements Scoring {

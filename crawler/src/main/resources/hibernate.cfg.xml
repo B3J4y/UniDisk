@@ -35,13 +35,13 @@
         <!-- org.hibernate.HibernateException: No CurrentSessionContext configured! -->
         <property name="hibernate.current_session_context_class">thread</property>
 
-        <mapping class="de.unidisk.entities.Keyword"/>
-        <mapping class="de.unidisk.entities.KeyWordScore"/>
-        <mapping class="de.unidisk.entities.Project"/>
-        <mapping class="de.unidisk.entities.SearchMetaData"/>
-        <mapping class="de.unidisk.entities.Topic"/>
-        <mapping class="de.unidisk.entities.TopicScore"/>
-        <mapping class="de.unidisk.entities.University"/>
+        <mapping class="de.unidisk.entities.hibernate.Keyword"/>
+        <mapping class="de.unidisk.entities.hibernate.KeyWordScore"/>
+        <mapping class="de.unidisk.entities.hibernate.Project"/>
+        <mapping class="de.unidisk.entities.hibernate.SearchMetaData"/>
+        <mapping class="de.unidisk.entities.hibernate.Topic"/>
+        <mapping class="de.unidisk.entities.hibernate.TopicScore"/>
+        <mapping class="de.unidisk.entities.hibernate.University"/>
 
     </session-factory>
 

@@ -1,9 +1,9 @@
 package de.unidisk.dao;
 
 import de.unidisk.HibernateUtil;
-import de.unidisk.entities.Input;
-import de.unidisk.entities.ScoredInput;
-import de.unidisk.entities.SearchMetaData;
+import de.unidisk.entities.hibernate.Input;
+import de.unidisk.entities.hibernate.ScoredInput;
+import de.unidisk.entities.hibernate.SearchMetaData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 

@@ -1,12 +1,15 @@
 package de.unidisk.dao;
 
 import de.unidisk.HibernateUtil;
-import de.unidisk.entities.Project;
-import de.unidisk.entities.Topic;
+import de.unidisk.entities.hibernate.Keyword;
+import de.unidisk.entities.hibernate.Project;
+import de.unidisk.entities.hibernate.Topic;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class ProjectDAO {

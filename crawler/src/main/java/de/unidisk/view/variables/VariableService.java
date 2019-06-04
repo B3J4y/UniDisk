@@ -1,9 +1,7 @@
 package de.unidisk.view.variables;
 
 import de.unidisk.dao.ProjectDAO;
-import de.unidisk.dao.TopicDAO;
-import de.unidisk.entities.Topic;
-import de.unidisk.view.project.Project;
+import de.unidisk.entities.hibernate.Project;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
@@ -26,7 +24,7 @@ public class VariableService {
     public List<Variable> getVariables(int i) {
 
         ProjectDAO projectDAO = new ProjectDAO();
-        de.unidisk.entities.Project project = projectDAO
+        Project project = projectDAO
                 .findProject(variablesView.getProjectSelected())
                 .orElseThrow(IllegalStateException::new);
         //List<Topic> topics = project.getTopics();

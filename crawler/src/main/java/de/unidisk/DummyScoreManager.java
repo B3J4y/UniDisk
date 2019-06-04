@@ -1,7 +1,7 @@
 package de.unidisk;
 
-import de.unidisk.entities.KeyWordScore;
-import de.unidisk.entities.TopicScore;
+import de.unidisk.entities.hibernate.KeyWordScore;
+import de.unidisk.entities.hibernate.TopicScore;
 
 import java.util.List;
 

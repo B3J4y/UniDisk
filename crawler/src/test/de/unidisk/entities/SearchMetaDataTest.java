@@ -2,6 +2,8 @@ package de.unidisk.entities;
 
 import de.unidisk.dao.SearchMetaDataDAO;
 import de.unidisk.dao.UniversityDAO;
+import de.unidisk.entities.hibernate.SearchMetaData;
+import de.unidisk.entities.hibernate.University;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;

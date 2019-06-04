@@ -1,4 +1,4 @@
-package de.unidisk.entities;
+package de.unidisk.entities.hibernate;
 
 public enum ProjectState {
     RUNNING,

@@ -1,4 +1,4 @@
-package de.unidisk.entities;
+package de.unidisk.entities.hibernate;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

@@ -1,6 +1,6 @@
 package de.unidisk;
 
-import de.unidisk.entities.Project;
+import de.unidisk.entities.hibernate.Project;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 

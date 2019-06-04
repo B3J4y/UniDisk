@@ -1,8 +1,8 @@
 package de.unidisk.dao;
 
 import de.unidisk.HibernateUtil;
-import de.unidisk.entities.Keyword;
-import de.unidisk.entities.Topic;
+import de.unidisk.entities.hibernate.Keyword;
+import de.unidisk.entities.hibernate.Topic;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Session;

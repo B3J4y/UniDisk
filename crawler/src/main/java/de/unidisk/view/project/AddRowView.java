@@ -7,7 +7,6 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import java.io.Serializable;
-import java.util.Optional;
 
 
 @ManagedBean(name = "dtAddRowView")
@@ -79,7 +78,7 @@ public class AddRowView implements Serializable {
 
         ProjectDAO projectDAO = new ProjectDAO();
         projectDAO.createProject(projectName);
-        de.unidisk.entities.Project project = projectDAO.findProject(projectName).orElseThrow(IllegalStateException::new);
+        de.unidisk.entities.hibernate.Project project = projectDAO.findProject(projectName).orElseThrow(IllegalStateException::new);
         projects.add(new Project(project.getName(), project.getStatus().toString()));
 
         // TODO @JAN sync projects with db

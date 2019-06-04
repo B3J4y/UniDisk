@@ -2,6 +2,8 @@ package de.unidisk.entities;
 
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.TopicDAO;
+import de.unidisk.entities.hibernate.Keyword;
+import de.unidisk.entities.hibernate.Topic;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 

@@ -2,6 +2,7 @@ package de.unidisk.entities;
 
 import de.unidisk.HibernateUtil;
 import de.unidisk.dao.KeywordDAO;
+import de.unidisk.entities.hibernate.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.TestInstance;

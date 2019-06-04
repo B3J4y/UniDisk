@@ -1,6 +1,7 @@
 package de.unidisk.entities;
 
 import de.unidisk.dao.UniversityDAO;
+import de.unidisk.entities.hibernate.University;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

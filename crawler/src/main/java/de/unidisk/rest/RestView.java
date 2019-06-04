@@ -4,9 +4,9 @@ import de.unidisk.IKeyword;
 import de.unidisk.IOverview;
 import de.unidisk.IScores;
 import de.unidisk.ITopic;
-import de.unidisk.entities.KeyWordScore;
-import de.unidisk.entities.Project;
-import de.unidisk.entities.TopicScore;
+import de.unidisk.entities.hibernate.KeyWordScore;
+import de.unidisk.entities.hibernate.Project;
+import de.unidisk.entities.hibernate.TopicScore;
 
 import javax.ws.rs.*;
 import java.util.List;

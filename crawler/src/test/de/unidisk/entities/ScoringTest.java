@@ -1,6 +1,7 @@
 package de.unidisk.entities;
 
 import de.unidisk.dao.*;
+import de.unidisk.entities.hibernate.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 
