@@ -1,10 +1,13 @@
 package de.unidisk.crawler.simple;
 
+import de.unidisk.crawler.solr.SolrConnector;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
@@ -13,6 +16,10 @@ import java.util.ArrayList;
 import static de.unidisk.crawler.simple.SimpleCarlConfig.crawledShitPlace;
 
 public class SimpleCrawl implements ICrawler {
+
+    static private final Logger logger = LogManager.getLogger(SimpleCrawl.class.getName());
+
+    private CrawlController controller;
 
     public void startCrawl(String seed) throws Exception {
 
@@ -26,7 +33,7 @@ public class SimpleCrawl implements ICrawler {
         PageFetcher pageFetcher = new PageFetcher(config);
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
-        CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
+        this.controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
         // For each crawl, you need to add some seed urls. These are the first
         // URLs that are fetched and then the crawler starts following links
@@ -40,6 +47,19 @@ public class SimpleCrawl implements ICrawler {
         // will reach the line after this only when crawling is finished.
         controller.start(factory, numberOfCrawlers);
 
+    }
+
+     public void startMultipleCrawl() {
+        
+     }
+
+    @Override
+    public void stopCrawl() {
+        if (controller == null) {
+            logger.warn("using stop crawl when now crawl has been started");
+        } else {
+            controller.shutdown();
+        }
     }
 
 

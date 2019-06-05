@@ -56,7 +56,7 @@ public class SimpleCrawlTest {
     @Test
     public void shootTheMoon() throws Exception {
         ICrawler crawler = new SimpleCrawl();
-        crawler.startCrawl(SimpleCarlConfig.seedList[1]);
+        crawler.startCrawl(SimpleCarlConfig.seedList[0]);
     }
 
 
