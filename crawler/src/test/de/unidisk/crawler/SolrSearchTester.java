@@ -1,11 +1,14 @@
 package de.unidisk.crawler;
 
-import de.unidisk.common.SystemProperties;
-import de.unidisk.crawler.datatype.*;
+import de.unidisk.common.StichwortModifier;
+import de.unidisk.crawler.datatype.SolrFile;
+import de.unidisk.crawler.datatype.SolrStichwort;
+import de.unidisk.crawler.datatype.Stichwort;
+import de.unidisk.crawler.datatype.Variable;
 import de.unidisk.crawler.io.FilesToSolrConverter;
-import de.unidisk.crawler.solr.SolrConnector;
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import de.unidisk.nlp.datatype.RegExpStichwort;
+import de.unidisk.solr.SolrConnector;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -33,7 +36,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class SolrSearchTester {
     static private final Logger logger = LogManager.getLogger(SolrSearchTester.class);
-    private static Properties systemProperties = SystemProperties.getInstance();
     private String path;
     private String directory;
     String fileName = "1-FirstBook.txt";
@@ -55,8 +57,7 @@ public class SolrSearchTester {
 
     @After
     public void tearDown() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl(),
-                systemProperties.getProperty("solr.connection.testDb"));
+        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
         QueryResponse response = connector.queryAllDocuments();
 
         connector.deleteDocuments(response.getResults());
@@ -88,8 +89,7 @@ public class SolrSearchTester {
     @Test
     public void testWithDocuments() throws Exception {
         List<SolrInputDocument> documents = new FilesToSolrConverter(path).getSolrDocs();
-        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl(),
-                systemProperties.getProperty("solr.connection.testDb"));
+        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
         if (documents.size() == 0) {
             logger.debug("Nothing to do here");
             return;

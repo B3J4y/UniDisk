@@ -1,5 +1,7 @@
 package de.unidisk.crawler.datatype;
 
+import de.unidisk.common.StichwortModifier;
+
 import java.util.List;
 
 /**

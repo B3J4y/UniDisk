@@ -1,7 +1,7 @@
 package de.unidisk.nlp.datatype;
 
+import de.unidisk.common.StichwortModifier;
 import de.unidisk.crawler.datatype.AbstractStichwort;
-import de.unidisk.crawler.datatype.StichwortModifier;
 
 import java.util.List;
 

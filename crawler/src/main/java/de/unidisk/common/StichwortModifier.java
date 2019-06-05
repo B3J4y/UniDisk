@@ -1,4 +1,4 @@
-package de.unidisk.crawler.datatype;
+package de.unidisk.common;
 
 /**
  * Created by carl on 21.03.17.

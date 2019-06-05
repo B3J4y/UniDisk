@@ -1,5 +1,6 @@
 package de.unidisk.crawler.datatype;
 
+import de.unidisk.common.StichwortModifier;
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import org.apache.solr.client.solrj.SolrQuery;
 

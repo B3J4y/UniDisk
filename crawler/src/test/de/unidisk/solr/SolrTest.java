@@ -1,9 +1,8 @@
 package de.unidisk.solr;
 
-import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+import de.unidisk.common.StichwortModifier;
 import de.unidisk.config.SolrConfiguration;
 import de.unidisk.crawler.datatype.Stichwort;
-import de.unidisk.crawler.datatype.StichwortModifier;
 import de.unidisk.crawler.datatype.Variable;
 import de.unidisk.nlp.datatype.RegExpStichwort;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -20,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public class SolrTest {
 
     @Test
-    public void smokeTest() throws CommunicationsException {
+    public void smokeTest() {
         SolrConnector connector = new SolrConnector(SolrConfiguration.getTestUrl());
         try {
             Stichwort stichwort = new RegExpStichwort("Test");
@@ -64,10 +63,10 @@ public class SolrTest {
         response = connector.query(regexStichwort.buildQuery(new ArrayList<>()));
         assertEquals(1, response.getResults().getNumFound());
 
-        List<RegExpStichwort> stichworte = new ArrayList<>();
+        List<Stichwort> stichworte = new ArrayList<>();
         stichworte.add(new RegExpStichwort("very"));
         stichworte.add(new RegExpStichwort("second"));
-        Variable<RegExpStichwort> variable = new Variable<>("Test Variable", stichworte);
+        Variable<Stichwort> variable = new Variable<>("Test Variable", stichworte);
         modifiers = new ArrayList<>();
         response = connector.query(variable.buildQuery(modifiers));
         assertEquals(2, response.getResults().getNumFound());

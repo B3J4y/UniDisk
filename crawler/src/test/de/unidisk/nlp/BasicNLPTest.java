@@ -1,7 +1,7 @@
 package de.unidisk.nlp;
 
+import de.unidisk.common.StichwortModifier;
 import de.unidisk.crawler.datatype.Stichwort;
-import de.unidisk.crawler.datatype.StichwortModifier;
 import de.unidisk.nlp.basics.GermanStemming;
 import de.unidisk.nlp.datatype.RegExpStichwort;
 import de.unidisk.nlp.datatype.Rule;
@@ -14,10 +14,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by carl on 08.03.17.
- */
-public class BasicNLPTester {
+public class BasicNLPTest {
     @Test
     public void testEnhancedWithRegExp() throws Exception {
         List<StichwortModifier> modifiers = new ArrayList<>();
