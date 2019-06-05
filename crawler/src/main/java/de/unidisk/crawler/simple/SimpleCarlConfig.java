@@ -2,7 +2,7 @@ package de.unidisk.crawler.simple;
 
 public class SimpleCarlConfig {
     public static String[] whitelist = new String[]{
-            "www.uni-potsdam.de"
+            "uni-potsdam.de"
     };
 
     /**

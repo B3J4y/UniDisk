@@ -7,24 +7,48 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.solr.client.solrj.SolrServerException;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class SimpleCarl extends WebCrawler {
 
+    /**
+     * tree to ensure max depth
+     */
+    private CarlTree urlTree;
 
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
             + "|png|mp3|mp4|zip|gz))$");
 
     private int maxnNumPages = 5;
 
+    public SimpleCarl(String seed) {
+        urlTree  = new CarlTree(new CarlsTreeNode(seed));
+    }
+
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        return !FILTERS.matcher(href).matches()
+        Boolean result =  !FILTERS.matcher(href).matches()
                 && checkWhiteList(url);
+
+        if (result) {
+            String parent = referringPage.getWebURL().getURL();
+            String child = url.getURL();
+            CarlsTreeNode parentNode = new CarlsTreeNode(parent);
+            CarlsTreeNode childNode = new CarlsTreeNode(child);
+            CarlTree copy = urlTree;
+            copy.insertCarlsNodes(parentNode, childNode);
+            int depth = copy.getPathToRoot(childNode).length;
+            childNode.setCarlsDepth(depth);
+            if (depth > 3) {
+                return false;
+            }
+            urlTree.insertCarlsNodes(parentNode, childNode);
+        }
+
+        return result;
     }
 
     public Boolean checkWhiteList(WebURL url) {
@@ -60,7 +84,9 @@ public class SimpleCarl extends WebCrawler {
 
                 SimpleSolarSystem.SimpleCarlDocument simpleCarlDocument =
                         new SimpleSolarSystem.SimpleCarlDocument(UUID.randomUUID().toString(), page.getWebURL().toString(),
-                                ((HtmlParseData) page.getParseData()).getTitle(), text, System.currentTimeMillis());
+                                ((HtmlParseData) page.getParseData()).getTitle(), text, page.getWebURL().getDepth(), System
+                                .currentTimeMillis
+                                ());
                 //if required write content to file
                 simpleSolarSystem.sendPageToTheMoon(simpleCarlDocument);
             }

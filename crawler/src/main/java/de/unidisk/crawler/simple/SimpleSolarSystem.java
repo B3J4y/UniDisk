@@ -53,14 +53,19 @@ public class SimpleSolarSystem {
         @Field
         public Long datum;
 
+        @Field
+        public int depth;
 
 
-        public SimpleCarlDocument(String id, String url, String title, String content, Long datum) {
+
+
+        public SimpleCarlDocument(String id, String url, String title, String content, int depth, Long datum) {
             this.id = id;
             this.title = title;
             this.content = content;
             this.datum = datum;
             this.url = url;
+            this.depth = depth;
         }
 
 
