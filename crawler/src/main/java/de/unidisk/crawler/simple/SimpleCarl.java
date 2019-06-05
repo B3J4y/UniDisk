@@ -1,5 +1,6 @@
 package de.unidisk.crawler.simple;
 
+import de.unidisk.config.CrawlerConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
@@ -30,7 +31,7 @@ public class SimpleCarl extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        Boolean result =  !FILTERS.matcher(href).matches()
+        boolean result =  !FILTERS.matcher(href).matches()
                 && checkWhiteList(url);
 
         if (result) {
@@ -53,7 +54,7 @@ public class SimpleCarl extends WebCrawler {
 
     public Boolean checkWhiteList(WebURL url) {
         String urlString = url.toString();
-        String[] whiteListe = SimpleCarlConfig.whitelist;
+        String[] whiteListe = CrawlerConfig.whitelist;
         boolean result = false;
         for (String s : whiteListe) {
             if (urlString.contains(s)){

@@ -1,6 +1,6 @@
-package de.unidisk.crawler.simple;
+package de.unidisk.config;
 
-public class SimpleCarlConfig {
+public class CrawlerConfig {
     public static String[] whitelist = new String[]{
             "uni-potsdam.de"
     };

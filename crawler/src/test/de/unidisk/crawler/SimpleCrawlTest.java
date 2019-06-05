@@ -1,7 +1,7 @@
 package de.unidisk.crawler;
 
+import de.unidisk.config.CrawlerConfig;
 import de.unidisk.crawler.simple.ICrawler;
-import de.unidisk.crawler.simple.SimpleCarlConfig;
 import de.unidisk.crawler.simple.SimpleCrawl;
 import de.unidisk.crawler.simple.SimpleSolarSystem;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -56,7 +56,7 @@ public class SimpleCrawlTest {
     @Test
     public void shootTheMoon() throws Exception {
         ICrawler crawler = new SimpleCrawl();
-        crawler.startCrawl(SimpleCarlConfig.seedList[1]);
+        crawler.startCrawl(CrawlerConfig.seedList[1]);
     }
 
 

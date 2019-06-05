@@ -2,14 +2,13 @@ package de.unidisk.crawler.simple;
 
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 
 /**
  * implementiert das TreeNode Interface bezogen auf Crawling
  */
 public class CarlsTreeNode extends DefaultMutableTreeNode {
 
-    private Integer carlsDepth;
+    private int carlsDepth;
 
     public CarlsTreeNode(String seed) {
         super(seed);
@@ -17,14 +16,22 @@ public class CarlsTreeNode extends DefaultMutableTreeNode {
 
     @Override
     public boolean equals(Object obj) {
+        if (! (obj instanceof DefaultMutableTreeNode)) {
+            return false;
+        }
         return this.getUserObject().equals(((DefaultMutableTreeNode)obj).getUserObject());
     }
 
-    public void setCarlsDepth(Integer depth) {
+    @Override
+    public int hashCode() {
+        return this.getUserObject().hashCode();
+    }
+
+    public void setCarlsDepth(int depth) {
         this.carlsDepth = depth;
     }
 
-    public Integer getCarlsDepth() {
+    public int getCarlsDepth() {
         return carlsDepth;
     }
 }

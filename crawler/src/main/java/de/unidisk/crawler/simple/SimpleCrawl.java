@@ -6,11 +6,7 @@ import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
-import java.util.ArrayList;
-
-import static de.unidisk.crawler.simple.SimpleCarlConfig.crawledShitPlace;
+import static de.unidisk.config.CrawlerConfig.crawledShitPlace;
 
 public class SimpleCrawl implements ICrawler {
 

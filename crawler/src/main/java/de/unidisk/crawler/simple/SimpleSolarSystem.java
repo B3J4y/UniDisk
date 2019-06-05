@@ -1,25 +1,14 @@
 package de.unidisk.crawler.simple;
 
-import de.unidisk.crawler.solr.SolrConnector;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
-import edu.uci.ics.crawler4j.crawler.Page;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.Field;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.UpdateResponse;
-import org.apache.solr.common.SolrInputDocument;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
-import static de.unidisk.crawler.simple.SimpleCarlConfig.collectionName;
-import static de.unidisk.crawler.simple.SimpleCarlConfig.solrUrl;
+import static de.unidisk.config.CrawlerConfig.collectionName;
+import static de.unidisk.config.CrawlerConfig.solrUrl;
 
 public class SimpleSolarSystem {
 
