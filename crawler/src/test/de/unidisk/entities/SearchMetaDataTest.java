@@ -22,8 +22,8 @@ public class SearchMetaDataTest implements HibernateLifecycle {
         UniversityDAO uDAO = new UniversityDAO();
         University up = uDAO.addUniversity("Uni Potsdam");
         long now = ZonedDateTime.now().toEpochSecond();
-        SearchMetaData homeUP = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), up, now);
-        SearchMetaData aboutUP = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/about"), up, now);
+        SearchMetaData homeUP = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), up.getId(), now);
+        SearchMetaData aboutUP = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/about"), up.getId(), now);
         assertNotEquals(homeUP.getId(), aboutUP.getId(), "Different SMD's should have different ID'S");
     }
 
@@ -33,8 +33,8 @@ public class SearchMetaDataTest implements HibernateLifecycle {
         UniversityDAO uDAO = new UniversityDAO();
         University up = uDAO.addUniversity("Uni Potsdam");
         URL home = new URL("http://www.uni-potsdam.de/home");
-        SearchMetaData oldUP = smdDAO.createMetaData(home, up, LocalDateTime.now().toEpochSecond(ZoneOffset.MIN));
-        SearchMetaData nowUP = smdDAO.createMetaData(home, up, ZonedDateTime.now().toEpochSecond());
+        SearchMetaData oldUP = smdDAO.createMetaData(home, up.getId(), LocalDateTime.now().toEpochSecond(ZoneOffset.MIN));
+        SearchMetaData nowUP = smdDAO.createMetaData(home, up.getId(), ZonedDateTime.now().toEpochSecond());
         assertNotEquals(oldUP.getId(), nowUP.getId(), "Different SMD's should have different ID'S");
     }
 
@@ -46,8 +46,8 @@ public class SearchMetaDataTest implements HibernateLifecycle {
         University fh = uDAO.addUniversity("FH Potsdam");
         long now = ZonedDateTime.now().toEpochSecond();
         URL home = new URL("http://www.uni-potsdam.de/home");
-        SearchMetaData oldUP = smdDAO.createMetaData(home, up, now);
-        SearchMetaData nowUP = smdDAO.createMetaData(home, fh, now);
+        SearchMetaData oldUP = smdDAO.createMetaData(home, up.getId(), now);
+        SearchMetaData nowUP = smdDAO.createMetaData(home, fh.getId(), now);
         assertNotEquals(oldUP.getId(), nowUP.getId(), "Different SMD's should have different ID'S");
     }
 }

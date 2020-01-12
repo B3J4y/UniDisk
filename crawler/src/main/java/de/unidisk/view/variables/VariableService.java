@@ -25,8 +25,7 @@ public class VariableService {
 
         ProjectDAO projectDAO = new ProjectDAO();
         Project project = projectDAO
-                .findProject(variablesView.getProjectSelected())
-                .orElseThrow(IllegalStateException::new);
+                .findProject(variablesView.getProjectSelected()).get();
         //List<Topic> topics = project.getTopics();
         //topics.get(0).get
 

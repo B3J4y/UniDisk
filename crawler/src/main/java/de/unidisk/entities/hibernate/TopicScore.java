@@ -1,9 +1,8 @@
 package de.unidisk.entities.hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import org.hibernate.annotations.Cascade;
+
+import javax.persistence.*;
 
 @Entity
 public class TopicScore implements ScoredInput {
@@ -12,7 +11,7 @@ public class TopicScore implements ScoredInput {
     private int id;
     @OneToOne
     private SearchMetaData searchMetaData;
-    @OneToOne
+    @OneToOne(cascade= CascadeType.REMOVE)
     private Topic topic;
     private double score;
 

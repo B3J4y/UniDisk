@@ -5,6 +5,7 @@ import de.unidisk.entities.hibernate.University;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,5 +30,28 @@ public class UniversityTest implements HibernateLifecycle {
 
         List<University> allUniversities = universityDAO.getAll();
         assertEquals(2, allUniversities.size(), "Size of universities is wrong");
+    }
+
+    @Test
+    void existsReturnsTrueIfExists(){
+        UniversityDAO universityDAO = new UniversityDAO();
+        University uni = universityDAO.addUniversity("FH Potsdam");
+        assertTrue(universityDAO.exists(uni.getId()));
+    }
+
+    @Test
+    void existsReturnsFalseIfDoesntExists(){
+        UniversityDAO universityDAO = new UniversityDAO();
+        assertFalse(universityDAO.exists(-5));
+    }
+
+
+    @Test
+    void findUniversityReturnsMatching(){
+        UniversityDAO universityDAO = new UniversityDAO();
+        University uni = universityDAO.addUniversity("FH Potsdam");
+        final Optional<University> dbUni = universityDAO.get(uni.getId());
+        assertTrue(dbUni.isPresent());
+        assertEquals(dbUni.get().getName(),uni.getName());
     }
 }

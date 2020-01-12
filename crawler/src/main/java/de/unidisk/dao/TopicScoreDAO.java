@@ -12,8 +12,8 @@ public class TopicScoreDAO implements Scoring {
 
     @Override
     public ScoredInput queryInput(Input input, Session currentSession) {
-        return currentSession.createQuery("select ts from TopicScore ts where ts.topic.name like :name ", TopicScore.class)
-                .setParameter("name", input.getName())
+        return currentSession.createQuery("select ts from TopicScore ts where ts.topic.id = :id ", TopicScore.class)
+                .setParameter("id", input.getId())
                 .uniqueResultOptional()
                 .orElse(new TopicScore((Topic) input));
     }

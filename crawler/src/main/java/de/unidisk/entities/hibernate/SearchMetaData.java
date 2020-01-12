@@ -11,9 +11,20 @@ public class SearchMetaData {
     @GeneratedValue
     private int id;
     private String url;
+    
     @OneToOne
     private University university;
     private Long timestamp;
+
+    public SearchMetaData(){
+
+    }
+
+    public SearchMetaData(String url, Long timestamp) {
+        this.url = url;
+
+        this.timestamp = timestamp;
+    }
 
     public int getId() {
         return id;

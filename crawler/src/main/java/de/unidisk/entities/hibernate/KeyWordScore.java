@@ -1,5 +1,6 @@
 package de.unidisk.entities.hibernate;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -51,5 +52,13 @@ public class KeyWordScore implements ScoredInput {
     @Override
     public void setScore(double score) {
         this.score = score;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

@@ -7,8 +7,8 @@ import de.unidisk.common.SystemProperties;
 import de.unidisk.common.datastructures.Pair;
 import de.unidisk.common.mysql.VereinfachtesResultSet;
 import de.unidisk.crawler.mysql.MysqlConnector;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 
@@ -86,7 +86,7 @@ public class CrawlerDataAnalysis {
 
         DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(values);
         double guess = 100; // init value
-        Boolean notInRange = true;
+        boolean notInRange = true;
         int sizeOfPerc = 0;
         while (notInRange) {
             final double percentile = descriptiveStatistics.getPercentile(guess);

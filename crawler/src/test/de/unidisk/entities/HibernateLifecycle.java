@@ -4,7 +4,9 @@ import de.unidisk.HibernateUtil;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.entities.hibernate.*;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 interface HibernateLifecycle {
-    @AfterEach
+    @BeforeEach
     default void cleanUpDatabase() {
         HibernateUtil.truncateTable(KeyWordScore.class);
         HibernateUtil.truncateTable(TopicScore.class);
@@ -23,16 +25,10 @@ interface HibernateLifecycle {
         HibernateUtil.truncateTable(University.class);
     }
 
-    default List<Keyword> createHalloWeltTopic() {
-        List<Pair<String, String>> keyTop = new ArrayList<>();
-        keyTop.add(Pair.of("Hallo", getHWTopicName()));
-        keyTop.add(Pair.of("Welt", getHWTopicName()));
+    @AfterAll
+    default void cleanUpAfter(){
 
-        KeywordDAO kDao = new KeywordDAO();
-        return kDao.addKeywords(keyTop);
+        //cleanUpDatabase();
     }
 
-    default String getHWTopicName() {
-        return "Hallo Welt";
-    }
 }

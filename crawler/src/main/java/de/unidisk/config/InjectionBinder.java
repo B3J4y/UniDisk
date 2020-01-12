@@ -11,11 +11,11 @@ public class InjectionBinder extends AbstractBinder {
 
     @Override
     protected void configure() {
-        bind(DummyKeywordManager.class).to(IKeyword.class);
+        /*bind(DummyKeywordManager.class).to(IKeyword.class);
         bind(DummyOverview.class).to(IOverview.class);
         bind(DummyScoreManager.class).to(IScores.class);
         bind(DummyTopicManager.class).to(ITopic.class);
-        bind(LegacyService.class).to(LegacyService.class);
+        bind(LegacyService.class).to(LegacyService.class);*/
     }
 
 

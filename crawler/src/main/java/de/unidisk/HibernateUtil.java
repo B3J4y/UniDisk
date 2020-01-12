@@ -4,26 +4,31 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
+
 
 public class HibernateUtil {
     private static SessionFactory sessionFactory;
-    public static SessionFactory getSesstionFactory() {
+
+
+    private static final String sqlConfig = "hibernate.cfg.xml";
+    private static final String memoryConfig = "hibernate.cfg.mem.xml";
+    private static String config = sqlConfig;
+
+    public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             Configuration config = new Configuration();
-            sessionFactory = config.configure().buildSessionFactory();
+            sessionFactory = config.configure(HibernateUtil.config).buildSessionFactory();
         }
         return sessionFactory;
     }
 
     public static <T> void truncateTable(Class<T> entityClass) {
-        Session session = HibernateUtil.getSesstionFactory().openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaDelete<T> query = cb.createCriteriaDelete(entityClass);
-        query.from(entityClass);
+        if(HibernateUtil.config == HibernateUtil.memoryConfig)
+            return;
+
+        Session session = HibernateUtil.getSessionFactory().openSession();
         session.getTransaction().begin();
-        session.createQuery(query).executeUpdate();
+        session.createSQLQuery("truncate table " + entityClass.getSimpleName()).executeUpdate();
         session.getTransaction().commit();
         session.close();
     }

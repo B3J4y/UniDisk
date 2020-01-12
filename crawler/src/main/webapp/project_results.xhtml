@@ -1,0 +1,36 @@
+<ui:composition
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:c="http://java.sun.com/jsp/jstl/core">
+    <c:if test="#{projectResultTable.projectId eq null}">
+        <p>Kein Projekt ausgewählt</p>
+    </c:if>
+    <c:if test="#{projectResultTable.hasResults()}">
+        <h:form id="projectResultForm">
+            <p:dataTable id="projectResultTable" var="result"
+
+                         value="#{projectResultTable.results}" scrollable="true"
+                         scrollHeight="200"
+                         emptyMessage="Keine Projektergebnisse vorhanden"
+            >
+
+                <p:column headerText="Thema">
+                    <h:outputText value="#{result.topic}" />
+                </p:column>
+                <p:column headerText="Score">
+                    <h:outputText value="#{result.score}" />
+                </p:column>
+                <p:column headerText="Anzahl Einträge">
+                    <h:outputText value="#{result.entryCount}" />
+                </p:column>
+
+            </p:dataTable>
+        </h:form>
+    </c:if>
+    <c:if test="#{not projectResultTable.hasResults()}">
+            <h1>#{projectResultTable.projectStatusMessage}</h1>
+    </c:if>
+
+</ui:composition>

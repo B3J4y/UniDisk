@@ -15,7 +15,5 @@ public interface ScoredInput {
         return getSearchMetaData().getUniversity().getName();
     }
 
-    default String getInputName() {
-        return getInput().getName();
-    }
+
 }

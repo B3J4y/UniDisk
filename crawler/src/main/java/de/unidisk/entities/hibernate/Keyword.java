@@ -9,12 +9,12 @@ public class Keyword implements Input {
     @Id
     @GeneratedValue
     int id;
+    int topicId;
     private String name;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<Topic> topics;
+
 
     public Keyword() {
-        topics = new ArrayList<>();
+
     }
 
     public Keyword(String name) {
@@ -22,6 +22,13 @@ public class Keyword implements Input {
         this.name = name;
     }
 
+    public Keyword(String name, int topicId) {
+        this();
+        this.name = name;
+        this.topicId = topicId;
+    }
+
+    @Override
     public int getId() {
         return id;
     }
@@ -29,7 +36,7 @@ public class Keyword implements Input {
         this.id = id;
     }
 
-    @Override
+
     public String getName() {
         return name;
     }
@@ -37,15 +44,6 @@ public class Keyword implements Input {
     public void setName(String name) {
         this.name = name;
     }
-
-    public List<Topic> getTopics() {
-        return topics;
-    }
-
-    public void setTopics(List<Topic> topics) {
-        this.topics = topics;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -56,6 +54,14 @@ public class Keyword implements Input {
 
         if (id != keyword.id) return false;
         return name != null ? name.equals(keyword.name) : keyword.name == null;
+    }
+
+    public int getTopicId() {
+        return topicId;
+    }
+
+    public void setTopicId(int topicId) {
+        this.topicId = topicId;
     }
 
     @Override
