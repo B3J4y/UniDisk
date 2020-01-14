@@ -3,6 +3,7 @@ package de.unidisk.entities.hibernate;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -27,6 +28,7 @@ public class Topic implements Serializable,Input {
     public Topic(String name, int projectId) {
         this.name = name;
         this.projectId = projectId;
+        keywords = new ArrayList<>();
     }
 
     public Topic(String name, int projectId, List<Keyword> keywords) {

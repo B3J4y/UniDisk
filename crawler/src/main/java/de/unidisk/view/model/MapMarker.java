@@ -7,15 +7,14 @@ public class MapMarker {
     String topicName;
     int topicId;
     University university;
-    double lat, lng;
+
     String iconUrl;
 
-    public MapMarker(String topicName, int topicId, University university, double lat, double lng) {
+    public MapMarker(String topicName, int topicId, University university) {
         this.topicName = topicName;
         this.topicId = topicId;
         this.university = university;
-        this.lat = lat;
-        this.lng = lng;
+
     }
 
     public String getTopicName() {
@@ -43,20 +42,14 @@ public class MapMarker {
     }
 
     public double getLat() {
-        return lat;
+        return university.getLat();
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
 
     public double getLng() {
-        return lng;
+        return university.getLng();
     }
 
-    public void setLng(double lng) {
-        this.lng = lng;
-    }
 
     public String getIconUrl() {
         return iconUrl;

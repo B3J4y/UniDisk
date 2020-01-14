@@ -35,7 +35,7 @@ public class HibernateProjectRepo implements IProjectRepository {
 
     @Override
     public Project getProject(String projectId) {
-        final Optional<Project> p = new ProjectDAO().findProjectById(Integer.valueOf(projectId));
+        final Optional<Project> p = new ProjectDAO().findProjectById(Integer.parseInt(projectId));
         return p.isPresent() ? p.get() : null;
     }
 
@@ -62,16 +62,7 @@ public class HibernateProjectRepo implements IProjectRepository {
 
     @Override
     public List<MapMarker> getMarker(String projectId) {
-        final ArrayList<MapMarker> marker = new ArrayList<>();
-        marker.add(new MapMarker(
-                "E-Learning",
-                0,
-                new University("Uni Potsdam"),
-                52.39356,
-                13.13044
-        ));
-
-        return marker;
+        return new ProjectDAO().getMapMarker(projectId);
     }
 
     @Override

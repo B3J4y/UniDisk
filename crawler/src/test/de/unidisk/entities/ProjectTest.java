@@ -6,6 +6,7 @@ import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.entities.templates.CRUDTest;
 import de.unidisk.entities.templates.ParentTests;
+import de.unidisk.view.model.MapMarker;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.unidisk.entities.util.TestFactory.randomUniversityUrl;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -84,6 +86,77 @@ public class ProjectTest implements HibernateLifecycle, CRUDTest, ParentTests {
         Optional<Project> dbProject = dao.findProjectById(5555555);
         Assert.assertNotNull(dbProject);
         Assert.assertFalse(dbProject.isPresent());
+    }
+
+    @Test
+    public void getMapMarkerReturnsValidData(){
+
+        final UniversityDAO uniDao = new UniversityDAO();
+        final ProjectDAO projectDAO = new ProjectDAO();
+
+        final TopicDAO topicDAO = new TopicDAO();
+        final TopicScoreDAO topicScoreDAO = new TopicScoreDAO();
+        final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
+
+        final List<University> universities = Arrays.asList(
+            new University("1",1,1),
+                new University("2",2,2)
+
+        );
+
+        universities.forEach((u) -> {
+            final University dbUni = uniDao.addUniversity(u);
+            u.setId(dbUni.getId());
+        });
+
+
+        Project p = new Project("test", ProjectState.FINISHED, Arrays.asList(
+                new Topic("5",0),
+                new Topic("7",0)
+        ) );
+
+        final Project dbProject = projectDAO.createProject(p.getName());
+        p.setId(dbProject.getId());
+        projectDAO.updateProjectState(dbProject.getId(),p.getProjectState());
+
+        p.getTopics().forEach((topic) -> {
+            final int index = p.getTopics().indexOf(topic);
+            final Topic dbTopic = topicDAO.createTopic(topic.getName(), dbProject.getId()
+                    , topic.getKeywords().stream().map(Keyword::getName)
+                            .collect(Collectors.toList()));
+            try {
+                SearchMetaData metaData = searchMetaDataDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), universities.get(index).getId(),
+                        ZonedDateTime.now().toEpochSecond());
+
+
+                topicScoreDAO.addScore(dbTopic, 1, metaData);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        final List<MapMarker> expectedMarker = Arrays.asList(
+            new MapMarker(
+                    "5",0, universities.get(0)
+
+            )  ,
+            new MapMarker(
+                    "7",0, universities.get(1)
+
+                    )
+        );
+
+        final List<MapMarker> mapMarker = projectDAO.getMapMarker(String.valueOf(dbProject.getId()));
+        assertEquals(mapMarker.size(),2);
+        mapMarker.forEach(marker -> {
+            final Optional<MapMarker> expected = expectedMarker.stream().filter(e -> marker.getTopicName().equals(e.getTopicName())).findFirst();
+            assertTrue(expected.isPresent());
+            final MapMarker expectedValue = expected.get();
+            assertEquals(expectedValue.getLat(), marker.getLat());
+            assertEquals(expectedValue.getLng(), marker.getLng());
+            assertEquals(expectedValue.getUniversity().getName(),marker.getUniversity().getName());
+        });
     }
 
     @Test

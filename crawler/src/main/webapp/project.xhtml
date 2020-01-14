@@ -141,12 +141,16 @@
         function refreshMap(jsonMarker){
             console.log(jsonMarker);
             const marker = jsonMarker;
+
             const features = marker.map(m => {
-                console.log("create marker");
+
+                const lat = m.university.lat;
+                const lng = m.university.lng;
+
                 const featureIcon = createIcon(m.iconUrl);
                 const newMarker = new ol.Feature({
                     geometry: new ol.geom.Point(
-                        ol.proj.fromLonLat([m.lng, m.lat])
+                        ol.proj.fromLonLat([lng, lat])
                     )
                 });
                 newMarker.setStyle(featureIcon);

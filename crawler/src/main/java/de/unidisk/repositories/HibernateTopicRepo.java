@@ -20,10 +20,6 @@ public class HibernateTopicRepo implements ITopicRepository {
         return new TopicDAO().createTopic(name,projectId);
     }
 
-    @Override
-    public Topic createTopic(int projectId, String name, List<String> keywords) {
-        return null;
-    }
 
     @Override
     public void deleteTopic(int topicId) {

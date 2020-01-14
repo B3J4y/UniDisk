@@ -2,6 +2,7 @@ package de.unidisk.dao;
 
 import de.unidisk.HibernateUtil;
 import de.unidisk.entities.hibernate.*;
+import de.unidisk.view.model.MapMarker;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -181,6 +182,21 @@ public class ProjectDAO  {
                 "WHERE t.projectId = :pId", KeyWordScore.class)
                 .setParameter("pId",pId)
                 .list();*/
+        transaction.commit();
+        currentSession.close();
+        return scores;
+    }
+
+    public List<MapMarker> getMapMarker(String projectId){
+        int pId = Integer.parseInt(projectId);
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+        List<MapMarker> scores = currentSession.createQuery("select new de.unidisk.view.model.MapMarker(tScore.topic.name,tScore.topic.id, tScore.searchMetaData.university) from TopicScore tScore where tScore.topic.projectId = :pId")
+                .setParameter("pId",pId).list();
+
         transaction.commit();
         currentSession.close();
         return scores;
