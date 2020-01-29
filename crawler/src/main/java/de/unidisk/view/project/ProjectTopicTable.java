@@ -48,7 +48,7 @@ public class ProjectTopicTable {
         MessagingCenter.getInstance().subscribe(this,"ProjectDeleted",(String projektName) -> {
             if(selectedProject == null)
                 return null;
-            System.out.println("AddRowView: new project created");
+
             if(selectedProject.getName().equals(projektName)){
                 selectedProject = null;
                 selectedTopic = null;
@@ -64,7 +64,7 @@ public class ProjectTopicTable {
 
 
     public void setProject(String projectId){
-        System.out.println("Set selected project to " + projectId);
+
         selectedProject = projectRepository.getProject(projectId);
         if(selectedProject == null){
 
@@ -92,10 +92,6 @@ public class ProjectTopicTable {
             //getKeywordsOfSelectedTopic();
         }
 
-        if(topic != null)
-            System.out.println("Set topic to " + topic.getName());
-        else
-            System.out.println("Set topic to null");
     }
 
     public Project getSelectedProject() {
@@ -107,7 +103,7 @@ public class ProjectTopicTable {
     }
 
     public List<Keyword> getSelectedTopicKeywords() {
-        System.out.println("getSelectedTopicKeywords");
+
         return selectedTopic.getKeywords();
     }
 
@@ -129,7 +125,7 @@ public class ProjectTopicTable {
     }
 
     public void addTopic(){
-        System.out.println("add topic");
+
         if(selectedProject.getTopics().stream().filter(t -> t.getName().equals(newTopic)).count() != 0){
             topicError = "Thema existiert bereits";
         }else if(newTopic == null || newTopic.trim().equals("")){
@@ -138,7 +134,7 @@ public class ProjectTopicTable {
         else{
             final Topic topic = topicRepository.createTopic( selectedProject.getId(),newTopic);
             if(topic == null){
-                System.out.println("");
+
                 topicError = "Thema konnte nicht erstellt werden.";
                 return;
             }
@@ -149,19 +145,19 @@ public class ProjectTopicTable {
     }
 
     public void deleteSelected(){
-        System.out.println("topic is set " + isTopicSet());
+
         if(selectedTopic == null)
             return;
-        System.out.println("delete selected topic");
+
         topicRepository.deleteTopic(selectedTopic.getId());
         boolean removed = selectedProject.getTopics().remove(selectedTopic);
 
         selectedTopic = null;
-        System.out.println("topic removed " + removed);
+
     }
 
     public void deleteTopic(int topicId){
-        System.out.println("delete topic with id " + topicId);
+
         topicRepository.deleteTopic(topicId);
         boolean removed = selectedProject.getTopics().removeIf(t  -> t.getId() == topicId);
         if(selectedTopic != null && selectedTopic.getId() == topicId)
@@ -169,7 +165,7 @@ public class ProjectTopicTable {
     }
 
     public void deleteKeyword(int keywordId){
-        System.out.println("delete keyword with id " + keywordId);
+
         topicRepository.deleteKeyword(keywordId);
         if(selectedTopic != null)
             selectedTopic.getKeywords().removeIf(k -> k.getId() == keywordId);
@@ -181,8 +177,7 @@ public class ProjectTopicTable {
     }
 
     public void addKeyword(){
-        System.out.println("add keyword "+ newKeyword);
-        System.out.println("topic is set " + isTopicSet());
+
         if(selectedTopic.getKeywords() == null)
             selectedTopic.setKeywords(new ArrayList<>());
         if(selectedTopic.getKeywords().contains(newKeyword)){
@@ -208,16 +203,11 @@ public class ProjectTopicTable {
 
     public void onRowSelect(SelectEvent event){
 
-       /* Topic topic = (Topic) event.getObject();
-        System.out.println("Set selected topic to" + topic.getName());
-        selectedTopic = topic;
-        selectedTopicKeywords = new ArrayList<>();*/
-        //getKeywordsOfSelectedTopic();
+
     }
 
     public void onRowUnselect(UnselectEvent event){
-        //selectedTopic = null;
-        //selectedTopicKeywords = null;
+
     }
 
     public void setSelectedProject(Project selectedProject) {

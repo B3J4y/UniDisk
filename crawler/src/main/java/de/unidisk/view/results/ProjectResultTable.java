@@ -76,7 +76,7 @@ public class ProjectResultTable {
         });
         final Gson gson = new Gson();
         String jsonMarker = gson.toJson(marker);
-        System.out.println(jsonMarker);
+
         PrimeFaces.current().executeScript("refreshMap("+jsonMarker+")");
     }
 

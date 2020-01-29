@@ -27,7 +27,7 @@ public class ProjectDAO  {
         Project project = new Project(name);
         project.setProjectState(ProjectState.WAITING);
         currentSession.save(project);
-        System.out.println("project id " + project.getId());
+
         transaction.commit();
         currentSession.close();
         return project;

@@ -56,7 +56,7 @@ public class SolrConnector {
     public void insertDocuments(List<SolrInputDocument> documents) throws IOException, SolrServerException {
         UpdateResponse updateResponse = client.add(documents);
         UpdateResponse updateCommit = client.commit();
-        System.out.println("Hallo");
+
     }
 
     public void deleteDocument(SolrInputDocument document) throws IOException, SolrServerException {

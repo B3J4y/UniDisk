@@ -112,7 +112,7 @@ public class KeywordDAO {
             try {
                 currentSession.save(keyword);
             } catch (NonUniqueObjectException exp) {
-                System.out.println("Object already saved");
+
             }
             currentSession.saveOrUpdate(keyword);
             keywords.add(keyword);

@@ -22,7 +22,7 @@ public class DeleteProjectDialog {
     public void setup(String projectName, String projectId){
         this.projectId = projectId;
         this.projectName = projectName;
-        System.out.println("setup project: " + projectName + " " + projectId);
+
     }
 
     public void delete(){

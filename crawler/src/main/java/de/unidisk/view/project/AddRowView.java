@@ -37,7 +37,7 @@ public class AddRowView implements Serializable {
 
         projects = service.getProjects();
         MessagingCenter.getInstance().subscribe(this,"NewProject",(Project newProject) -> {
-            System.out.println("AddRowView: new project created");
+
             projects.add(
                     new ProjectView(
                             newProject.getName(),
@@ -52,7 +52,7 @@ public class AddRowView implements Serializable {
         });
 
         MessagingCenter.getInstance().subscribe(this,"ProjectDeleted",(String projectName) -> {
-            System.out.println("AddRowView: project deleted");
+
             projects.removeIf((p) -> p.getName().equals(projectName));
 
 

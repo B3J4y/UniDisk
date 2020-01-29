@@ -55,14 +55,12 @@ public class AddKeywordRowView implements Serializable {
         de.unidisk.entities.hibernate.Project project = projectDAO.findProject(projectName).orElseThrow(IllegalStateException::new);
         projects.add(new ProjectView(project.getName(), project.getStatus(), String.valueOf(project.getId())));
 
-        // TODO @JAN sync projects with db
-        System.out.println(projectName + " entered");
+
         //projects.add(projects.get(0));
     }
 
     public void deleteRow(ProjectView project) {
-        // TODO @JAN delete projects in db
-        System.out.println("hi");
+
         projects.remove(project);
 
     }

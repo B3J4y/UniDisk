@@ -65,7 +65,7 @@ public class AddProjectDialog implements Serializable {
                     current.executeScript("PF('dlg2').hide();");
                     newProjectText = null;
                     errorText = null;
-                    System.out.println("Created project with name " + projectName);
+
                     MessagingCenter.getInstance().send("NewProject",project);
                 }
 

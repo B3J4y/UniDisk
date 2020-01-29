@@ -56,17 +56,17 @@ public class VariablesView {
     public void showTopics(){
 
         this.view = ProjectViews.Topics;
-        System.out.println("Set view to " + view.toString());
+
     }
 
     public void showResults(){
         this.view = ProjectViews.Results;
-        System.out.println("Set view to " + view.toString());
+
     }
 
     public void showVisual(){
         this.view = ProjectViews.Visual;
-        System.out.println("Set view to " + view.toString());
+
     }
 
     public void setService(IProjectRepository service) {
