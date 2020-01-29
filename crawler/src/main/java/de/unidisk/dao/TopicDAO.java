@@ -106,23 +106,19 @@ public class TopicDAO {
     }
 
     public Topic createTopic(String name, int projectId, List<String> keywords){
+        final Topic topic = createTopic(name,projectId);
+
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction transaction = currentSession.getTransaction();
         if (!transaction.isActive()) {
             transaction.begin();
         }
-        final Topic topic = new Topic(name,projectId);
-
-        currentSession.save(topic);
 
         topic.setKeywords(keywords.stream().map(k -> new Keyword(k, topic.getId())).collect(Collectors.toList()));
         currentSession.saveOrUpdate(topic);
-
-        final Topic dbTopic = currentSession.createQuery("Select t from Topic t where t.id = :id",Topic.class).setParameter("id", topic.getId()).uniqueResult();
-
         transaction.commit();
         currentSession.close();
-        return dbTopic;
+        return topic;
     }
 
     public Optional<Topic> findOrCreateTopic(String name) {
