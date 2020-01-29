@@ -14,6 +14,6 @@ public class HibernateConnectionTest implements HibernateLifecycle {
     void createH2Database() throws SQLException {
         ProjectDAO dao = new ProjectDAO();
         dao.createProject("name");
-        Assert.assertTrue(dao.findProject("name").get() != null);
+        Assert.assertTrue(dao.findProject("name").isPresent());
     }
 }

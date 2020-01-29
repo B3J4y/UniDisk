@@ -15,9 +15,9 @@ public class ProjectDAO  {
     }
 
     public Project createProject(String name) {
-        boolean isProjectPresent = findProject(name).isPresent();
-        if (isProjectPresent) {
-            return null;
+        Optional<Project> existingProject = findProject(name);
+        if (existingProject.isPresent()) {
+            return existingProject.get();
         }
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction transaction = currentSession.getTransaction();

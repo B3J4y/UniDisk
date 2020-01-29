@@ -62,7 +62,7 @@ public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, Ch
     public void topicCreationAssignsKeywordIds(){
         final Topic t = DataFactory.createTopic(1);
         final TopicDAO dao = new TopicDAO();
-        final Topic dbTopic = dao.createTopic(t.getName(),t.getProjectId(),t.getKeywords().stream().map(Keyword::getName).collect(Collectors.toList()));
+        final Topic dbTopic = dao.createTopic(t.getName(),parentProject.getId(),t.getKeywords().stream().map(Keyword::getName).collect(Collectors.toList()));
 
 
         Assert.assertTrue(dbTopic.getKeywords().size() == 1);

@@ -21,16 +21,22 @@ public class ScoringTest implements HibernateLifecycle {
 
     @Test
     void testKeywordScoring() throws MalformedURLException {
+
+        ProjectDAO pDao = new ProjectDAO();
+        Project project = pDao.createProject("parent");
+
         UniversityDAO universityDAO = new UniversityDAO();
         University up = universityDAO.addUniversity("Uni Potsdam");
         TopicDAO kDao = new TopicDAO();
         List<Topic> keyTop = new ArrayList<>();
 
-        keyTop.add(new Topic("hallo",5,Arrays.asList(new Keyword[]{new Keyword("Hallo Welt")})));
-        keyTop.add(new Topic("welt",5,Arrays.asList(new Keyword[]{new Keyword("Hallo Welt")})));
+        keyTop.add(new Topic("hallo",project.getId(),Arrays.asList(new Keyword("Hallo Welt"))));
+        keyTop.add(new Topic("welt",project.getId(),Arrays.asList(new Keyword("Hallo Welt"))));
 
-        List<Topic> expKeywords = keyTop.stream().map(t -> kDao.createTopic(t.getName(),t.getId(),t.getKeywords().stream().map(Keyword::getName)
-                .collect(Collectors.toList()))).collect(Collectors.toList());
+        List<Topic> expKeywords = keyTop.stream().map(
+                t -> kDao.createTopic(t.getName(),t.getProjectId(),t.getKeywords().stream().map(Keyword::getName)
+                .collect(Collectors.toList())))
+                .collect(Collectors.toList());
 
         SearchMetaDataDAO smdDAO = new SearchMetaDataDAO();
         SearchMetaData metaData = smdDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), up.getId(),

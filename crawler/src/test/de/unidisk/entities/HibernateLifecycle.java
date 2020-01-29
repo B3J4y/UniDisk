@@ -14,8 +14,15 @@ import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 interface HibernateLifecycle {
+
     @BeforeEach
     default void cleanUpDatabase() {
+        final HibernateUtil.DatabaseConfig config = HibernateUtil.DatabaseConfig.Memory;
+
+        HibernateUtil.setSessionFactory(config);
+        if(config == HibernateUtil.DatabaseConfig.Memory)
+            return;
+
         HibernateUtil.truncateTable(KeyWordScore.class);
         HibernateUtil.truncateTable(TopicScore.class);
         HibernateUtil.truncateTable(Keyword.class);
@@ -24,11 +31,4 @@ interface HibernateLifecycle {
         HibernateUtil.truncateTable(SearchMetaData.class);
         HibernateUtil.truncateTable(University.class);
     }
-
-    @AfterAll
-    default void cleanUpAfter(){
-
-        //cleanUpDatabase();
-    }
-
 }
