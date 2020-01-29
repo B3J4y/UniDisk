@@ -5,15 +5,18 @@ A Crawler to search for keywords and compare the score
 
 ## Installation
 ### Prerequisites
+
 * Java 8
 * Maven
 * Tomcat 8.X
 * IntelliJ Ultimate (preferred)
+
 ### Installation steps for primefaces
 * build an artifact
 * mvn install
 * mvn test
 * run with tomcat and artifact war
+
 
 ### Database
 
