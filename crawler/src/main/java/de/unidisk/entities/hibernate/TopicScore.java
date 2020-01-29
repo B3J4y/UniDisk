@@ -1,6 +1,8 @@
 package de.unidisk.entities.hibernate;
 
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -11,7 +13,9 @@ public class TopicScore implements ScoredInput {
     private int id;
     @OneToOne
     private SearchMetaData searchMetaData;
+
     @OneToOne(cascade= CascadeType.REMOVE)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Topic topic;
     private double score;
 

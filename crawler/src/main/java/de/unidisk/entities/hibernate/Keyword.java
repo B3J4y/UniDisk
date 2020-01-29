@@ -9,7 +9,9 @@ public class Keyword implements Input {
     @Id
     @GeneratedValue
     int id;
-    int topicId;
+
+
+    private int topicId;
     private String name;
 
 

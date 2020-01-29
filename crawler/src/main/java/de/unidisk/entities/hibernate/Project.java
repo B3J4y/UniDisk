@@ -1,5 +1,8 @@
 package de.unidisk.entities.hibernate;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,7 @@ public class Project {
     private ProjectState projectState;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Topic> topics;
 
     public Project() {

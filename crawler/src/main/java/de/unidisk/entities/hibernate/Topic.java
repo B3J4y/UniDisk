@@ -1,5 +1,8 @@
 package de.unidisk.entities.hibernate;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.security.Key;
@@ -20,6 +23,7 @@ public class Topic implements Serializable,Input {
     private String name;
 
     @OneToMany(fetch = FetchType.EAGER,mappedBy = "topicId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Keyword> keywords;
 
     public Topic() {
