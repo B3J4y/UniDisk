@@ -1,5 +1,8 @@
 package de.unidisk.entities.hibernate;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,13 +10,27 @@ import java.util.List;
 @Entity
 public class Project {
     @Id
+
     @GeneratedValue
     private int id;
+
+    @Column(nullable = false)
     private String name;
-    @OneToMany(fetch = FetchType.EAGER)
+
+    @Enumerated(EnumType.STRING)
+    private ProjectState projectState;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Topic> topics;
 
     public Project() {
+    }
+
+    public Project(String name, ProjectState projectState, List<Topic> topics) {
+        this.name = name;
+        this.projectState = projectState;
+        this.topics = topics;
     }
 
     public Project(String name) {
@@ -49,7 +66,7 @@ public class Project {
      * @return
      */
     public ProjectState getStatus() {
-        return ProjectState.RUNNING;
+        return projectState;
     }
 
     public void addTopic(Topic topic) {
@@ -59,5 +76,13 @@ public class Project {
         if (!topics.contains(topic)) {
             topics.add(topic);
         }
+    }
+
+    public ProjectState getProjectState() {
+        return projectState;
+    }
+
+    public void setProjectState(ProjectState projectState) {
+        this.projectState = projectState;
     }
 }

@@ -9,7 +9,7 @@ import org.hibernate.Transaction;
 
 public interface Scoring {
     default ScoredInput addScore(Input input, double score, SearchMetaData smd) {
-        Session currentSession = HibernateUtil.getSesstionFactory().openSession();
+        Session currentSession = HibernateUtil.getSessionFactory().openSession();
         Transaction tnx = currentSession.beginTransaction();
         ScoredInput scoredInput = queryInput(input, currentSession);
 

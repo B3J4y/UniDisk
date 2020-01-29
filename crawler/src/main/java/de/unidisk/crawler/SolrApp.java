@@ -7,7 +7,7 @@ import de.unidisk.crawler.io.ReadMysql;
 import de.unidisk.crawler.mysql.MysqlConnector;
 import de.unidisk.crawler.solr.SolrConnector;
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -43,7 +43,8 @@ public class SolrApp {
             SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getStandardUrl(),
                     systemProperties.getProperty("solr.connection.db"));
 
-            CrawlerDataAnalysis cda = new CrawlerDataAnalysis(Integer.valueOf(systemProperties.getProperty("values.percentile.min")),
+            CrawlerDataAnalysis cda = new CrawlerDataAnalysis(
+                    Integer.valueOf(systemProperties.getProperty("values.percentile.min")),
                     Integer.valueOf(systemProperties.getProperty("values.percentile.max")), this.database);
 
 

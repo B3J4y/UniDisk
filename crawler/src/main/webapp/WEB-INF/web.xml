@@ -5,7 +5,21 @@
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
          id="WebApp_ID" version="3.0">
-    <display-name>Unidisk server</display-name>
+    <display-name>Unidisk</display-name>
+
+    <context-param>
+        <param-name>primefaces.FONT_AWESOME</param-name>
+        <param-value>true</param-value>
+
+
+
+    </context-param>
+
+    <context-param>
+        <!-- Reference: https://stackoverflow.com/questions/7079978/how-to-create-a-custom-el-function-to-invoke-a-static-method  -->
+        <param-name>javax.faces.FACELETS_LIBRARIES</param-name>
+        <param-value>/WEB-INF/functions.taglib.xml</param-value>
+    </context-param>
 
     <servlet>
         <!--suppress ServletWithoutMappingInspection -->
@@ -87,7 +101,7 @@
     </servlet-mapping>-->
 
     <welcome-file-list>
-        <welcome-file>index_p.xhtml</welcome-file>
+        <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
 
 </web-app>

@@ -12,7 +12,8 @@ import java.util.Properties;
 public class SystemProperties {
   private static SystemProperties systemProperties;
   private Properties properties;
-  private String[] possiblePaths = new String[]{"/development/UniDisk/crawler/src/main/webapp/WEB-INF/classes/unidisk_productive.properties"};
+  private String[] possiblePaths = new String[]{
+          "/development/UniDisk/crawler/src/main/webapp/WEB-INF/classes/unidisk_productive.properties"};
   private String productiveFile = "unidisk_productive.properties";
   private String versionedFile = "unidisk.properties";
 
