@@ -202,3 +202,23 @@ z-index: 1400;
 td {
 	max-width: 220px
 }
+
+#projectTabs .ui-tabs li a{
+    padding: 5px !important;
+
+}
+
+
+#projectTabs .ui-tabs-top{
+    padding: 0;
+
+}
+
+#projectTabs .ui-tabs-panel{
+    padding: 0 !important;
+
+}
+
+#projectTabs thead{
+    display:none;
+}

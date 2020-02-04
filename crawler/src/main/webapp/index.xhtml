@@ -25,7 +25,7 @@
     <p:dialog header="Neues Projekt" widgetVar="dlg2" modal="true" resizable="false" draggable="false">
        <h:form id="projectDialogForm">
            <p:panelGrid columns="1" layout="grid"  styleClass="ui-noborder">
-            <p:remoteCommand name="addProject" update="dataTableForm projectDialogForm" actionListener="#{addProjectDialog.onAddNew(addProjectDialog.newProjectText)}"/>
+            <p:remoteCommand name="addProject" update=" projectDialogForm" actionListener="#{addProjectDialog.onAddNew(addProjectDialog.newProjectText)}"/>
             <p:inputText id="projectNameInput"  placeholder="Projektname..." value="#{addProjectDialog.newProjectText}"
                          onkeypress="if (event.keyCode == 13) { addProject(); return false; }"
             />
@@ -37,64 +37,63 @@
                              update="projectDialogForm" onclick="PF('dlg2').hide();"/>
             <p:commandButton value="Anlegen" styleClass="ui-priority-primary"
                              action="#{addProjectDialog.onAddNew(addProjectDialog.newProjectText)}"
-                             update="projectNameInput projectDialogError dataTableForm"/>
+                             update="projectNameInput projectDialogError projectTabs"/>
             </p:panelGrid>
        </h:form>
     </p:dialog>
 
     <ui:include src="components/projects/DeleteProjectDialog.xhtml">
-        <ui:param name="updateOnDelete" value="dataTableForm stichwortPanel" />
+        <ui:param name="updateOnDelete" value="stichwortPanel projectTabs" />
     </ui:include>
 
     <!-- the data table -->
     <div class="row">
-        <div class="col-lg-3">
+        <div class="col-lg-4">
             <div class="col-lg-12">
                 <p:panelGrid columns="2" styleClass="ui-noborder">
                 <h3>Projektübersicht</h3>
                 <p:commandButton value="+" type="button" update=":projectDialogForm" onclick="PF('dlg2').show();" />
                 </p:panelGrid>
-                <h:form id="dataTableForm">
-                    <p:growl id="msgs" showDetail="true"/>
 
-                    <p:dataTable id="projects1" widgetVar="projects1" var="project" value="#{dtAddRowView.projects}"
-                                 editable="false"
-                                 emptyMessage="Keine Projekte vorhanden"
-                                 style="margin-bottom:20px">
+            <h:form id="projectTabs">
+                    <p:tabView value="#{dtAddRowView.projectStates}" var="projectState">
+                        <p:tab>
+                            <f:facet name="title">
+                                <h:graphicImage library="images" style="height: 30px; width: 30px; " name="#{func:getStateIconUrl(projectState)}"/>
+                            </f:facet>
+                            <p:dataTable id="projectTabProjects" widgetVar="projects1" var="project" value="#{dtAddRowView.getProjectOfState(projectState)}"
+                                         editable="false"
+                                         emptyMessage="Keine passenden Projekte"
+                                         >
+                                <p:column headerText="">
+                                    <p:link outcome="project" value="#{project.name}">
+                                        <f:param name="projectId" value="#{project.id}" />
+                                    </p:link>
+                                    <div style="float:right;">
+                                        <p:commandButton value="-" id="deleteButton2"
+                                                         update=" stichwortPanel projectTopicHeader projectTabs projectTabProjects"
+                                                         onclick="PF('projectDeleteDialog').show();"
+                                                         action="#{deleteProjectDialog.setup(project.name,project.id)}" style="margin-right:20px;"
+                                                         styleClass="ui-priority-primary">
 
-                        <p:column headerText="Meine Projekte">
-                            <p:link outcome="project" value="#{project.name}">
-                                <f:param name="projectId" value="#{project.id}" />
-                            </p:link>
-                            <h:graphicImage library="images" style="height: 30px; width: 30px; margin-left: 16px; margin-right: 16px;" name="#{func:getStateIconUrl(project.status)}"/>
-                            <div style="float:right;">
-                            <p:commandButton value="-" id="deleteButton"
-                                             update="dataTableForm stichwortPanel projectTopicHeader"
-                                             onclick="PF('projectDeleteDialog').show();"
-                                             action="#{deleteProjectDialog.setup(project.name,project.id)}" style="margin-right:20px;"
-                                             styleClass="ui-priority-primary">
-                                <!-- <f:actionListener binding="#{projectTopicTable.setSelectedTopic(null)}" /> -->
-                            </p:commandButton>
-                            <p:commandButton value="Details" id="projectDetailButton"
-                                             update="stichwortPanel projectTopicHeader"
-                                             action="#{projectTopicTable.setProject(project.id)}" style="margin-right:20px;"
-                                             styleClass="ui-priority-primary"/>
-                            </div>
-                        </p:column>
-
-
-
-                    </p:dataTable>
+                                        </p:commandButton>
+                                        <p:commandButton value="Details" id="projectDetailButton2"
+                                                         update="stichwortPanel projectTopicHeader"
+                                                         action="#{projectTopicTable.setProject(project.id)}" style="margin-right:20px;"
+                                                         styleClass="ui-priority-primary"/>
+                                    </div>
+                                </p:column>
+                            </p:dataTable>
+                        </p:tab>
+                    </p:tabView>
                 </h:form>
-
             </div>
 
-            <ui:include src="components/projects/StateLegendView.xhtml" />
 
 
         </div>
 
-        <div class="col-lg-9">
+        <div class="col-lg-8">
             <h:panelGroup layout="block" class="row" id="projectTopicHeader">
                 <c:if test="#{not projectTopicTable.projectIsSet()}">
                     <h3>Projektdetails</h3>
@@ -127,11 +126,5 @@
     </div>
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script type="text/javascript">
-        $('.ui-panel-titlebar').on("click",function() {
-            $(this).find(".ui-panel-content").toggle();
-
-        });
-    </script>
 </h:body>
 </html>
