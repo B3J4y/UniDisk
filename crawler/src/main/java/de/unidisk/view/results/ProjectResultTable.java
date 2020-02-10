@@ -12,6 +12,7 @@ import org.primefaces.PrimeFaces;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class ProjectResultTable {
 
     @ManagedProperty("#{projectRepository}")
     private IProjectRepository projectRepository;
-    private List<Result> results;
+    private List<Result> results = new ArrayList<>();
     private String projectId;
     private HashMap<Integer,String> topicIcons;
     private List<MapLegendItem> mapLegendItems;
@@ -31,18 +32,21 @@ public class ProjectResultTable {
 
     private boolean projectHasResults = false;
     private String projectStatusMessage;
+    private boolean projectExists = false;
 
     public void load(String projectId){
         this.projectId = projectId;
-        results = projectRepository.getResults(this.projectId);
+
         topicIcons = new HashMap<Integer, String>();
 
         final Project p = projectRepository.getProject(projectId);
 
         if(p == null){
             setupError = "Projekt existiert nicht.";
+            projectExists = false;
         }
         else {
+            projectExists = true;
             projectHasResults = p.getProjectState() == ProjectState.FINISHED;
             if(!projectHasResults){
                 if(p.getProjectState() == ProjectState.RUNNING){
@@ -56,6 +60,7 @@ public class ProjectResultTable {
                 projectStatusMessage = null;
             }
 
+            results = projectRepository.getResults(this.projectId);
             mapLegendItems = p.getTopics().stream().map(t -> {
                 final String url = "https://img.icons8.com/material/4ac144/256/user-male.png";
                 topicIcons.put(t.getId(), url);
@@ -114,5 +119,9 @@ public class ProjectResultTable {
 
     public String getProjectStatusMessage() {
         return projectStatusMessage;
+    }
+
+    public boolean projectExists(){
+        return this.projectExists;
     }
 }
