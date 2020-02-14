@@ -14,4 +14,10 @@
         <function-class>de.unidisk.common.ProjectStateMapper</function-class>
         <function-signature>java.lang.String getStateIconUrl(de.unidisk.entities.hibernate.ProjectState)</function-signature>
     </function>
+
+    <function>
+        <function-name>getFriendlyName</function-name>
+        <function-class>de.unidisk.common.ProjectStateMapper</function-class>
+        <function-signature>java.lang.String mapToFriendlyName(de.unidisk.entities.hibernate.ProjectState)</function-signature>
+    </function>
 </facelet-taglib>

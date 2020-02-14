@@ -7,14 +7,14 @@ public final class ProjectStateMapper {
     public static String mapToFriendlyName(ProjectState state){
         switch(state){
             case ERROR:
-                return "Fehler aufgetreten";
+                return "Fehler";
             case WAITING:
-                return "Nicht gestartet";
+                return "In Vorbereitung";
             case FINISHED:
-                return "Erfolgreich beendet";
+                return "Abgeschlossen";
 
             default:
-                return "Im Prozess";
+                return "In Bearbeitung";
         }
     }
 
