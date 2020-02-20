@@ -99,9 +99,6 @@ public abstract class MysqlConnect {
 			for (String file : files) {
 				importSQL(conn, file);
 			}
-
-
-
 		} catch (SQLException ex) {
 			System.out.println("SQLException: " + ex.getMessage());
 			System.out.println("SQLState: " + ex.getSQLState());
@@ -163,10 +160,6 @@ public abstract class MysqlConnect {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	private void ensureConnection() {
-
 	}
 
 	/**

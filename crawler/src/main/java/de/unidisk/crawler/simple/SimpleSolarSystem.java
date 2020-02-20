@@ -12,11 +12,13 @@ import static de.unidisk.config.CrawlerConfig.solrUrl;
 
 public class SimpleSolarSystem {
 
-    public SimpleSolarSystem() {
+    private String solrUrl;
 
+    public SimpleSolarSystem(String solrUrl) {
+        this.solrUrl = solrUrl;
     }
 
-    public void sendPageToTheMoon(SimpleCarlDocument content) throws IOException, SolrServerException {
+    public void sendPageToTheMoon(SimpleCrawlDocument content) throws IOException, SolrServerException {
         HttpSolrClient client =
                 new HttpSolrClient.Builder(solrUrl).withConnectionTimeout(10000).withSocketTimeout(60000).build();
 
@@ -24,7 +26,7 @@ public class SimpleSolarSystem {
         client.commit(collectionName);
     }
 
-    public static class SimpleCarlDocument {
+    public static class SimpleCrawlDocument {
         @Field
         public String id;
 
@@ -48,7 +50,7 @@ public class SimpleSolarSystem {
 
 
 
-        public SimpleCarlDocument(String id, String url, String title, String content, int depth, Long datum) {
+        public SimpleCrawlDocument(String id, String url, String title, String content, int depth, Long datum) {
             this.id = id;
             this.title = title;
             this.content = content;

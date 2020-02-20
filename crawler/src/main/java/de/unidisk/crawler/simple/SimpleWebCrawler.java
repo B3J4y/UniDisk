@@ -1,6 +1,5 @@
 package de.unidisk.crawler.simple;
 
-import de.unidisk.config.CrawlerConfig;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
@@ -8,13 +7,11 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.solr.client.solrj.SolrServerException;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class SimpleCarl extends WebCrawler {
+public class SimpleWebCrawler extends WebCrawler {
 
     /**
      * tree to ensure max depth
@@ -24,11 +21,13 @@ public class SimpleCarl extends WebCrawler {
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
             + "|png|mp3|mp4|zip|gz))$");
     private String[] whitelistUrls;
+    private int crawlDepth = 3;
+    private String solrUrl;
 
-
-    public SimpleCarl(String seed, String[] whitelist) {
+    public SimpleWebCrawler(String seed, String[] whitelist, String solrUrl) {
         this.whitelistUrls = whitelist;
         urlTree  = new CarlTree(new CarlsTreeNode(seed));
+        this.solrUrl = solrUrl;
     }
 
     @Override
@@ -46,7 +45,7 @@ public class SimpleCarl extends WebCrawler {
             copy.insertCarlsNodes(parentNode, childNode);
             int depth = copy.getPathToRoot(childNode).length;
             childNode.setCarlsDepth(depth);
-            if (depth > 3) {
+            if (depth > crawlDepth) {
                 return false;
             }
             urlTree.insertCarlsNodes(parentNode, childNode);
@@ -71,7 +70,7 @@ public class SimpleCarl extends WebCrawler {
     @Override
     public void visit(Page page) {
         super.visit(page);
-        SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem();
+        SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(solrUrl);
         try {
             if (page.getParseData() instanceof HtmlParseData) {
                 HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
@@ -85,13 +84,13 @@ public class SimpleCarl extends WebCrawler {
                 System.out.println("Number of outgoing links: " + links.size());
                 System.out.println("---------------------------------------------------------");
 
-                SimpleSolarSystem.SimpleCarlDocument simpleCarlDocument =
-                        new SimpleSolarSystem.SimpleCarlDocument(UUID.randomUUID().toString(), page.getWebURL().toString(),
+                SimpleSolarSystem.SimpleCrawlDocument simpleCrawlDocument =
+                        new SimpleSolarSystem.SimpleCrawlDocument(UUID.randomUUID().toString(), page.getWebURL().toString(),
                                 ((HtmlParseData) page.getParseData()).getTitle(), text, page.getWebURL().getDepth(), System
                                 .currentTimeMillis
                                 ());
                 //if required write content to file
-                simpleSolarSystem.sendPageToTheMoon(simpleCarlDocument);
+                simpleSolarSystem.sendPageToTheMoon(simpleCrawlDocument);
             }
         } catch (IOException e) {
             e.printStackTrace();

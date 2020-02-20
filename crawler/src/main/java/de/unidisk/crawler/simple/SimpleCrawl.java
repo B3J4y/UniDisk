@@ -1,16 +1,13 @@
 package de.unidisk.crawler.simple;
 
-import de.unidisk.config.CrawlerConfig;
-import de.unidisk.crawler.solr.SolrConnector;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
+import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-
-import static de.unidisk.config.CrawlerConfig.crawledShitPlace;
 
 public class SimpleCrawl implements ICrawler {
 
@@ -20,13 +17,15 @@ public class SimpleCrawl implements ICrawler {
 
     private String storageLocation;
     private String[] seedList;
+    private String[] whiteList;
+    private String solrUrl;
 
-    public SimpleCrawl(String storageLocation, String[] seedList){
+    public SimpleCrawl(String storageLocation, String[] seedList, String[] whiteList, String solrUrl){
         this.storageLocation = storageLocation;
         this.seedList = seedList;
+        this.whiteList = whiteList;
+        this.solrUrl = solrUrl;
     }
-
-    private SimpleCrawl(){}
 
     public void startCrawl(String seed) throws Exception {
         startCrawl(seed, false);
@@ -53,7 +52,7 @@ public class SimpleCrawl implements ICrawler {
             controller.addSeed(seed);
 
             // The factory which creates instances of crawlers.
-            CrawlController.WebCrawlerFactory<SimpleCarl> factory = () -> new SimpleCarl(seed);
+            CrawlController.WebCrawlerFactory<SimpleWebCrawler> factory = CreateCrawler(seed);
 
             // Start the crawl. This is a blocking operation, meaning that your code
             // will reach the line after this only when crawling is finished.
@@ -64,12 +63,16 @@ public class SimpleCrawl implements ICrawler {
              */
             CrawlController controllerTemp = new CrawlController(config, pageFetcher, robotstxtServer);
             controllerTemp.addSeed(seed);
-            CrawlController.WebCrawlerFactory<SimpleCarl> factory = () -> new SimpleCarl(seed);
+            CrawlController.WebCrawlerFactory<SimpleWebCrawler> factory = CreateCrawler(seed);
             controllerTemp.start(factory, numberOfCrawlers);
         }
 
     }
 
+    private CrawlController.WebCrawlerFactory<SimpleWebCrawler> CreateCrawler(String seed){
+        CrawlController.WebCrawlerFactory<SimpleWebCrawler> factory = () -> new SimpleWebCrawler(seed,whiteList, solrUrl);
+        return factory;
+    }
 
     @Override
      public void startMultipleCrawl() throws Exception {
