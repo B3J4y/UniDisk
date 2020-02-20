@@ -1,6 +1,7 @@
 package de.unidisk.crawler;
 
 import de.unidisk.config.CrawlerConfig;
+import de.unidisk.config.SolrConfiguration;
 import de.unidisk.crawler.simple.ICrawler;
 import de.unidisk.crawler.simple.SimpleCrawl;
 import de.unidisk.crawler.simple.SimpleSolarSystem;
@@ -39,7 +40,7 @@ public class SimpleCrawlTest {
      */
     @Test
     public void createSimpleSolrCollection() throws IOException, SolrServerException {
-        final String solrUrl = "http://localhost:8983/solr";
+        final String solrUrl = SolrConfiguration.getTestUrl();
         HttpSolrClient client =
                 new HttpSolrClient.Builder(solrUrl).withConnectionTimeout(10000).withSocketTimeout(60000).build();
 
@@ -60,8 +61,8 @@ public class SimpleCrawlTest {
     @Ignore
     @Test
     public void testFieldInputAndQuery() throws Exception {
-        SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem();
-        simpleSolarSystem.sendPageToTheMoon(podamFactory.manufacturePojo(SimpleSolarSystem.SimpleCarlDocument.class));
+        SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(SolrConfiguration.getTestUrl());
+        simpleSolarSystem.sendPageToTheMoon(podamFactory.manufacturePojo(SimpleSolarSystem.SimpleCrawlDocument.class));
     }
 
     /**
@@ -71,20 +72,12 @@ public class SimpleCrawlTest {
     //@Ignore
     @Test
     public void shootTheMoon() throws Exception {
-/*        java.util.logging.LogManager.getLogManager().reset();
-        Enumeration<Category> loggers = LogManager.getCurrentLoggers();
-        while (loggers.hasMoreElements()) {
-            Category category = loggers.nextElement();
-            category.setLevel(Level.INFO);
-        }
-        //Logger.getLogger(WebCrawler.class).setLevel(Level.OFF);
-        Logger.getLogger("edu.uci.ics.crawler4j").setLevel(Level.OFF);
-        java.util.logging.Logger.getLogger("edu.uci.ics.crawler4j").setLevel(java.util.logging.Level.OFF);
-
-        Logger.getLogger("org.apache.http").setLevel(Level.OFF);
-        java.util.logging.Logger.getLogger("org.apache.http").setLevel(java.util.logging.Level.OFF);*/
-
-        ICrawler crawler = new SimpleCrawl();
+        ICrawler crawler = new SimpleCrawl(
+                CrawlerConfig.storageLocation,
+                CrawlerConfig.seedList,
+                CrawlerConfig.whitelist,
+                CrawlerConfig.solrUrl
+        );
         crawler.startCrawl(CrawlerConfig.seedList[0]);
     }
 
