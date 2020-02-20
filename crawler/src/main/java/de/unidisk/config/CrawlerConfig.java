@@ -11,7 +11,7 @@ public class CrawlerConfig {
     public static String[] seedList = new String[]{
             "https://uni-potsdam.de"
     };
-    public static String crawledShitPlace = "C:\\Users\\dehne\\Desktop\\crawledshit";
+    public static String crawledShitPlace = "C:\\Users\\Tim Sauvageot\\Desktop\\crawledshit";
 
 
     public final static String collectionName = "mycollection";
