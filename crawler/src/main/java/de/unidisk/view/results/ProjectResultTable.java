@@ -34,41 +34,52 @@ public class ProjectResultTable {
     private String projectStatusMessage;
     private boolean projectExists = false;
 
+    private void setProjectNotExisting(){
+        results  = new ArrayList<>();
+        mapLegendItems = new ArrayList<>();
+        setupError = "Projekt existiert nicht.";
+        projectExists = false;
+    }
+
     public void load(String projectId){
         this.projectId = projectId;
 
         topicIcons = new HashMap<Integer, String>();
+        if(projectId == null){
+            setProjectNotExisting();
+            return;
+        }
 
         final Project p = projectRepository.getProject(projectId);
 
         if(p == null){
-            setupError = "Projekt existiert nicht.";
-            projectExists = false;
+            setProjectNotExisting();
+            return;
         }
-        else {
-            projectExists = true;
-            projectHasResults = p.getProjectState() == ProjectState.FINISHED;
-            if(!projectHasResults){
-                if(p.getProjectState() == ProjectState.RUNNING){
-                    projectStatusMessage = "Das Projekt wird noch bearbeitet.";
-                }else if(p.getProjectState() == ProjectState.ERROR){
-                    projectStatusMessage = "Beim Bearbeiten des Projekts trat ein Fehler auf.";
-                }else if(p.getProjectState() == ProjectState.WAITING){
-                    projectStatusMessage = "Die Bearbeitung des Projekts steht noch aus.";
-                }
-            }else{
-                projectStatusMessage = null;
+
+        projectExists = true;
+        projectHasResults = p.getProjectState() == ProjectState.FINISHED;
+        if(!projectHasResults){
+            if(p.getProjectState() == ProjectState.RUNNING){
+                projectStatusMessage = "Das Projekt wird noch bearbeitet.";
+            }else if(p.getProjectState() == ProjectState.ERROR){
+                projectStatusMessage = "Beim Bearbeiten des Projekts trat ein Fehler auf.";
+            }else if(p.getProjectState() == ProjectState.WAITING){
+                projectStatusMessage = "Die Bearbeitung des Projekts steht noch aus.";
             }
-
-            results = projectRepository.getResults(this.projectId);
-            mapLegendItems = p.getTopics().stream().map(t -> {
-                final String url = "https://img.icons8.com/material/4ac144/256/user-male.png";
-                topicIcons.put(t.getId(), url);
-                return new MapLegendItem(url, t.getName());
-            }).collect(Collectors.toList());
-
-            RefreshMap();
+        }else{
+            projectStatusMessage = null;
         }
+
+        results = projectRepository.getResults(this.projectId);
+        mapLegendItems = p.getTopics().stream().map(t -> {
+            final String url = "https://img.icons8.com/material/4ac144/256/user-male.png";
+            topicIcons.put(t.getId(), url);
+            return new MapLegendItem(url, t.getName());
+        }).collect(Collectors.toList());
+
+        RefreshMap();
+
     }
 
 
