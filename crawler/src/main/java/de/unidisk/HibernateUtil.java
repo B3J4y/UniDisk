@@ -4,26 +4,44 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
+
 
 public class HibernateUtil {
     private static SessionFactory sessionFactory;
-    public static SessionFactory getSesstionFactory() {
+
+    public enum DatabaseConfig {Memory, MySql}
+
+    private static final String sqlConfig = "hibernate.cfg.xml";
+    private static final String memoryConfig = "hibernate.cfg.mem.xml";
+    private static String config = memoryConfig;
+
+    public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             Configuration config = new Configuration();
-            sessionFactory = config.configure().buildSessionFactory();
+            sessionFactory = config.configure(HibernateUtil.config).buildSessionFactory();
         }
         return sessionFactory;
     }
 
+    public static void setSessionFactory(DatabaseConfig dbConfig) {
+        Configuration config = new Configuration();
+        String configFile;
+        switch(dbConfig){
+            case MySql:
+                configFile = HibernateUtil.sqlConfig;
+                break;
+            default:
+                configFile = HibernateUtil.memoryConfig;
+        }
+
+        sessionFactory = config.configure(configFile).buildSessionFactory();
+        HibernateUtil.config = configFile;
+    }
+
     public static <T> void truncateTable(Class<T> entityClass) {
-        Session session = HibernateUtil.getSesstionFactory().openSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaDelete<T> query = cb.createCriteriaDelete(entityClass);
-        query.from(entityClass);
+        Session session = HibernateUtil.getSessionFactory().openSession();
         session.getTransaction().begin();
-        session.createQuery(query).executeUpdate();
+        session.createSQLQuery("truncate table " + entityClass.getSimpleName()).executeUpdate();
         session.getTransaction().commit();
         session.close();
     }

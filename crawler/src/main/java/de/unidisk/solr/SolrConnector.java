@@ -1,6 +1,6 @@
 package de.unidisk.solr;
 
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
+import de.unidisk.config.SolrConfiguration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
@@ -8,6 +8,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -15,9 +16,6 @@ import org.apache.solr.common.SolrInputDocument;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Created by carl on 07.01.16.
- */
 public class SolrConnector {
     static private final Logger logger = LogManager.getLogger(SolrConnector.class.getName());
     private SolrClient client ;
@@ -56,8 +54,9 @@ public class SolrConnector {
     }
 
     public void insertDocuments(List<SolrInputDocument> documents) throws IOException, SolrServerException {
-        client.add(documents);
-        client.commit();
+        UpdateResponse updateResponse = client.add(documents);
+        UpdateResponse updateCommit = client.commit();
+
     }
 
     public void deleteDocument(SolrInputDocument document) throws IOException, SolrServerException {
@@ -68,7 +67,7 @@ public class SolrConnector {
     public void deleteDocuments(SolrDocumentList documents) throws IOException, SolrServerException {
         for (int i = 0; i < documents.getNumFound(); i++) {
             SolrDocument document = documents.get(i);
-            String idIdentifier = SolrStandardConfigurator.getFieldProperty("id");
+            String idIdentifier = SolrConfiguration.getFieldProperty("id");
             client.deleteById((String) document.getFieldValue(idIdentifier));
         }
         client.commit();

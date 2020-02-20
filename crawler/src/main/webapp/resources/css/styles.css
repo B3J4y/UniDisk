@@ -1,0 +1,224 @@
+.highlight {
+    background-color: #fff34d;
+    -moz-border-radius: 5px; /* FF1+ */
+    -webkit-border-radius: 5px; /* Saf3-4 */
+    border-radius: 5px; /* Opera 10.5, IE 9, Saf5, Chrome */
+    -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7); /* FF3.5+ */
+    -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7); /* Saf3.0+, Chrome */
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7); /* Opera 10.5+, IE 9.0 */
+}
+
+body,html{
+    height: 100%;
+}
+
+.row{
+    max-width: 100%;
+}
+
+.simple-card{
+    padding: 0 !important;
+    border: 1px solid grey;
+}
+
+.main-table .ui-datatable-tablewrapper{
+    height: 240px;
+}
+.row{
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+.highlight {
+    padding:1px 4px;
+    margin:0 -4px;
+}
+.progress-label {
+    float: left;
+    margin-left: 50%;
+    margin-top: 5px;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #fff;
+}
+.card {
+
+}
+
+.ui-datatable table{
+
+    max-width: 100%;
+}
+
+.ui-layout-unit, .ui-layout-unit-content{
+    padding: 0 !important;
+}
+.ui-datatable tbody td, .ui-datatable th{
+
+}
+
+.card .card-header{
+    background-color: #2b669a;
+    color: #ffffff;
+}
+
+body, html{
+    overflow-x: hidden;
+    min-height: 100%;
+    height: 100%;
+}
+
+.content{
+    padding-top: 15px;
+}
+#header{
+    background-color: #2b669a;
+}
+
+#header .navbar-brand{
+    color: white;
+
+}
+
+#header .navbar-brand:hover{
+    font-weight: bold;
+    text-decoration: underline;
+}
+#sidebar{
+    padding: 0;
+    background-color: #2e6da4;
+}
+
+#sidebar h2{
+    color: white;
+    text-align: center;
+    border-bottom: 2px solid grey;
+    padding-bottom: 8px;
+    cursor: default;
+}
+
+#sidebar .navitem a{
+    text-decoration: none;
+    color: white;
+}
+
+#sidebar .navitem a:hover{
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.selection-empty{
+    text-align: center;
+    margin-top: 1rem;
+    display: block;
+}
+
+@media (min-width: 768px) {
+  .sidebar-nav .navbar .navbar-collapse {
+    padding: 0;
+    max-height: none;
+		
+  }
+  .sidebar-nav .navbar ul {
+    float: none;
+    display: block;
+  }
+  .sidebar-nav .navbar li {
+    float: none;
+    display: block;
+  }
+  .sidebar-nav .navbar li a {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+.alerts {
+  position: absolute;
+  top: 30px;
+  left: 20px;
+  right: 20px;
+}
+
+.hidden {
+	visibility: hidden;
+}
+.spinner{
+    position:fixed;
+    z-index:99;/* make higher than whatever is on the page */
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    margin:auto;
+    background:red;
+    width:100px;
+    height:100px;
+}
+
+.sidebar{
+    height: 100%;
+    width: 200px;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+}
+
+.sidebar .navitem{
+    width: 100%;
+    display: block;
+}
+
+.sidebar .navitem.select{
+    background-color: #2aabd2;
+}
+
+.sidebar .navitem a{
+    width: 100%;
+    text-align: center;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    display: block;
+}
+
+
+#pluswrap {
+position: fixed;
+width: 100%;
+height:100%;
+display: flex;
+align-items: center;
+background: rgba(0, 0, 0, 0.91);
+top: 0;
+z-index: 1400;
+}
+
+.plus {
+  display: flex;
+  margin: 0 auto;
+}
+
+td {
+	max-width: 220px
+}
+
+#projectTabs .ui-tabs li a{
+    padding: 5px !important;
+
+}
+
+
+#projectTabs .ui-tabs-top{
+    padding: 0;
+
+}
+
+#projectTabs .ui-tabs-panel{
+    padding: 0 !important;
+
+}
+
+#projectTabs thead{
+    display:none;
+}

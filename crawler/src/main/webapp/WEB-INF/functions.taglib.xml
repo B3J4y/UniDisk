@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facelet-taglib
+        xmlns="http://java.sun.com/xml/ns/javaee"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd"
+        version="2.0">
+    <namespace>http://example.com/functions</namespace>
+
+    <!--
+    Reference: https://stackoverflow.com/questions/7079978/how-to-create-a-custom-el-function-to-invoke-a-static-method
+    -->
+    <function>
+        <function-name>getStateIconUrl</function-name>
+        <function-class>de.unidisk.common.ProjectStateMapper</function-class>
+        <function-signature>java.lang.String getStateIconUrl(de.unidisk.entities.hibernate.ProjectState)</function-signature>
+    </function>
+
+    <function>
+        <function-name>getFriendlyName</function-name>
+        <function-class>de.unidisk.common.ProjectStateMapper</function-class>
+        <function-signature>java.lang.String mapToFriendlyName(de.unidisk.entities.hibernate.ProjectState)</function-signature>
+    </function>
+</facelet-taglib>

@@ -67,14 +67,12 @@ public class VariablesAddRowView implements Serializable {
     }*/
 
     public void onAddNew(String projectName) {
-        // TODO @JAN sync projects with db
-        System.out.println(projectName + " entered");
+
         variables.add(variables.get(0));
     }
 
     public void deleteRow(Variable project) {
-        // TODO @JAN delete projects in db
-        System.out.println("hi");
+
         variables.remove(project);
 
     }

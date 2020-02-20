@@ -1,0 +1,22 @@
+<ui:composition
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui">
+
+    <div class="col-12 text-left d-md-flex flex-column justify-content-md-start justify-content-lg-start align-items-lg-start">
+
+        <div class="table-responsive">
+            <p:dataTable id="homeProjectStateLegend" widgetVar="projectState"  var="projectState" value="#{legendView.symbols}" emptyMessage="Keine Informationen vorhanden...">
+                <p:column headerText="Legende">
+
+                    <h:graphicImage library="images" style="height: 30px; width: 30px; margin-right: 16px;" name="#{projectState.icon}"/>
+                    <h:outputText value="#{projectState.name}"/>
+                </p:column>
+
+
+            </p:dataTable>
+
+        </div>
+    </div>
+</ui:composition>

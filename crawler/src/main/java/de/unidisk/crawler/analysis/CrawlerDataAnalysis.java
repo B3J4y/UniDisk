@@ -82,7 +82,7 @@ public class CrawlerDataAnalysis {
 
         DescriptiveStatistics descriptiveStatistics = new DescriptiveStatistics(values);
         double guess = 100; // init value
-        Boolean notInRange = true;
+        boolean notInRange = true;
         int sizeOfPerc = 0;
         while (notInRange) {
             final double percentile = descriptiveStatistics.getPercentile(guess);

@@ -1,0 +1,73 @@
+<!--
+Include Parameter:
+    - updateOnDelete
+        Ids von Elementen, die nach Löschen eines Themas geupdated
+        werden sollen
+    - updateOnCreated
+        Ids von Elementen, die nach der Erstellung eines Themas geupdated
+        werden sollen
+    - updateOnRowSelect
+        Ids von Elementen, die nach der Auswahl eines Themas geupdated
+        werden sollen
+    - updateOnRowDeselect
+        Ids von Elementen, die nach der Auswahl eines Themas geupdated
+        werden sollen
+-->
+
+<ui:composition
+        xmlns:h="http://java.sun.com/jsf/html"
+        xmlns:f="http://java.sun.com/jsf/core"
+        xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+        xmlns:p="http://primefaces.org/ui"
+        xmlns:c="http://java.sun.com/jsp/jstl/core">
+    <c:if test="#{ not projectTopicTable.projectIsSet()}">
+        <p class="selection-empty">Kein Projekt ausgewählt</p>
+
+    </c:if>
+    <h:form>
+
+        <p:dataTable id="projectTopicTable" var="topic"
+                     rendered="#{projectTopicTable.selectedProject != null}"
+                     value="#{projectTopicTable.topics}"
+                     scrollable="true"
+                     class="main-table"
+                     scrollHeight="200"  selectionMode="single"
+                     emptyMessage="Noch keine Themen zugeordnet"
+                     selection="#{projectTopicTable.selectedTopic}" rowKey="#{topic}">
+
+            <p:column headerText="Themen">
+                <h:outputText value="#{topic.name}" />
+                <div style="float:right;">
+                <c:if test="#{projectTopicTable.canEdit()}">
+
+                <p:commandButton value="-"
+                                 update="projectTopicTable #{updateOnDelete}"
+                                 action="#{projectTopicTable.deleteTopic(topic.id)}" />
+                </c:if>
+                </div>
+            </p:column>
+
+            <p:ajax event="rowSelect" update="#{updateOnRowSelect}" />
+            <p:ajax event="rowUnselect" update="#{updateOnRowDeselect}" />
+        </p:dataTable>
+    </h:form>
+    <c:if test="#{projectTopicTable.canEdit()}">
+    <h:form id="newTopicForm" rendered="#{projectTopicTable.selectedProject != null}" >
+        <p:panelGrid columns="1" layout="grid"  styleClass="ui-noborder">
+            <h:outputText value="Neues Thema" />
+
+            <p:remoteCommand name="addTopic" update="#{updateOnCreated}" actionListener="#{projectTopicTable.addTopic}"/>
+
+            <p:panelGrid columns="3" layout="grid"  styleClass="ui-noborder">
+                <p:inputText placeholder="Thema..." value="#{projectTopicTable.newTopic}"
+                             id="newTopicInput"
+                             onkeypress="if (event.keyCode == 13) { addTopic(); return false; }"
+                />
+                <p:watermark for="newTopicInput" value="Thema..." id="watermark_newTopic" />
+                <p:commandButton style="margin-left: 16px;" value="+" update="#{updateOnCreated}" action="#{projectTopicTable.addTopic()}"/>
+            </p:panelGrid>
+            <h:outputText value="#{projectTopicTable.topicError}" />
+        </p:panelGrid>
+    </h:form>
+    </c:if>
+</ui:composition>
