@@ -7,8 +7,8 @@ import de.unidisk.common.SystemProperties;
 import de.unidisk.common.datastructures.Pair;
 import de.unidisk.common.mysql.VereinfachtesResultSet;
 import de.unidisk.crawler.mysql.MysqlConnector;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.log4j.Logger;
 
@@ -28,10 +28,6 @@ public class CrawlerDataAnalysis {
     private MysqlConnector mysqlConnect;
 
     static Logger logger = Logger.getLogger(CrawlerDataAnalysis.class);
-
-    public CrawlerDataAnalysis() {
-
-    }
 
     public CrawlerDataAnalysis(int minResults, int maxResults, String tableName) throws CommunicationsException {
         mysqlConnect = new MysqlConnector();

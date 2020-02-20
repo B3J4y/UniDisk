@@ -8,6 +8,8 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.solr.client.solrj.SolrServerException;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -21,10 +23,11 @@ public class SimpleCarl extends WebCrawler {
 
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
             + "|png|mp3|mp4|zip|gz))$");
+    private String[] whitelistUrls;
 
-    private int maxnNumPages = 5;
 
-    public SimpleCarl(String seed) {
+    public SimpleCarl(String seed, String[] whitelist) {
+        this.whitelistUrls = whitelist;
         urlTree  = new CarlTree(new CarlsTreeNode(seed));
     }
 
@@ -54,9 +57,8 @@ public class SimpleCarl extends WebCrawler {
 
     public Boolean checkWhiteList(WebURL url) {
         String urlString = url.toString();
-        String[] whiteListe = CrawlerConfig.whitelist;
         boolean result = false;
-        for (String s : whiteListe) {
+        for (String s : this.whitelistUrls) {
             if (urlString.contains(s)){
                 result = true;
                 break;

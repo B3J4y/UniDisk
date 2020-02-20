@@ -18,13 +18,23 @@ public class SimpleCrawl implements ICrawler {
 
     private CrawlController controller;
 
+    private String storageLocation;
+    private String[] seedList;
+
+    public SimpleCrawl(String storageLocation, String[] seedList){
+        this.storageLocation = storageLocation;
+        this.seedList = seedList;
+    }
+
+    private SimpleCrawl(){}
+
     public void startCrawl(String seed) throws Exception {
         startCrawl(seed, false);
     }
 
     private void startCrawl(String seed, Boolean isParallel) throws Exception {
 
-        String crawlStorageFolder = crawledShitPlace;
+        String crawlStorageFolder = this.storageLocation;
         int numberOfCrawlers = 1;
 
         CrawlConfig config = new CrawlConfig();
@@ -63,7 +73,7 @@ public class SimpleCrawl implements ICrawler {
 
     @Override
      public void startMultipleCrawl() throws Exception {
-         String[] seedList = CrawlerConfig.seedList;
+         String[] seedList = this.seedList;
          for (String s : seedList) {
              logger.info("STARTING crawl with seed: "+ s);
              startCrawl(s);
@@ -73,19 +83,16 @@ public class SimpleCrawl implements ICrawler {
 
      @Override
      public void startParallelCrawls() {
-         String[] seedList = CrawlerConfig.seedList;
+         String[] seedList = this.seedList;
          for (String s : seedList) {
-             Thread t = new Thread(new Runnable() {
-                 @Override
-                 public void run() {
-                     logger.info("STARTING crawl with seed: "+ s);
-                     try {
-                         startCrawl(s, true);
-                     } catch (Exception e) {
-                         logger.error(e);
-                     }
-                     logger.info("FINISHED crawl with seed: "+ s);
+             Thread t = new Thread(() -> {
+                 logger.info("STARTING crawl with seed: "+ s);
+                 try {
+                     startCrawl(s, true);
+                 } catch (Exception e) {
+                     logger.error(e);
                  }
+                 logger.info("FINISHED crawl with seed: "+ s);
              });
              t.start();
          }
