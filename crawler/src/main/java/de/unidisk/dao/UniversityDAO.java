@@ -1,7 +1,5 @@
 package de.unidisk.dao;
 
-import de.unidisk.HibernateUtil;
-import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.University;
 import org.hibernate.Session;
 import org.hibernate.Transaction;

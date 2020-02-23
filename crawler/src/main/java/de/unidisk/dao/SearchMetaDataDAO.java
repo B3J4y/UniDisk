@@ -1,12 +1,9 @@
 package de.unidisk.dao;
 
-import de.unidisk.HibernateUtil;
-import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.SearchMetaData;
 import de.unidisk.entities.hibernate.University;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 
 import java.net.URL;
 import java.util.Optional;

@@ -1,11 +1,9 @@
 package de.unidisk.repositories;
 
-import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.KeyWordScore;
-import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
-import de.unidisk.entities.hibernate.University;
+import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.repositories.contracts.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.model.MapMarker;
@@ -15,7 +13,6 @@ import de.unidisk.view.results.Result;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,8 +49,8 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
-    public List<Result> getResults(String projectId) {
-        return new ProjectDAO().getResults(projectId).stream().map(this::mapKeywordScoreToResult).collect(Collectors.toList());
+    public List<KeyWordScore> getResults(String projectId) {
+        return new ProjectDAO().getResults(projectId);
     }
 
     private Result mapKeywordScoreToResult(KeyWordScore r){
@@ -62,12 +59,22 @@ public class HibernateProjectRepo implements IProjectRepository {
 
     @Override
     public List<MapMarker> getMarker(String projectId) {
-        return new ProjectDAO().getMapMarker(projectId);
+        return new ProjectDAO().getMarker(projectId);
     }
 
     @Override
     public boolean canEdit(String projectId) {
         return new ProjectDAO().canEdit(projectId);
+    }
+
+    @Override
+    public List<Project> getProjects(ProjectState state) {
+        return null;
+    }
+
+    @Override
+    public void updateProjectState(int projectId, ProjectState state) {
+        new ProjectDAO().updateProjectState(projectId,state);
     }
 
 }

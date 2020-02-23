@@ -1,6 +1,5 @@
 package de.unidisk.dao;
 
-import de.unidisk.HibernateUtil;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class TopicDAO {
@@ -129,6 +127,21 @@ public class TopicDAO {
         }
         Optional<Topic> optTopic = currentSession.createQuery("select t from Topic t where t.name like :name", Topic.class)
                 .setParameter("name", name)
+                .uniqueResultOptional();
+
+        transaction.commit();
+        currentSession.close();
+        return optTopic;
+    }
+
+    public Optional<Topic> getTopic(int id) {
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+        Optional<Topic> optTopic = currentSession.createQuery("select t from Topic t where t.id = :id", Topic.class)
+                .setParameter("id", id)
                 .uniqueResultOptional();
 
         transaction.commit();

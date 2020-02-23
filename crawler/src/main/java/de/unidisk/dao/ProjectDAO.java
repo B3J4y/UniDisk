@@ -1,16 +1,19 @@
 package de.unidisk.dao;
 
-import de.unidisk.HibernateUtil;
 import de.unidisk.entities.hibernate.*;
+import de.unidisk.repositories.contracts.IProjectRepository;
+import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.model.MapMarker;
+import de.unidisk.view.project.ProjectView;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class ProjectDAO  {
+public class ProjectDAO  implements IProjectRepository {
     public ProjectDAO() {
     }
 
@@ -49,6 +52,25 @@ public class ProjectDAO  {
         currentSession.update(project);
         transaction.commit();
         currentSession.close();
+    }
+
+    @Override
+    public List<ProjectView> getProjects() {
+        return getAll().stream().map(ProjectView::fromProject).collect(Collectors.toList());
+    }
+
+    @Override
+    public Project getProject(String projectId) {
+        int id = Integer.parseInt(projectId);
+        final Optional<Project> p  = findProjectById(id);
+        if(p.isPresent())
+            return p.get();
+        return null;
+    }
+
+    @Override
+    public List<KeywordItem> getProjectKeywords(String projectId) {
+        return null;
     }
 
     public boolean deleteProject(String name){
@@ -172,22 +194,16 @@ public class ProjectDAO  {
         if (!transaction.isActive()) {
             transaction.begin();
         }
-        //currentSession.createQuery("select t from TopicScore t where t.topic.id in (select t.id from topic t where t.projectId = :pId)", TopicScore.class).setParameter("pId",pId);
-        List<KeyWordScore> scores = currentSession.createQuery("select kScore from KeyWordScore kScore where kScore.keyword.topicId in " +
+       List<KeyWordScore> scores = currentSession.createQuery("select kScore from KeyWordScore kScore where kScore.keyword.topicId in " +
                 "(select t.id from Topic t where t.projectId = :pId)", KeyWordScore.class)
                 .setParameter("pId",pId).list();
-        /*List<KeyWordScore> scores = currentSession.createQuery("select score from Topic t " +
-                "INNER JOIN Keyword k ON t.id = k.topicId " +
-                "LEFT JOIN KeyWordScore  score ON score.keyword.id = k.id " +
-                "WHERE t.projectId = :pId", KeyWordScore.class)
-                .setParameter("pId",pId)
-                .list();*/
         transaction.commit();
         currentSession.close();
         return scores;
     }
 
-    public List<MapMarker> getMapMarker(String projectId){
+    @Override
+    public List<MapMarker> getMarker(String projectId) {
         int pId = Integer.parseInt(projectId);
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction transaction = currentSession.getTransaction();
@@ -200,5 +216,19 @@ public class ProjectDAO  {
         transaction.commit();
         currentSession.close();
         return scores;
+    }
+
+    @Override
+    public List<Project> getProjects(ProjectState state){
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+
+        List<Project> project = currentSession.createQuery("select p from Project p where p.projectState = :state", Project.class).setParameter("state",state).list();
+        transaction.commit();
+        currentSession.close();
+        return project;
     }
 }

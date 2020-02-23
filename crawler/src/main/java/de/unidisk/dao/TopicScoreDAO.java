@@ -1,10 +1,11 @@
 package de.unidisk.dao;
 
-import de.unidisk.entities.hibernate.Input;
-import de.unidisk.entities.hibernate.ScoredInput;
-import de.unidisk.entities.hibernate.Topic;
-import de.unidisk.entities.hibernate.TopicScore;
+import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+
+import java.util.Optional;
 
 public class TopicScoreDAO implements Scoring {
     public TopicScoreDAO() {
@@ -16,5 +17,27 @@ public class TopicScoreDAO implements Scoring {
                 .setParameter("id", input.getId())
                 .uniqueResultOptional()
                 .orElse(new TopicScore((Topic) input));
+    }
+
+    public TopicScore createScore(int topicId, double score) throws EntityNotFoundException {
+        TopicDAO tDao = new TopicDAO();
+        final Optional<Topic> topic = tDao.getTopic(topicId);
+        if(!topic.isPresent())
+            throw new EntityNotFoundException(Topic.class,topicId);
+
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+        final TopicScore topicScore = new TopicScore();
+        topicScore.setScore(score);
+        topicScore.setTopic(topic.get());
+        final int id = (int) currentSession.save(topicScore);
+
+        transaction.commit();
+        currentSession.close();
+        topicScore.setId(id);
+        return topicScore;
     }
 }
