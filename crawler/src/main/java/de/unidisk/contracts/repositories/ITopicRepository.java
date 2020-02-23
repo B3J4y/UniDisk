@@ -1,4 +1,4 @@
-package de.unidisk.repositories.contracts;
+package de.unidisk.contracts.repositories;
 
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Topic;

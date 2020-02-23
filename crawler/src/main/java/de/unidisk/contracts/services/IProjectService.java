@@ -1,4 +1,4 @@
-package de.unidisk.services;
+package de.unidisk.contracts.services;
 
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.view.project.ProjectView;

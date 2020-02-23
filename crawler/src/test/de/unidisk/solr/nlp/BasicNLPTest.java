@@ -1,10 +1,10 @@
-package de.unidisk.nlp;
+package de.unidisk.solr.nlp;
 
 import de.unidisk.common.StichwortModifier;
 import de.unidisk.crawler.datatype.Stichwort;
-import de.unidisk.nlp.basics.GermanStemming;
-import de.unidisk.nlp.datatype.RegExpStichwort;
-import de.unidisk.nlp.datatype.Rule;
+import de.unidisk.solr.nlp.basics.GermanStemming;
+import de.unidisk.solr.nlp.datatype.RegExpStichwort;
+import de.unidisk.solr.nlp.datatype.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;

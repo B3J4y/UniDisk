@@ -1,9 +1,14 @@
-package de.unidisk;
+package de.unidisk.crawler;
 
 
 
-import de.unidisk.crawler.SolrApp;
-import de.unidisk.crawler.mysql.MysqlConnector;
+import de.unidisk.solr.SolrApp;
+import de.unidisk.contracts.services.IScoringService;
+import de.unidisk.solr.services.SolrScoringService;
+import de.unidisk.dao.ProjectDAO;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.services.IResultService;
+import de.unidisk.services.HibernateResultService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -27,6 +32,10 @@ public class CrawlerServiceRest {
     // TODO comment in the following and adapt to the current project situation
 
 
+    private IProjectRepository projectRepository = new ProjectDAO();
+    private IScoringService iScoringService = new SolrScoringService();
+    private IResultService iResultService = new HibernateResultService();
+
     @GET
     @Path("/isRunning")
     public String isRunning() {
@@ -48,7 +57,7 @@ public class CrawlerServiceRest {
                 @Override
                 public void run() {
                     logger.debug("Thread is running");
-                    SolrApp solrApp = new SolrApp(campaignOs);
+                    SolrApp solrApp = new SolrApp(projectRepository, iScoringService, iResultService);
                     try {
                         solrApp.execute();
                     } catch (Exception e) {
@@ -72,6 +81,7 @@ public class CrawlerServiceRest {
         }
     }
 
+    /*
     @POST
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Path("/stop")
@@ -102,5 +112,5 @@ public class CrawlerServiceRest {
             }
         }
         return Response.ok("thread doesn't exists").build();
-    }
+    }*/
 }

@@ -1,4 +1,4 @@
-package de.unidisk.nlp.datatype;
+package de.unidisk.solr.nlp.datatype;
 
 import de.unidisk.common.StichwortModifier;
 import de.unidisk.crawler.datatype.AbstractStichwort;

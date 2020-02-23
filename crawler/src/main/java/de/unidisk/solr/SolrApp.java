@@ -1,31 +1,21 @@
-package de.unidisk.crawler;
+package de.unidisk.solr;
 
-import de.unidisk.common.SystemProperties;
-import de.unidisk.crawler.analysis.CrawlerDataAnalysis;
-import de.unidisk.crawler.contracts.IScoringService;
-import de.unidisk.crawler.datatype.Model;
-import de.unidisk.crawler.io.ReadMysql;
+import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.model.ScoreResult;
-import de.unidisk.crawler.mysql.MysqlConnector;
-import de.unidisk.crawler.services.SolrScoringService;
-import de.unidisk.crawler.solr.SolrConnector;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
+import de.unidisk.solr.services.SolrScoringService;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.entities.hibernate.Topic;
-import de.unidisk.repositories.contracts.IProjectRepository;
-import de.unidisk.repositories.contracts.IResultService;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.services.IResultService;
 import de.unidisk.services.HibernateResultService;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
-import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Created by carl on 06.01.16.

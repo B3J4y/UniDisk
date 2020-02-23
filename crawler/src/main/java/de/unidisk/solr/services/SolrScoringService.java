@@ -1,6 +1,6 @@
-package de.unidisk.crawler.services;
+package de.unidisk.solr.services;
 
-import de.unidisk.crawler.contracts.IScoringService;
+import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.model.ScoreResult;
 
 public class SolrScoringService implements IScoringService {

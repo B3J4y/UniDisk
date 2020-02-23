@@ -1,4 +1,4 @@
-package de.unidisk.nlp.datatype;
+package de.unidisk.solr.nlp.datatype;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

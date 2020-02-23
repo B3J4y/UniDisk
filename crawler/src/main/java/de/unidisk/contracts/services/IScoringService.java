@@ -1,4 +1,4 @@
-package de.unidisk.crawler.contracts;
+package de.unidisk.contracts.services;
 
 import de.unidisk.crawler.model.ScoreResult;
 

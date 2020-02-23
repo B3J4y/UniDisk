@@ -6,7 +6,7 @@ import de.unidisk.entities.hibernate.SearchMetaData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-public interface Scoring {
+public interface ScoringDAO {
     default ScoredInput addScore(Input input, double score, SearchMetaData smd) {
         Session currentSession = HibernateUtil.getSessionFactory().openSession();
         Transaction tnx = currentSession.beginTransaction();

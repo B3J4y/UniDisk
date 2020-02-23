@@ -1,4 +1,4 @@
-package de.unidisk.repositories.contracts;
+package de.unidisk.contracts.services;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.crawler.model.ScoreResult;

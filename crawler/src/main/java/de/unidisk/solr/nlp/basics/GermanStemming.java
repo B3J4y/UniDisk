@@ -1,6 +1,6 @@
-package de.unidisk.nlp.basics;
+package de.unidisk.solr.nlp.basics;
 
-import de.unidisk.nlp.datatype.Rule;
+import de.unidisk.solr.nlp.datatype.Rule;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package de.unidisk.nlp.basics;
+package de.unidisk.solr.nlp.basics;
 
 import java.util.HashSet;
 import java.util.Set;
