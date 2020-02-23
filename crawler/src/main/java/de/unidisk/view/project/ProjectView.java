@@ -1,5 +1,6 @@
 package de.unidisk.view.project;
 
+import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 
 import javax.faces.bean.ManagedBean;
@@ -16,6 +17,10 @@ public class ProjectView implements Serializable {
         this.name = name;
         this.status = status;
         this.id = id;
+    }
+
+    public static ProjectView fromProject(Project p){
+        return new ProjectView(p.getName(),p.getProjectState(),String.valueOf(p.getId()));
     }
 
     public ProjectView() {

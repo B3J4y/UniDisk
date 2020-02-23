@@ -1,6 +1,6 @@
 package de.unidisk.view.project;
 
-import de.unidisk.MessagingCenter;
+import de.unidisk.view.MessagingCenter;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
