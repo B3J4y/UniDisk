@@ -1,9 +1,8 @@
 package de.unidisk.view.project.dialog;
 
-import de.unidisk.MessagingCenter;
+import de.unidisk.view.MessagingCenter;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.services.ProjectService;
-import de.unidisk.view.project.ProjectView;
 import org.primefaces.PrimeFaces;
 
 import javax.annotation.PostConstruct;
