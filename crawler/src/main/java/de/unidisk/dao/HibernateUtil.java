@@ -1,4 +1,4 @@
-package de.unidisk;
+package de.unidisk.dao;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

@@ -1,6 +1,5 @@
-package de.unidisk;
+package de.unidisk.view;
 
-import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.SessionScoped;
 import java.util.ArrayList;
 import java.util.List;
