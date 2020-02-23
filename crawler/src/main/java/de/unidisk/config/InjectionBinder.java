@@ -2,7 +2,7 @@ package de.unidisk.config;
 
 
 import de.unidisk.*;
-import de.unidisk.rest.LegacyService;
+
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 

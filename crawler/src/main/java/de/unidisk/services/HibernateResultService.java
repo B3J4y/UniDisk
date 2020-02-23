@@ -3,9 +3,8 @@ package de.unidisk.services;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.crawler.model.ScoreResult;
 import de.unidisk.dao.*;
-import de.unidisk.entities.KeyWordScore_;
 import de.unidisk.entities.hibernate.*;
-import de.unidisk.repositories.contracts.IResultService;
+import de.unidisk.contracts.services.IResultService;
 
 import java.net.MalformedURLException;
 import java.net.URL;

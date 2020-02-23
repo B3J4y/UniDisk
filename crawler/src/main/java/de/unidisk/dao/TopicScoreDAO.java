@@ -7,7 +7,7 @@ import org.hibernate.Transaction;
 
 import java.util.Optional;
 
-public class TopicScoreDAO implements Scoring {
+public class TopicScoreDAO implements ScoringDAO {
     public TopicScoreDAO() {
     }
 

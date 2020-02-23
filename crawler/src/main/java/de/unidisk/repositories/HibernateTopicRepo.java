@@ -4,11 +4,10 @@ import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Topic;
-import de.unidisk.repositories.contracts.ITopicRepository;
+import de.unidisk.contracts.repositories.ITopicRepository;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import java.util.List;
 
 @ViewScoped
 @ManagedBean(name = "topicRepository")

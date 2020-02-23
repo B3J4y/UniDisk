@@ -3,8 +3,7 @@ package de.unidisk.view.results;
 import com.google.gson.Gson;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
-import de.unidisk.entities.hibernate.University;
-import de.unidisk.repositories.contracts.IProjectRepository;
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.MapLegendItem;
 import de.unidisk.view.model.MapMarker;
 import org.primefaces.PrimeFaces;
@@ -14,7 +13,6 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @ManagedBean(name = "projectResultTable")

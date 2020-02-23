@@ -6,7 +6,7 @@ import org.hibernate.Transaction;
 
 import java.util.Optional;
 
-public class KeywordScoreDAO implements Scoring {
+public class KeywordScoreDAO implements ScoringDAO {
     public KeywordScoreDAO() {
     }
 

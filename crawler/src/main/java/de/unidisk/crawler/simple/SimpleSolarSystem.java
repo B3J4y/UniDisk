@@ -48,8 +48,6 @@ public class SimpleSolarSystem {
         public int depth;
 
 
-
-
         public SimpleCrawlDocument(String id, String url, String title, String content, int depth, Long datum) {
             this.id = id;
             this.title = title;

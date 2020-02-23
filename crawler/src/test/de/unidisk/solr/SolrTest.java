@@ -4,23 +4,30 @@ import de.unidisk.common.StichwortModifier;
 import de.unidisk.config.SolrConfiguration;
 import de.unidisk.crawler.datatype.Stichwort;
 import de.unidisk.crawler.datatype.Variable;
-import de.unidisk.nlp.datatype.RegExpStichwort;
+import de.unidisk.solr.nlp.datatype.RegExpStichwort;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SolrTest {
 
+
+    @Test
+    public void canLoadConfig(){
+        final SolrConfiguration config = SolrConfiguration.Instance();
+       assertTrue(config.getCore().equals("unidisc"));
+    }
     @Test
     public void smokeTest() {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
         try {
             Stichwort stichwort = new RegExpStichwort("Test");
             QueryResponse response = connector.query(stichwort.buildQuery(new ArrayList<>()));
@@ -30,9 +37,10 @@ public class SolrTest {
         }
     }
 
+
     @Test
     public void testFieldInputAndQuery() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
         List<SolrInputDocument> docs = new ArrayList<>();
         SolrInputDocument document = new SolrInputDocument();
         document.addField(SolrConfiguration.getFieldProperty("id"), "1");

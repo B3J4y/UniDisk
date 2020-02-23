@@ -7,7 +7,7 @@ import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.SearchMetaData;
 import de.unidisk.entities.hibernate.Topic;
-import de.unidisk.rest.TopicData;
+
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.security.Key;

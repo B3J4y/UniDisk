@@ -21,7 +21,7 @@ public class SolrQueryConversionTest {
     @Test
     @Disabled
     void testConnectorWithRegex() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
         List<SolrInputDocument> docs = new ArrayList<>();
         SolrInputDocument document = new SolrInputDocument();
         document.addField(SolrConfiguration.getFieldProperty("id"), "1");

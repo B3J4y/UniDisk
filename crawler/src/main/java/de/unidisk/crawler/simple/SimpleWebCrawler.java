@@ -21,7 +21,7 @@ public class SimpleWebCrawler extends WebCrawler {
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|gif|jpg"
             + "|png|mp3|mp4|zip|gz))$");
     private String[] whitelistUrls;
-    private int crawlDepth = 3;
+    private int maxCrawlDepth = 3;
     private String solrUrl;
 
     public SimpleWebCrawler(String seed, String[] whitelist, String solrUrl) {
@@ -33,10 +33,10 @@ public class SimpleWebCrawler extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        boolean result =  !FILTERS.matcher(href).matches()
+        boolean visitPage =  !FILTERS.matcher(href).matches()
                 && checkWhiteList(url);
 
-        if (result) {
+        if (visitPage) {
             String parent = referringPage.getWebURL().getURL();
             String child = url.getURL();
             CarlsTreeNode parentNode = new CarlsTreeNode(parent);
@@ -45,13 +45,13 @@ public class SimpleWebCrawler extends WebCrawler {
             copy.insertCarlsNodes(parentNode, childNode);
             int depth = copy.getPathToRoot(childNode).length;
             childNode.setCarlsDepth(depth);
-            if (depth > crawlDepth) {
+            if (depth > maxCrawlDepth) {
                 return false;
             }
             urlTree.insertCarlsNodes(parentNode, childNode);
         }
 
-        return result;
+        return visitPage;
     }
 
     public Boolean checkWhiteList(WebURL url) {
@@ -74,8 +74,8 @@ public class SimpleWebCrawler extends WebCrawler {
         try {
             if (page.getParseData() instanceof HtmlParseData) {
                 HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
-                String text = htmlParseData.getText(); //extract text from page
-                String html = htmlParseData.getHtml(); //extract html from page
+                String text = htmlParseData.getText();
+                String html = htmlParseData.getHtml();
                 Set<WebURL> links = htmlParseData.getOutgoingUrls();
 
                 System.out.println("---------------------------------------------------------");
@@ -85,10 +85,9 @@ public class SimpleWebCrawler extends WebCrawler {
                 System.out.println("---------------------------------------------------------");
 
                 SimpleSolarSystem.SimpleCrawlDocument simpleCrawlDocument =
-                        new SimpleSolarSystem.SimpleCrawlDocument(UUID.randomUUID().toString(), page.getWebURL().toString(),
-                                ((HtmlParseData) page.getParseData()).getTitle(), text, page.getWebURL().getDepth(), System
-                                .currentTimeMillis
-                                ());
+                        new SimpleSolarSystem.SimpleCrawlDocument(UUID.randomUUID().toString(),
+                                page.getWebURL().toString(), ((HtmlParseData) page.getParseData()).getTitle(),
+                                text, page.getWebURL().getDepth(), System.currentTimeMillis());
                 //if required write content to file
                 simpleSolarSystem.sendPageToTheMoon(simpleCrawlDocument);
             }

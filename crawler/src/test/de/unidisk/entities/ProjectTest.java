@@ -164,7 +164,7 @@ public class ProjectTest implements HibernateLifecycle, CRUDTest, ParentTests {
                     )
         );
 
-        final List<MapMarker> mapMarker = projectDAO.getMapMarker(String.valueOf(dbProject.getId()));
+        final List<MapMarker> mapMarker = projectDAO.getMarker(String.valueOf(dbProject.getId()));
         assertEquals(mapMarker.size(),2);
         mapMarker.forEach(marker -> {
             final Optional<MapMarker> expected = expectedMarker.stream().filter(e -> marker.getTopicName().equals(e.getTopicName())).findFirst();

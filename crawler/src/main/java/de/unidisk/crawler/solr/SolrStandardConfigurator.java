@@ -24,7 +24,8 @@ public class SolrStandardConfigurator {
     }
 
     public static String getTestUrl() {
-        return "http://" + SolrConfiguration.SERVER_NAME + ":" + SolrConfiguration.PORT + "/solr/" + SolrConfiguration.CORE;
+        final SolrConfiguration config = SolrConfiguration.Instance();
+        return "http://" + config.getServer() + ":" + config.getPort() + "/solr/" + config.getCore();
     }
 
     public static String[] getStandardFields() {

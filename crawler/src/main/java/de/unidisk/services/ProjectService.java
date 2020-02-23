@@ -1,16 +1,14 @@
 package de.unidisk.services;
 
-import de.unidisk.common.ProjectStateMapper;
-import de.unidisk.dao.ProjectDAO;
+import de.unidisk.contracts.services.IProjectService;
 import de.unidisk.entities.hibernate.Project;
-import de.unidisk.repositories.contracts.IProjectRepository;
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.project.ProjectView;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @SessionScoped
 @ManagedBean(name = "projectService")

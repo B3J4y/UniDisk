@@ -1,10 +1,9 @@
 package de.unidisk.repositories;
 
 import de.unidisk.dao.ProjectDAO;
-import de.unidisk.entities.hibernate.KeyWordScore;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
-import de.unidisk.repositories.contracts.IProjectRepository;
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.model.MapMarker;
 import de.unidisk.view.project.ProjectView;
@@ -49,13 +48,10 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
-    public List<KeyWordScore> getResults(String projectId) {
+    public List<Result> getResults(String projectId) {
         return new ProjectDAO().getResults(projectId);
     }
 
-    private Result mapKeywordScoreToResult(KeyWordScore r){
-       return new Result(r.getUniName(),r.getScore(),r.getId());
-    }
 
     @Override
     public List<MapMarker> getMarker(String projectId) {

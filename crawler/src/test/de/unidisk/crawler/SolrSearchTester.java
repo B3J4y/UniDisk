@@ -1,13 +1,14 @@
 package de.unidisk.crawler;
 
 import de.unidisk.common.StichwortModifier;
+import de.unidisk.config.SolrConfiguration;
 import de.unidisk.crawler.datatype.SolrFile;
 import de.unidisk.crawler.datatype.SolrStichwort;
 import de.unidisk.crawler.datatype.Stichwort;
 import de.unidisk.crawler.datatype.Variable;
 import de.unidisk.crawler.io.FilesToSolrConverter;
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
-import de.unidisk.nlp.datatype.RegExpStichwort;
+import de.unidisk.solr.nlp.datatype.RegExpStichwort;
 import de.unidisk.solr.SolrConnector;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -57,7 +58,7 @@ public class SolrSearchTester {
 
     @After
     public void tearDown() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
         QueryResponse response = connector.queryAllDocuments();
 
         connector.deleteDocuments(response.getResults());
@@ -89,7 +90,7 @@ public class SolrSearchTester {
     @Test
     public void testWithDocuments() throws Exception {
         List<SolrInputDocument> documents = new FilesToSolrConverter(path).getSolrDocs();
-        SolrConnector connector = new SolrConnector(SolrStandardConfigurator.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
         if (documents.size() == 0) {
             logger.debug("Nothing to do here");
             return;

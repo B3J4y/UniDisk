@@ -1,10 +1,11 @@
 package de.unidisk.dao;
 
 import de.unidisk.entities.hibernate.*;
-import de.unidisk.repositories.contracts.IProjectRepository;
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.model.MapMarker;
 import de.unidisk.view.project.ProjectView;
+import de.unidisk.view.results.Result;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -186,7 +187,12 @@ public class ProjectDAO  implements IProjectRepository {
         return project;
     }
 
-    public List<KeyWordScore> getResults(String projectId)
+    private Result mapKeywordScoreToResult(KeyWordScore r){
+        return new Result(r.getUniName(),r.getScore(),r.getId());
+    }
+
+
+    public List<Result> getResults(String projectId)
     {
         int pId = Integer.parseInt(projectId);
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -199,7 +205,7 @@ public class ProjectDAO  implements IProjectRepository {
                 .setParameter("pId",pId).list();
         transaction.commit();
         currentSession.close();
-        return scores;
+        return scores.stream().map(this::mapKeywordScoreToResult).collect(Collectors.toList());
     }
 
     @Override

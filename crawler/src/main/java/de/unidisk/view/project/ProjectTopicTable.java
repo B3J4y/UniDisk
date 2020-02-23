@@ -6,8 +6,8 @@ import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.entities.hibernate.Topic;
-import de.unidisk.repositories.contracts.IProjectRepository;
-import de.unidisk.repositories.contracts.ITopicRepository;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.ITopicRepository;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.UnselectEvent;
 

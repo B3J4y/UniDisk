@@ -1,7 +1,7 @@
 package de.unidisk.crawler.datatype;
 
 import de.unidisk.crawler.solr.SolrStandardConfigurator;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.io.BufferedReader;
@@ -13,7 +13,7 @@ import java.util.Date;
 /**
  * Data representation of a convertible solr file
  */
-public class SolrFile {
+public class  SolrFile {
     private Date modifiedDate;
     private String content;
     private String title;
