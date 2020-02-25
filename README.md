@@ -61,3 +61,9 @@ If you chose another one make sure to adapt the urls and commands.
 Run `solr create -c unidisc`. After the command finished you should see the message 
 _Created new core 'unidisc'_ in the console/terminal. You should now see the
 unidisc core section at http://localhost:8983/solr/#/unidisc/core-overview.  
+
+##### Verify Setup
+
+The test case `testFieldInputAndQuery` in _SimpleCrawlTest_ should now run successfully.
+You can also run `shootTheMoon` which crawls websites and posts the result to solr. The test doesn't
+terminate but the number of documents in the *unidisc core* should increase.

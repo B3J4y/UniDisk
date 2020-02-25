@@ -7,6 +7,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.solr.client.solrj.SolrServerException;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -23,16 +24,25 @@ public class SimpleWebCrawler extends WebCrawler {
     private String[] whitelistUrls;
     private int maxCrawlDepth = 3;
     private String solrUrl;
+    private int maxPages;
+    private HashSet<String> visitedPages =  new HashSet<>();
 
-    public SimpleWebCrawler(String seed, String[] whitelist, String solrUrl) {
+    public SimpleWebCrawler(String seed, String[] whitelist, String solrUrl, int maxPages) {
         this.whitelistUrls = whitelist;
         urlTree  = new CarlTree(new CarlsTreeNode(seed));
         this.solrUrl = solrUrl;
+        this.maxPages = maxPages;
     }
 
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
+        if(visitedPages.contains(href))
+            return false;
+
+        if(visitedPages.size() >= maxPages)
+            return false;
+
         boolean visitPage =  !FILTERS.matcher(href).matches()
                 && checkWhiteList(url);
 
@@ -50,7 +60,7 @@ public class SimpleWebCrawler extends WebCrawler {
             }
             urlTree.insertCarlsNodes(parentNode, childNode);
         }
-
+        visitedPages.add(href);
         return visitPage;
     }
 
@@ -84,10 +94,14 @@ public class SimpleWebCrawler extends WebCrawler {
                 System.out.println("Number of outgoing links: " + links.size());
                 System.out.println("---------------------------------------------------------");
 
+                final String url = page.getWebURL().toString();
+                final String documentId = String.valueOf(url.hashCode());
+                final long timestamp = System.currentTimeMillis();
+                final String pageTitle = ((HtmlParseData) page.getParseData()).getTitle();
                 SimpleSolarSystem.SimpleCrawlDocument simpleCrawlDocument =
-                        new SimpleSolarSystem.SimpleCrawlDocument(UUID.randomUUID().toString(),
-                                page.getWebURL().toString(), ((HtmlParseData) page.getParseData()).getTitle(),
-                                text, page.getWebURL().getDepth(), System.currentTimeMillis());
+                        new SimpleSolarSystem.SimpleCrawlDocument(documentId,
+                                url, pageTitle,
+                                text, page.getWebURL().getDepth(), timestamp);
                 //if required write content to file
                 simpleSolarSystem.sendPageToTheMoon(simpleCrawlDocument);
             }

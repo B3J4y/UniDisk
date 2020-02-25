@@ -19,12 +19,14 @@ public class SimpleCrawl implements ICrawler {
     private String[] seedList;
     private String[] whiteList;
     private String solrUrl;
+    private int maxVisitsPerSeed;
 
-    public SimpleCrawl(String storageLocation, String[] seedList, String[] whiteList, String solrUrl){
+    public SimpleCrawl(String storageLocation, String[] seedList, String[] whiteList, String solrUrl, int maxVisitsPerSeed){
         this.storageLocation = storageLocation;
         this.seedList = seedList;
         this.whiteList = whiteList;
         this.solrUrl = solrUrl;
+        this.maxVisitsPerSeed = maxVisitsPerSeed;
     }
 
     public void startCrawl(String seed) throws Exception {
@@ -70,7 +72,7 @@ public class SimpleCrawl implements ICrawler {
     }
 
     private CrawlController.WebCrawlerFactory<SimpleWebCrawler> CreateCrawler(String seed){
-        CrawlController.WebCrawlerFactory<SimpleWebCrawler> factory = () -> new SimpleWebCrawler(seed,whiteList, solrUrl);
+        CrawlController.WebCrawlerFactory<SimpleWebCrawler> factory = () -> new SimpleWebCrawler(seed,whiteList, solrUrl, maxVisitsPerSeed);
         return factory;
     }
 

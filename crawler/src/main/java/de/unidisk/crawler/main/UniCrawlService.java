@@ -42,7 +42,8 @@ public class UniCrawlService {
                 CrawlerConfig.storageLocation,
                 urlArr,
                 urlArr,
-                SolrStandardConfigurator.getStandardUrl()
+                SolrStandardConfigurator.getStandardUrl(),
+                100
         );
         crawler.startParallelCrawls();
 

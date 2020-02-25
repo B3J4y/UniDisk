@@ -7,8 +7,6 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 
 import java.io.IOException;
 
-import static de.unidisk.config.CrawlerConfig.collectionName;
-import static de.unidisk.config.CrawlerConfig.solrUrl;
 
 public class SimpleSolarSystem {
 
@@ -22,8 +20,8 @@ public class SimpleSolarSystem {
         HttpSolrClient client =
                 new HttpSolrClient.Builder(solrUrl).withConnectionTimeout(10000).withSocketTimeout(60000).build();
 
-        final UpdateResponse response = client.addBean(collectionName, content);
-        client.commit(collectionName);
+        final UpdateResponse response = client.addBean(content);
+        client.commit();
     }
 
     public static class SimpleCrawlDocument {

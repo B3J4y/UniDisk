@@ -13,6 +13,5 @@ public class CrawlerConfig {
     };
     public static String storageLocation = "C:\\Users\\Tim Sauvageot\\Desktop\\crawledshit";
     public final static String collectionName = "mycollection";
-    public final static String solrUrl = "http://localhost:8983/solr";
 
 }

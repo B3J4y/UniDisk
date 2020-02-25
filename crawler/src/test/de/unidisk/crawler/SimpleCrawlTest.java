@@ -5,6 +5,7 @@ import de.unidisk.config.SolrConfiguration;
 import de.unidisk.crawler.simple.ICrawler;
 import de.unidisk.crawler.simple.SimpleCrawl;
 import de.unidisk.crawler.simple.SimpleSolarSystem;
+import de.unidisk.crawler.simple.SimpleWebCrawler;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import org.apache.log4j.Category;
 import org.apache.log4j.Level;
@@ -69,17 +70,17 @@ public class SimpleCrawlTest {
      * set to ignore because of travis
      * @throws Exception
      */
-    //@Ignore
+    @Ignore
     @Test
     public void shootTheMoon() throws Exception {
         ICrawler crawler = new SimpleCrawl(
                 CrawlerConfig.storageLocation,
                 CrawlerConfig.seedList,
                 CrawlerConfig.whitelist,
-                CrawlerConfig.solrUrl
+                SolrConfiguration.getTestUrl(),
+                100
         );
         crawler.startCrawl(CrawlerConfig.seedList[0]);
     }
-
 
 }
