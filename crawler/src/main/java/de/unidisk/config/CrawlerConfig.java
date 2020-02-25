@@ -1,5 +1,7 @@
 package de.unidisk.config;
 
+import de.unidisk.crawler.model.UniversitySeed;
+
 public class CrawlerConfig {
     public static String[] whitelist = new String[]{
             "uni-potsdam.de"
@@ -12,6 +14,8 @@ public class CrawlerConfig {
             "https://uni-potsdam.de"
     };
     public static String storageLocation = "C:\\Users\\Tim Sauvageot\\Desktop\\crawledshit";
-    public final static String collectionName = "mycollection";
 
+    public static UniversitySeed[] seeds = new UniversitySeed[]{
+            new UniversitySeed("https://uni-potsdam.de",0)
+    };
 }

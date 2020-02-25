@@ -75,7 +75,7 @@ public class SolrConfiguration {
         };
     }
 
-    public static String getTestUrl() throws IOException {
+    public static String getTestUrl() {
         final SolrConfiguration config = SolrConfiguration.Instance();
         return "http://" + config.getServer() + ":" + config.getPort() + "/solr/" + config.getCore();
     }
@@ -114,6 +114,10 @@ public class SolrConfiguration {
 
     public int getRowLimit() {
         return this.config.getRowLimit();
+    }
+
+    public String getUrl(){
+        return "http://" + config.getServer() + ":" + config.getPort() + "/solr/" + config.getCore();
     }
 
     private class SolrConfig{

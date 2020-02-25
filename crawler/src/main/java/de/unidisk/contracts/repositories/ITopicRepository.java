@@ -4,6 +4,7 @@ import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Topic;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ITopicRepository {
 
@@ -13,4 +14,6 @@ public interface ITopicRepository {
 
     Keyword addKeyword(int topicId, String name);
     void deleteKeyword(int keywordId);
+
+    Optional<Topic> getTopic(int id);
 }

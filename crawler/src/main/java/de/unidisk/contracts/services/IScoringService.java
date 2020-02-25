@@ -2,9 +2,11 @@ package de.unidisk.contracts.services;
 
 import de.unidisk.crawler.model.ScoreResult;
 
+import java.util.List;
+
 public interface IScoringService {
 
-    ScoreResult getKeywordScore(int projectId, int keywordId);
+    List<ScoreResult> getKeywordScore(int projectId, int keywordId);
 
     ScoreResult getTopicScore(int projectId, int topicId);
 }

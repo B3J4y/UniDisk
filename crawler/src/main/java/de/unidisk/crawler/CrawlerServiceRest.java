@@ -2,8 +2,19 @@ package de.unidisk.crawler;
 
 
 
+import de.unidisk.config.CrawlerConfig;
+import de.unidisk.config.SolrConfiguration;
+import de.unidisk.contracts.repositories.IUniversityRepository;
+import de.unidisk.crawler.model.UniversitySeed;
+import de.unidisk.crawler.simple.CrawlConfiguration;
+import de.unidisk.crawler.simple.SimpleCrawl;
+import de.unidisk.entities.hibernate.University;
+import de.unidisk.repositories.HibernateKeywordRepo;
+import de.unidisk.repositories.HibernateTopicRepo;
+import de.unidisk.repositories.HibernateUniversityRepo;
 import de.unidisk.solr.SolrApp;
 import de.unidisk.contracts.services.IScoringService;
+import de.unidisk.solr.SolrConnector;
 import de.unidisk.solr.services.SolrScoringService;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.contracts.repositories.IProjectRepository;
@@ -12,9 +23,11 @@ import de.unidisk.services.HibernateResultService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import javax.print.attribute.standard.Media;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Optional;
 
 
 /**
@@ -33,13 +46,54 @@ public class CrawlerServiceRest {
 
 
     private IProjectRepository projectRepository = new ProjectDAO();
-    private IScoringService iScoringService = new SolrScoringService();
+    private IScoringService iScoringService = new SolrScoringService(new HibernateKeywordRepo(), new HibernateTopicRepo(), SolrConfiguration.Instance());
     private IResultService iResultService = new HibernateResultService();
 
     @GET
     @Path("/isRunning")
     public String isRunning() {
         return "Hello Jan!";
+    }
+
+    @POST
+    @Consumes({MediaType.APPLICATION_JSON})
+    @Path("crawler/university")
+    public Response crawl(
+            @QueryParam("universityId") int universityId
+    ) throws Exception{
+        final IUniversityRepository universityRepository = new HibernateUniversityRepo();
+        final Optional<University> uni = universityRepository.getUniversity(universityId);
+        if(!uni.isPresent()){
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        final  University university = uni.get();
+
+        CURRENTTHREADS ++;
+        if (CURRENTTHREADS <=  MAXTHREAD) {
+            Thread t = new Thread(tg, (Runnable) () -> {
+                logger.debug("Thread is running");
+                final SimpleCrawl crawl = new SimpleCrawl(CrawlerConfig.storageLocation,
+                        new UniversitySeed(university.getSeedUrl(),university.getId()),
+                        SolrConfiguration.getTestUrl(),
+                        100
+                        );
+                try {
+                    crawl.startMultipleCrawl();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.error(e.getMessage());
+                } finally {
+                    CURRENTTHREADS --;
+                }
+                logger.debug("Thread is done");
+            });
+            //threads.add(t);
+            t.start();
+
+            return Response.ok("Start crawling university " + uni.get().getName()).build();
+        } else {
+            return Response.ok("too many threads. Plz come back later").build();
+        }
     }
 
     @POST

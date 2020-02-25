@@ -2,15 +2,10 @@ package de.unidisk.crawler;
 
 import de.unidisk.config.CrawlerConfig;
 import de.unidisk.config.SolrConfiguration;
+import de.unidisk.crawler.model.CrawlDocument;
 import de.unidisk.crawler.simple.ICrawler;
 import de.unidisk.crawler.simple.SimpleCrawl;
 import de.unidisk.crawler.simple.SimpleSolarSystem;
-import de.unidisk.crawler.simple.SimpleWebCrawler;
-import edu.uci.ics.crawler4j.crawler.WebCrawler;
-import org.apache.log4j.Category;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -23,7 +18,6 @@ import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import java.io.IOException;
-import java.util.Enumeration;
 
 public class SimpleCrawlTest {
 
@@ -63,7 +57,7 @@ public class SimpleCrawlTest {
     @Test
     public void testFieldInputAndQuery() throws Exception {
         SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(SolrConfiguration.getTestUrl());
-        simpleSolarSystem.sendPageToTheMoon(podamFactory.manufacturePojo(SimpleSolarSystem.SimpleCrawlDocument.class));
+        simpleSolarSystem.sendPageToTheMoon(podamFactory.manufacturePojo(CrawlDocument.class));
     }
 
     /**
@@ -73,10 +67,10 @@ public class SimpleCrawlTest {
     @Ignore
     @Test
     public void shootTheMoon() throws Exception {
+
         ICrawler crawler = new SimpleCrawl(
                 CrawlerConfig.storageLocation,
-                CrawlerConfig.seedList,
-                CrawlerConfig.whitelist,
+                CrawlerConfig.seeds,
                 SolrConfiguration.getTestUrl(),
                 100
         );

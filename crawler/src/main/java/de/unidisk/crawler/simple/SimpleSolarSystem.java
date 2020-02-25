@@ -1,5 +1,6 @@
 package de.unidisk.crawler.simple;
 
+import de.unidisk.crawler.model.CrawlDocument;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.Field;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -16,7 +17,7 @@ public class SimpleSolarSystem {
         this.solrUrl = solrUrl;
     }
 
-    public void sendPageToTheMoon(SimpleCrawlDocument content) throws IOException, SolrServerException {
+    public void sendPageToTheMoon(CrawlDocument content) throws IOException, SolrServerException {
         HttpSolrClient client =
                 new HttpSolrClient.Builder(solrUrl).withConnectionTimeout(10000).withSocketTimeout(60000).build();
 
@@ -24,38 +25,5 @@ public class SimpleSolarSystem {
         client.commit();
     }
 
-    public static class SimpleCrawlDocument {
-        @Field
-        public String id;
 
-        @Field
-        public String url;
-        @Field
-        public String name;
-
-        @Field
-        public String title;
-
-        @Field
-        public String content;
-
-        @Field
-        public Long datum;
-
-        @Field
-        public int depth;
-
-
-        public SimpleCrawlDocument(String id, String url, String title, String content, int depth, Long datum) {
-            this.id = id;
-            this.title = title;
-            this.content = content;
-            this.datum = datum;
-            this.url = url;
-            this.depth = depth;
-        }
-
-
-
-    }
 }

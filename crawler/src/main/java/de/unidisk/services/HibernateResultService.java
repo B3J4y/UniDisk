@@ -23,7 +23,7 @@ public class HibernateResultService implements IResultService {
         final KeywordScoreDAO kScoreDao = new KeywordScoreDAO();
         final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
         final SearchMetaData searchMetaData = searchMetaDataDAO.createMetaData(new URL(result.getUrl()),
-                result.getEntityId(), result.getTimestamp());
+                result.getUniversityId(), result.getTimestamp());
         final KeyWordScore score = kScoreDao.createKeywordScore(keyword.getId(),result.getScore());
         kScoreDao.setMetaData(score.getId(),searchMetaData.getId());
     }
@@ -38,7 +38,7 @@ public class HibernateResultService implements IResultService {
         final TopicScoreDAO scoreDao = new TopicScoreDAO();
         final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
         final SearchMetaData searchMetaData = searchMetaDataDAO.createMetaData(new URL(result.getUrl()),
-                result.getEntityId(), result.getTimestamp());
+                result.getUniversityId(), result.getTimestamp());
         scoreDao.addScore(topic.get(),result.getScore(),searchMetaData);
 
     }

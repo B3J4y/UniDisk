@@ -1,6 +1,7 @@
 package de.unidisk.crawler.solr;
 
 import de.unidisk.config.SolrConfiguration;
+import de.unidisk.crawler.model.CrawlDocument;
 import org.apache.solr.client.solrj.SolrQuery;
 
 import java.io.File;
@@ -31,7 +32,7 @@ public class SolrStandardConfigurator {
     public static String[] getStandardFields() {
         return new String[]{getFieldProperty("id"),
                 getFieldProperty("title"),
-                getFieldProperty("date"),
+                getFieldProperty("datum"),
                 getFieldProperty("score")
         };
     }
@@ -72,7 +73,7 @@ public class SolrStandardConfigurator {
     public static void configureSolrQuery(SolrQuery query) {
         query.set("indent", "true");
         query.set("rows", SolrStandardConfigurator.getLimit());
-        query.setFields(SolrStandardConfigurator.getStandardFields());
+        query.setFields(CrawlDocument.getFields());
         query.set("wt", "json");
     }
 }

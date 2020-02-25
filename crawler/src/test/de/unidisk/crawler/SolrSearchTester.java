@@ -46,6 +46,7 @@ public class SolrSearchTester {
         this.directory = direcotry;
     }
 
+
     //shows the name of the directory
     @Parameterized.Parameters(name = "{1}")
     public static Collection<Object[]> data() {

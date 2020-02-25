@@ -8,6 +8,7 @@ import de.unidisk.contracts.repositories.ITopicRepository;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import java.util.Optional;
 
 @ViewScoped
 @ManagedBean(name = "topicRepository")
@@ -34,5 +35,10 @@ public class HibernateTopicRepo implements ITopicRepository {
     @Override
     public void deleteKeyword(int keywordId) {
         new KeywordDAO().deleteKeyword(keywordId);
+    }
+
+    @Override
+    public Optional<Topic> getTopic(int id) {
+        return new TopicDAO().getTopic(id);
     }
 }

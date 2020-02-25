@@ -31,7 +31,9 @@ public abstract class AbstractStichwort implements Stichwort {
             expression += getEnd();
         }
         SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperty("content") + ":" + expression);
+
         SolrStandardConfigurator.configureSolrQuery(solrQuery);
+        solrQuery.addField("score");
         return solrQuery;
     }
 

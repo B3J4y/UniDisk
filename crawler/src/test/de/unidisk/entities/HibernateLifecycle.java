@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-interface HibernateLifecycle {
+public interface HibernateLifecycle {
 
     @BeforeEach
     default void cleanUpDatabase() {

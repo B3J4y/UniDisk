@@ -29,7 +29,7 @@ public class SolrConnector {
 
     public SolrConnector(SolrConfiguration configuration) {
         logger.debug("Entering SolrConnector Constructor with serverUrl:" + configuration.getServer());
-        this.serverUrl = configuration.getServer();
+        this.serverUrl = configuration.getUrl();
         client = new HttpSolrClient.Builder(serverUrl)
                 .withConnectionTimeout(10000)
                 .withSocketTimeout(60000)

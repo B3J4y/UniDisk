@@ -1,7 +1,12 @@
 package de.unidisk.solr;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.config.SolrConfiguration;
 import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.model.ScoreResult;
+import de.unidisk.repositories.HibernateKeywordRepo;
+import de.unidisk.repositories.HibernateTopicRepo;
+import de.unidisk.repositories.HibernateUniversityRepo;
 import de.unidisk.solr.services.SolrScoringService;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Keyword;
@@ -15,6 +20,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
+import java.net.MalformedURLException;
 import java.util.List;
 
 /**
@@ -34,7 +40,7 @@ public class SolrApp {
     }
 
     private String projectLockFileName(Project p){
-        return p.getId()+"lock.unidisk";
+        return p.getId()+"_lock.unidisc";
     }
 
     public void execute() throws Exception {
@@ -68,10 +74,15 @@ public class SolrApp {
 
                 final List<Topic> topics = p.getTopics();
                 for(Topic t : topics){
-
                     for(Keyword keyword : t.getKeywords()){
-                        final ScoreResult score = this.scoringService.getKeywordScore(p.getId(),keyword.getId());
-                        this.resultService.CreateKeywordScore(score);
+                        final List<ScoreResult> scores = this.scoringService.getKeywordScore(p.getId(),keyword.getId());
+                        scores.forEach(score -> {
+                            try {
+                                this.resultService.CreateKeywordScore(score);
+                            } catch (EntityNotFoundException | MalformedURLException e) {
+                                e.printStackTrace();
+                            }
+                        });
                     }
                     final ScoreResult topicScore = this.scoringService.getTopicScore(p.getId(), t.getId());
                     this.resultService.CreateTopicScore(topicScore);
@@ -90,7 +101,7 @@ public class SolrApp {
 
     }
     public static void main(String[] args) throws Exception {
-        final IScoringService scoringService = new SolrScoringService();
+        final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(), new HibernateTopicRepo(), SolrConfiguration.Instance());
         final IProjectRepository projectRepository = new ProjectDAO();
         final IResultService resultService = new HibernateResultService();
 
