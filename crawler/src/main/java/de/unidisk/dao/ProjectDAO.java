@@ -29,7 +29,7 @@ public class ProjectDAO  implements IProjectRepository {
             transaction.begin();
         }
         Project project = new Project(name);
-        project.setProjectState(ProjectState.WAITING);
+        project.setProjectState(ProjectState.IDLE);
         currentSession.save(project);
 
         transaction.commit();
@@ -123,7 +123,7 @@ public class ProjectDAO  implements IProjectRepository {
         Optional<ProjectState> state = (Optional<ProjectState>) stateQuery.uniqueResultOptional();
         transaction.commit();
         currentSession.close();
-        return state.isPresent() ? state.get() == ProjectState.WAITING : false;
+        return state.isPresent() ? state.get() == ProjectState.IDLE : false;
     }
 
     public Optional<Project> findProjectById(int id) {

@@ -251,6 +251,6 @@ public class ProjectTopicTable {
     }
 
     public boolean canEdit(){
-        return this.selectedProject != null && this.selectedProject.getProjectState() == ProjectState.WAITING;
+        return this.selectedProject != null && this.selectedProject.getProjectState() == ProjectState.IDLE;
     }
 }
