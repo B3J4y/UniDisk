@@ -37,6 +37,7 @@ public class UniversityCrawler extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
+        //Todo: überprüfen ob Fall eintritt
         if(visitedPages.contains(href))
             return false;
 

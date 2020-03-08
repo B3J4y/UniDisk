@@ -1,16 +1,20 @@
 package de.unidisk.crawler.main;
 
-import de.unidisk.config.CrawlerConfig;
+import de.unidisk.config.CrawlerConfiguration;
+import de.unidisk.config.SolrConfiguration;
+import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IUniversityRepository;
+import de.unidisk.crawler.model.UniversitySeed;
 import de.unidisk.crawler.simple.SimpleCrawl;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
-import de.unidisk.entities.hibernate.University;
-import de.unidisk.repositories.HibernateUniversityRepo;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class UniCrawlService {
+
+    static private final Logger logger = LogManager.getLogger(UniCrawlService.class.getName());
 
     public UniCrawlService(IUniversityRepository projectRepository) {
 
@@ -22,27 +26,19 @@ public class UniCrawlService {
 
 
     public void start(){
-
-        final List<String> urls = projectRepository.getUniversities().stream().map(University::getSeedUrl).collect(Collectors.toList());
-
-        String[] urlArr = new String[urls.size()];
-        urlArr = urls.toArray(urlArr);
-/*
+        logger.info("Start UniCrawlService");
+        final List<UniversitySeed> seeds = projectRepository.getUniversities().stream().map(u -> new UniversitySeed(u.getSeedUrl(),u.getId())).collect(Collectors.toList());
+        logger.info("Start Crawling " + seeds.size() + " websites.");
+        UniversitySeed[] urlArr = new UniversitySeed[seeds.size()];
+        urlArr = seeds.toArray(urlArr);
+        final CrawlerConfiguration crawlerConfiguration = SystemConfiguration.getInstance().getCrawlerConfiguration();
         final SimpleCrawl crawler = new SimpleCrawl(
-                CrawlerConfig.storageLocation,
+                crawlerConfiguration.getStorageLocation(),
                 urlArr,
-                urlArr,
-                SolrStandardConfigurator.getStandardUrl(),
-                100
+                SolrConfiguration.getInstance().getUrl(),
+                crawlerConfiguration.getMaxVisits()
         );
-        crawler.startParallelCrawls();*/
-
+        crawler.startParallelCrawls();
     }
 
-    public static void main(String[] args){
-        final IUniversityRepository universityRepository = new HibernateUniversityRepo();
-
-        UniCrawlService sapp = new UniCrawlService(universityRepository);
-        sapp.start();
-    }
 }

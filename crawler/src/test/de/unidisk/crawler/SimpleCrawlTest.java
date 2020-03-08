@@ -1,8 +1,11 @@
 package de.unidisk.crawler;
 
-import de.unidisk.config.CrawlerConfig;
+
+import de.unidisk.config.CrawlerConfiguration;
 import de.unidisk.config.SolrConfiguration;
+import de.unidisk.config.SystemConfiguration;
 import de.unidisk.crawler.model.CrawlDocument;
+import de.unidisk.crawler.model.UniversitySeed;
 import de.unidisk.crawler.simple.ICrawler;
 import de.unidisk.crawler.simple.SimpleCrawl;
 import de.unidisk.crawler.simple.SimpleSolarSystem;
@@ -35,7 +38,7 @@ public class SimpleCrawlTest {
      */
     @Test
     public void createSimpleSolrCollection() throws IOException, SolrServerException {
-        final String solrUrl = SolrConfiguration.getTestUrl();
+        final String solrUrl = SolrConfiguration.getInstance().getUrl();
         HttpSolrClient client =
                 new HttpSolrClient.Builder(solrUrl).withConnectionTimeout(10000).withSocketTimeout(60000).build();
 
@@ -56,7 +59,7 @@ public class SimpleCrawlTest {
     @Ignore
     @Test
     public void testFieldInputAndQuery() throws Exception {
-        SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(SolrConfiguration.getTestUrl());
+        SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(SolrConfiguration.getInstance().getUrl());
         simpleSolarSystem.sendPageToTheMoon(podamFactory.manufacturePojo(CrawlDocument.class));
     }
 
@@ -67,14 +70,15 @@ public class SimpleCrawlTest {
     @Ignore
     @Test
     public void shootTheMoon() throws Exception {
-
+        final CrawlerConfiguration crawlerConfiguration = SystemConfiguration.getInstance().getCrawlerConfiguration();
+        final UniversitySeed[] seeds = new UniversitySeed[]{};
         ICrawler crawler = new SimpleCrawl(
-                CrawlerConfig.storageLocation,
-                CrawlerConfig.seeds,
-                SolrConfiguration.getTestUrl(),
-                100
+                crawlerConfiguration.getStorageLocation(),
+                seeds,
+                SolrConfiguration.getInstance().getUrl(),
+                crawlerConfiguration.getMaxVisits()
         );
-        crawler.startCrawl(CrawlerConfig.seedList[0]);
+        crawler.startCrawl(seeds[0].getSeedUrl());
     }
 
 }

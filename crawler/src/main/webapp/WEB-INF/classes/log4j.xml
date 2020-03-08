@@ -36,6 +36,10 @@
         <appender-ref ref="console"/>
     </logger>
 
+    <logger name="org.hibernate">
+        <level value="info"/>
+    </logger>
+
     <root>
         <appender-ref ref="rootFileAppender"/>
     </root>

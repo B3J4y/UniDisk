@@ -20,7 +20,7 @@ public class ScoreProject implements HibernateLifecycle {
         return new SolrScoringService(
                 getKeywordRepository(),
                 null,
-                SolrConfiguration.Instance()
+                SolrConfiguration.getInstance()
         );
     }
 

@@ -7,7 +7,6 @@ import de.unidisk.crawler.datatype.SolrStichwort;
 import de.unidisk.crawler.datatype.Stichwort;
 import de.unidisk.crawler.datatype.Variable;
 import de.unidisk.crawler.io.FilesToSolrConverter;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
 import de.unidisk.solr.nlp.datatype.RegExpStichwort;
 import de.unidisk.solr.SolrConnector;
 import org.apache.log4j.LogManager;
@@ -59,7 +58,7 @@ public class SolrSearchTester {
 
     @After
     public void tearDown() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.getInstance());
         QueryResponse response = connector.queryAllDocuments();
 
         connector.deleteDocuments(response.getResults());
@@ -81,9 +80,9 @@ public class SolrSearchTester {
         out.close();
 
         SolrFile solrFile = new SolrFile(file.getAbsolutePath());
-        assertEquals("Id from testfile", 1, solrFile.getSolrInputDocument().get(SolrStandardConfigurator.getFieldProperty("id")).getValue());
-        assertEquals("Title of testfile", "FirstBook", solrFile.getSolrInputDocument().get(SolrStandardConfigurator.getFieldProperty("title")).getValue());
-        assertEquals("Content from testfile", content, solrFile.getSolrInputDocument().get(SolrStandardConfigurator.getFieldProperty("content")).getValue());
+        assertEquals("Id from testfile", 1, solrFile.getSolrInputDocument().get(SolrConfiguration.getInstance().getFieldProperty("id")).getValue());
+        assertEquals("Title of testfile", "FirstBook", solrFile.getSolrInputDocument().get(SolrConfiguration.getInstance().getFieldProperty("title")).getValue());
+        assertEquals("Content from testfile", content, solrFile.getSolrInputDocument().get(SolrConfiguration.getInstance().getFieldProperty("content")).getValue());
 
         assertTrue("File couldn't be deleted", file.delete());
     }
@@ -91,7 +90,7 @@ public class SolrSearchTester {
     @Test
     public void testWithDocuments() throws Exception {
         List<SolrInputDocument> documents = new FilesToSolrConverter(path).getSolrDocs();
-        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.getInstance());
         if (documents.size() == 0) {
             logger.debug("Nothing to do here");
             return;
@@ -100,7 +99,7 @@ public class SolrSearchTester {
         QueryResponse queryResponse = connector.queryAllDocuments();
         long actualNumbers = queryResponse.getResults().getNumFound();
         assertEquals("Size of documents in directory differs to solr",
-                Math.min(documents.size(), SolrStandardConfigurator.getLimit()), actualNumbers);
+                Math.min(documents.size(), SolrConfiguration.getInstance().getRowLimit()), actualNumbers);
 
         List<Variable<RegExpStichwort>> regExpVariables = new ArrayList<>();
         List<Variable<SolrStichwort>> solrVariables = new ArrayList<>();
@@ -177,13 +176,13 @@ public class SolrSearchTester {
                 }
 
                 for (int i = 0; i < results.getNumFound(); i++) {
-                    String title = (String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperty("title"));
-                    float score = (float) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperty("score"));
+                    String title = (String) results.get(i).getFieldValue(SolrConfiguration.getInstance().getFieldProperty("title"));
+                    float score = (float) results.get(i).getFieldValue(SolrConfiguration.getInstance().getFieldProperty("score"));
                     resultTitles.add(title);
                     logger.debug(String.format("Title: %s, Score: %f", title, score));
                 }
                 SolrDocument firstResult = results.get(0);
-                String titleBestResult = (String) firstResult.getFieldValue(SolrStandardConfigurator.getFieldProperty("title"));
+                String titleBestResult = (String) firstResult.getFieldValue(SolrConfiguration.getInstance().getFieldProperty("title"));
                 logger.debug(String.format("Stichwort: %s; BestResult: %s, MaxScore: %f", searchStichwort, titleBestResult, results.getMaxScore()));
             }
             QueryResponse response = connector.query(variable.buildQuery(mods));
@@ -194,8 +193,8 @@ public class SolrSearchTester {
                 continue;
             }
             for (int i = 0; i < results.getNumFound(); i++) {
-                String resultTitle = (String) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperty("title"));
-                float score = (float) results.get(i).getFieldValue(SolrStandardConfigurator.getFieldProperty("score"));
+                String resultTitle = (String) results.get(i).getFieldValue(SolrConfiguration.getInstance().getFieldProperty("title"));
+                float score = (float) results.get(i).getFieldValue(SolrConfiguration.getInstance().getFieldProperty("score"));
                 assertTrue("For the regex variable query is a title which couldn't found in Stichworte", resultTitles.contains(resultTitle));
                 logger.debug(String.format("Title: %s, Score: %f", resultTitle, score));
                 resultTitles.remove(resultTitle);

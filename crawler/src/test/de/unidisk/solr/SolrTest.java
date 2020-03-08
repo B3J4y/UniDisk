@@ -22,12 +22,12 @@ public class SolrTest {
 
     @Test
     public void canLoadConfig(){
-        final SolrConfiguration config = SolrConfiguration.Instance();
+        final SolrConfiguration config = SolrConfiguration.getInstance();
        assertTrue(config.getCore().equals("unidisc"));
     }
     @Test
     public void smokeTest() {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.getInstance());
         try {
             Stichwort stichwort = new RegExpStichwort("Test");
             QueryResponse response = connector.query(stichwort.buildQuery(new ArrayList<>()));
@@ -40,20 +40,22 @@ public class SolrTest {
 
     @Test
     public void testFieldInputAndQuery() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
+        final SolrConfiguration solrConfiguration = SolrConfiguration.getInstance();
+
+        SolrConnector connector = new SolrConnector(SolrConfiguration.getInstance());
         List<SolrInputDocument> docs = new ArrayList<>();
         SolrInputDocument document = new SolrInputDocument();
-        document.addField(SolrConfiguration.getFieldProperty("id"), "1");
-        document.addField(SolrConfiguration.getFieldProperty("title"), "First Document");
-        document.addField(SolrConfiguration.getFieldProperty("content"), "Hi, this is the very first document");
-        document.addField(SolrConfiguration.getFieldProperty("date"), new Date());
+        document.addField(solrConfiguration.getFieldProperty("id"), "1");
+        document.addField(solrConfiguration.getFieldProperty("title"), "First Document");
+        document.addField(solrConfiguration.getFieldProperty("content"), "Hi, this is the very first document");
+        document.addField(solrConfiguration.getFieldProperty("date"), new Date());
         connector.insertDocument(document);
         docs.add(document.deepCopy());
         document = new SolrInputDocument();
-        document.addField(SolrConfiguration.getFieldProperty("id"), "2");
-        document.addField(SolrConfiguration.getFieldProperty("title"), "Second Document");
-        document.addField(SolrConfiguration.getFieldProperty("content"), "Hi, this is the second document");
-        document.addField(SolrConfiguration.getFieldProperty("date"), "2017-03-03T00:00:00Z");
+        document.addField(solrConfiguration.getFieldProperty("id"), "2");
+        document.addField(solrConfiguration.getFieldProperty("title"), "Second Document");
+        document.addField(solrConfiguration.getFieldProperty("content"), "Hi, this is the second document");
+        document.addField(solrConfiguration.getFieldProperty("date"), "2017-03-03T00:00:00Z");
         connector.insertDocument(document);
         docs.add(document.deepCopy());
 

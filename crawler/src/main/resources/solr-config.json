@@ -1,6 +1,0 @@
-{
-  "server": "localhost",
-  "port": 8984,
-  "rowLimit": 10000,
-  "core": "unidisc"
-}

@@ -21,27 +21,29 @@ public class SolrQueryConversionTest {
     @Test
     @Disabled
     void testConnectorWithRegex() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.Instance());
+        final SolrConfiguration solrConfiguration = SolrConfiguration.getInstance();
+
+        SolrConnector connector = new SolrConnector(SolrConfiguration.getInstance());
         List<SolrInputDocument> docs = new ArrayList<>();
         SolrInputDocument document = new SolrInputDocument();
-        document.addField(SolrConfiguration.getFieldProperty("id"), "1");
-        document.addField(SolrConfiguration.getFieldProperty("title"), "Complex Multimedia Application Architectures");
-        document.addField(SolrConfiguration.getFieldProperty("content"), "Today’s multimedia research is not limited to input-output and transfer " +
+        document.addField(solrConfiguration.getFieldProperty("id"), "1");
+        document.addField(solrConfiguration.getFieldProperty("title"), "Complex Multimedia Application Architectures");
+        document.addField(solrConfiguration.getFieldProperty("content"), "Today’s multimedia research is not limited to input-output and transfer " +
                 "mechanisms anymore. Taking into account the ubiquitous networks such " +
                 "architectures play an important role. The chair works on interoperability of " +
                 "heterogeneous systems in today’s IT landscape. In the area of multimedial " +
                 "applications those linked to learning and teaching are of foremost interest to us.");
-        document.addField(SolrConfiguration.getFieldProperty("date"), new Date());
+        document.addField(solrConfiguration.getFieldProperty("date"), new Date());
         connector.insertDocument(document);
         docs.add(document.deepCopy());
         document = new SolrInputDocument();
-        document.addField(SolrConfiguration.getFieldProperty("id"), "2");
-        document.addField(SolrConfiguration.getFieldProperty("title"), "Dependable and Energy Efficient Sensor Networks");
-        document.addField(SolrConfiguration.getFieldProperty("content"), "Our research is focussed on dependable systems. We are especially interested " +
+        document.addField(solrConfiguration.getFieldProperty("id"), "2");
+        document.addField(solrConfiguration.getFieldProperty("title"), "Dependable and Energy Efficient Sensor Networks");
+        document.addField(solrConfiguration.getFieldProperty("content"), "Our research is focussed on dependable systems. We are especially interested " +
                 "in diagnostic self-test in the field for processors, fault-tolerance techniques for " +
                 "processors, middleware for reliable sensor nodes, and architectural synthesis for " +
                 "processors.");
-        document.addField(SolrConfiguration.getFieldProperty("date"), "2017-03-03T00:00:00Z");
+        document.addField(solrConfiguration.getFieldProperty("date"), "2017-03-03T00:00:00Z");
         connector.insertDocument(document);
         docs.add(document.deepCopy());
         List<StichwortModifier> mods = new ArrayList<>();

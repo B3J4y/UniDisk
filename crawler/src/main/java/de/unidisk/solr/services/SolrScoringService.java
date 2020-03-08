@@ -1,6 +1,7 @@
 package de.unidisk.solr.services;
 
 import de.unidisk.config.SolrConfiguration;
+import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.repositories.IUniversityRepository;
@@ -8,7 +9,7 @@ import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.datatype.SolrStichwort;
 import de.unidisk.crawler.model.CrawlDocument;
 import de.unidisk.crawler.model.ScoreResult;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
+
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.University;
 import de.unidisk.solr.SolrConnector;
@@ -82,7 +83,7 @@ public class SolrScoringService implements IScoringService {
         QueryResponse response = connector.query(new SolrStichwort(key).buildQuery(new ArrayList<>()));
         SolrDocumentList solrList = response.getResults();
 
-        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrStandardConfigurator.getLimit());
+        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConfiguration.getInstance().getRowLimit());
         ArrayList<SolrDocument> documents = new ArrayList<>();
         for (int i = 0; i < sizeOfStichwortResult; i++) {
             SolrDocument doc = solrList.get(i);

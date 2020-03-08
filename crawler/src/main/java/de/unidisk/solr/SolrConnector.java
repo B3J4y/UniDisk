@@ -1,7 +1,7 @@
 package de.unidisk.solr;
 
 import de.unidisk.config.SolrConfiguration;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
+import de.unidisk.config.SystemConfiguration;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
@@ -99,7 +99,7 @@ public class SolrConnector {
     public void deleteDocuments(SolrDocumentList documents) throws IOException, SolrServerException {
         for (int i = 0; i < documents.getNumFound(); i++) {
             SolrDocument document = documents.get(i);
-            String idIdentifier = SolrStandardConfigurator.getFieldProperty("id");
+            String idIdentifier = SystemConfiguration.getInstance().getSolrConfiguration().getFieldProperty("id");
             client.deleteById((String) document.getFieldValue(idIdentifier));
         }
         client.commit();

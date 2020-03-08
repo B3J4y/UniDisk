@@ -101,7 +101,7 @@ public class SolrApp {
 
     }
     public static void main(String[] args) throws Exception {
-        final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(), new HibernateTopicRepo(), SolrConfiguration.Instance());
+        final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(), new HibernateTopicRepo(), SolrConfiguration.getInstance());
         final IProjectRepository projectRepository = new ProjectDAO();
         final IResultService resultService = new HibernateResultService();
 

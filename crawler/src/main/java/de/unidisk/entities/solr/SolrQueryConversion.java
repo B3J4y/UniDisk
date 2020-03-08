@@ -1,7 +1,7 @@
 package de.unidisk.entities.solr;
 
 import de.unidisk.common.StichwortModifier;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
+import de.unidisk.config.SolrConfiguration;
 import org.apache.solr.client.solrj.SolrQuery;
 
 import java.util.List;
@@ -11,8 +11,8 @@ public class SolrQueryConversion {
 
     public static SolrQuery buildWordQuery(List<String> keywords) {
         String expression = "("+ String.join(" ", keywords) + ")";
-        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperty("content") + ":" + expression);
-        SolrStandardConfigurator.configureSolrQuery(solrQuery);
+        SolrQuery solrQuery = new SolrQuery(SolrConfiguration.getInstance().getFieldProperty("content") + ":" + expression);
+        SolrConfiguration.getInstance().configureSolrQuery(solrQuery);
         return solrQuery;
     }
 
@@ -30,8 +30,8 @@ public class SolrQueryConversion {
             expression += "/";
         }
         System.out.println(expression);
-        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperty("content") + ":" + expression);
-        SolrStandardConfigurator.configureSolrQuery(solrQuery);
+        SolrQuery solrQuery = new SolrQuery(SolrConfiguration.getInstance().getFieldProperty("content") + ":" + expression);
+        SolrConfiguration.getInstance().configureSolrQuery(solrQuery);
         return solrQuery;
     }
 

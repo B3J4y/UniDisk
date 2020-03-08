@@ -21,53 +21,51 @@ import java.util.Map;
 
 public class SolrConfiguration {
 
-    private static SolrConfiguration configuration;
-    static private final Logger logger = LogManager.getLogger(SolrConfiguration.class.getName());
-
-    public static SolrConfiguration Instance(){
-        if(configuration == null)
-            configuration = new SolrConfiguration();
-        return configuration;
-    }
     private static Map<String, String> fieldProperties;
 
-    private static final String configJsonPath ="solr-config.json";
+    String server;
+    int port;
+    int rowLimit;
+    String core;
 
-    private SolrConfig config;
-
-    private SolrConfiguration() {
-        /*try {
-            InputStream is = FacesContext.getCurrentInstance().getExternalContext().getResourceAsStream("solr-config.json");
-
-            String content = CharStreams.toString(new InputStreamReader(
-                    is, Charsets.UTF_8));
-            final Gson gson = new Gson();
-            final SolrConfig config = gson.fromJson(content, SolrConfig.class);
-            this.config = config;
-        }catch (Exception e){
-            logger.error("Unable to read solr config file.");
-            SetupDefault();
-        }*/
-        SetupDefault();
-        logger.info("Solr configuration: \n" + this.config.toString());
+    public SolrConfiguration(String server, int port, int rowLimit, String core) {
+        this.server = server;
+        this.port = port;
+        this.rowLimit = rowLimit;
+        this.core = core;
     }
 
-    private void SetupDefault(){
-        logger.info("Setting up default solr configuration.");
-        this.config = Default();
+    public static SolrConfiguration getInstance(){
+        return SystemConfiguration.getInstance().getSolrConfiguration();
     }
 
-    private SolrConfig Default(){
-
-        return new SolrConfig(
-                "localhost",
-                8984,
-                10000,
-                "unidisc"
-        );
+    public String getServer() {
+        return server;
     }
 
-    public static String[] getStandardFields() {
+    public int getPort() {
+        return port;
+    }
+
+    public int getRowLimit() {
+        return rowLimit;
+    }
+
+    public String getCore() {
+        return core;
+    }
+
+    @Override
+    public String toString() {
+        return "SolrConfig{" +
+                "server='" + server + '\'' +
+                ", port=" + port +
+                ", rowLimit=" + rowLimit +
+                ", core='" + core + '\'' +
+                '}';
+    }
+
+    public String[] getStandardFields() {
         return new String[]{getFieldProperty("id"),
                 getFieldProperty("title"),
                 getFieldProperty("date"),
@@ -75,12 +73,8 @@ public class SolrConfiguration {
         };
     }
 
-    public static String getTestUrl() {
-        final SolrConfiguration config = SolrConfiguration.Instance();
-        return "http://" + config.getServer() + ":" + config.getPort() + "/solr/" + config.getCore();
-    }
 
-    public static String getFieldProperty(String field) {
+    public String getFieldProperty(String field) {
         if (fieldProperties == null) {
             fieldProperties = new HashMap<>();
             fieldProperties.put("id", "id");
@@ -92,75 +86,15 @@ public class SolrConfiguration {
         return fieldProperties.get(field);
     }
 
-    public static void configureSolrQuery(SolrQuery query) throws IOException {
-        final SolrConfiguration config = SolrConfiguration.Instance();
+    public void configureSolrQuery(SolrQuery query)  {
         query.set("indent", "true");
-        query.set("rows", config.getRowLimit());
+        query.set("rows", getRowLimit());
         query.setFields(getStandardFields());
         query.set("wt", "json");
     }
 
-    public String getServer(){
-        return this.config.getServer();
-    }
-
-    public String getCore(){
-        return this.config.getCore();
-    }
-
-    public int getPort() {
-        return this.config.getPort();
-    }
-
-    public int getRowLimit() {
-        return this.config.getRowLimit();
-    }
-
     public String getUrl(){
-        return "http://" + config.getServer() + ":" + config.getPort() + "/solr/" + config.getCore();
+        return "http://" + getServer() + ":" + getPort() + "/solr/" + getCore();
     }
 
-    private class SolrConfig{
-        String server;
-        int port;
-        int rowLimit;
-        String core;
-
-        public SolrConfig(String server, int port, int rowLimit, String core) {
-            this.server = server;
-            this.port = port;
-            this.rowLimit = rowLimit;
-            this.core = core;
-        }
-
-
-        public SolrConfig() {
-        }
-
-        public String getServer() {
-            return server;
-        }
-
-        public int getPort() {
-            return port;
-        }
-
-        public int getRowLimit() {
-            return rowLimit;
-        }
-
-        public String getCore() {
-            return core;
-        }
-
-        @Override
-        public String toString() {
-            return "SolrConfig{" +
-                    "server='" + server + '\'' +
-                    ", port=" + port +
-                    ", rowLimit=" + rowLimit +
-                    ", core='" + core + '\'' +
-                    '}';
-        }
-    }
 }

@@ -35,7 +35,7 @@ public class SolrScoringServiceTest {
 
     @Test
     public void canGetKeywordScores() throws IOException, SolrServerException {
-        final String solrUrl = SolrConfiguration.getTestUrl();
+        final String solrUrl = SolrConfiguration.getInstance().getUrl();
         final SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(solrUrl);
         final Keyword keyword = new Keyword(
                 "randomkeywordstringstuff",
@@ -47,7 +47,7 @@ public class SolrScoringServiceTest {
         final SolrScoringService scoringService = new SolrScoringService(
                 keywordRepository,
                 topicRepository,
-                SolrConfiguration.Instance()
+                SolrConfiguration.getInstance()
         );
         final List<ScoreResult> results = scoringService.getKeywordScore(0,keyword.getId());
         assertNotNull(results);
@@ -56,7 +56,7 @@ public class SolrScoringServiceTest {
 
     @Test
     public void canGetTopicScore() throws IOException, SolrServerException {
-        final String solrUrl = SolrConfiguration.getTestUrl();
+        final String solrUrl = SolrConfiguration.getInstance().getUrl();
         final SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(solrUrl);
         final Topic topic = new Topic(
                 "randomtopicstringstuff",
@@ -68,7 +68,7 @@ public class SolrScoringServiceTest {
         final SolrScoringService scoringService = new SolrScoringService(
                 keywordRepository,
                 topicRepository,
-                SolrConfiguration.Instance()
+                SolrConfiguration.getInstance()
         );
         final ScoreResult result = scoringService.getTopicScore(0,optionalTopic.get().getId());
         assertNotNull(result);
