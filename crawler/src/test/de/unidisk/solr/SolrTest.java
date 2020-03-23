@@ -6,17 +6,24 @@ import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.services.IResultService;
 import de.unidisk.contracts.services.IScoringService;
+import de.unidisk.crawler.datatype.SolrStichwort;
 import de.unidisk.crawler.datatype.Stichwort;
 import de.unidisk.crawler.datatype.Variable;
+import de.unidisk.crawler.model.CrawlDocument;
+import de.unidisk.crawler.model.ScoreResult;
+import de.unidisk.crawler.simple.SimpleSolarSystem;
 import de.unidisk.dao.HibernateTestSetup;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.*;
+import de.unidisk.entities.solr.SolrDocument;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
 import de.unidisk.services.HibernateResultService;
 import de.unidisk.solr.nlp.datatype.RegExpStichwort;
 import de.unidisk.solr.services.SolrScoringService;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -56,6 +64,51 @@ public class SolrTest {
     }
 
 
+    @Test
+    public void canParseCrawlDocument() throws IOException, SolrServerException {
+        final CrawlDocument document = new CrawlDocument(
+                String.valueOf(System.currentTimeMillis()),
+                "https://www.google.com",
+                "test",
+       "inhalt",
+                3,
+                System.currentTimeMillis(),
+        1
+        );
+        final SolrConfiguration solrConfiguration = SolrConfiguration.getInstance();
+        final SimpleSolarSystem solarSystem = new SimpleSolarSystem(solrConfiguration.getUrl());
+        solarSystem.sendPageToTheMoon(document);
+        final SolrConnector solrConnector = new SolrConnector(solrConfiguration);
+        final List<org.apache.solr.common.SolrDocument> docs = getKeyDocs(solrConnector, "inhalt");
+        assertTrue(docs.size() > 0);
+
+        final List<ScoreResult> results = docs.stream().map(d -> {
+            final CrawlDocument crawlDocument = new CrawlDocument(d);
+            final int universityId = crawlDocument.universityId;
+            return new ScoreResult(
+                    0,
+                    (float) d.get("score"),
+                    universityId,
+                    crawlDocument.datum,
+                    crawlDocument.url
+            );
+        }).collect(Collectors.toList());
+        assertTrue(true);
+    }
+
+    private List<org.apache.solr.common.SolrDocument> getKeyDocs(SolrConnector connector, String key) throws IOException, SolrServerException {
+        QueryResponse response = connector.query(new SolrStichwort(key).buildQuery(new ArrayList<>()));
+        SolrDocumentList solrList = response.getResults();
+
+        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConfiguration.getInstance().getRowLimit());
+        ArrayList<org.apache.solr.common.SolrDocument> documents = new ArrayList<>();
+        for (int i = 0; i < sizeOfStichwortResult; i++) {
+            org.apache.solr.common.SolrDocument doc = solrList.get(i);
+
+            documents.add(doc);
+        }
+        return documents;
+    }
     @Test
     public void solrAppTest(){
         final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(), new HibernateTopicRepo(), SolrConfiguration.getInstance());

@@ -187,11 +187,6 @@ public class ProjectDAO  implements IProjectRepository {
         return project;
     }
 
-    private Result mapKeywordScoreToResult(KeyWordScore r){
-        return new Result(r.getUniName(),r.getScore(),r.getId());
-    }
-
-
     public List<Result> getResults(String projectId)
     {
         int pId = Integer.parseInt(projectId);
@@ -200,12 +195,15 @@ public class ProjectDAO  implements IProjectRepository {
         if (!transaction.isActive()) {
             transaction.begin();
         }
-       List<KeyWordScore> scores = currentSession.createQuery("select kScore from KeyWordScore kScore where kScore.keyword.topicId in " +
-                "(select t.id from Topic t where t.projectId = :pId)", KeyWordScore.class)
+
+
+
+       List<Result> scores = currentSession.createQuery("select new de.unidisk.view.results.Result(t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
+               " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
                 .setParameter("pId",pId).list();
         transaction.commit();
         currentSession.close();
-        return scores.stream().map(this::mapKeywordScoreToResult).collect(Collectors.toList());
+        return scores;
     }
 
     @Override

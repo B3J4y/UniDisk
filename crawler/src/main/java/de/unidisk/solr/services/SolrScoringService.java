@@ -14,6 +14,7 @@ import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.TopicScore;
 import de.unidisk.entities.hibernate.University;
 import de.unidisk.solr.SolrConnector;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -78,7 +79,7 @@ public class SolrScoringService implements IScoringService {
                     s.getId(),
                     s.getScore(),
                     s.getSearchMetaData().getUniversity().getId(),
-                    s.getSearchMetaData().getTimestamp(),
+                    0,
                     s.getSearchMetaData().getUrl()
             )
         ).collect(Collectors.toList());
@@ -86,7 +87,8 @@ public class SolrScoringService implements IScoringService {
     }
 
     private List<SolrDocument> getKeyDocs(SolrConnector connector, String key) throws IOException, SolrServerException {
-        QueryResponse response = connector.query(new SolrStichwort(key).buildQuery(new ArrayList<>()));
+        final SolrQuery query =new SolrStichwort(key).buildQuery(new ArrayList<>());
+        QueryResponse response = connector.query(query);
         SolrDocumentList solrList = response.getResults();
 
         int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConfiguration.getInstance().getRowLimit());
