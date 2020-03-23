@@ -20,6 +20,13 @@ public class SearchMetaData {
 
     }
 
+
+    public SearchMetaData(String url, University university, Long timestamp) {
+        this.url = url;
+        this.university = university;
+        this.timestamp = timestamp;
+    }
+
     public SearchMetaData(String url, Long timestamp) {
         this.url = url;
 

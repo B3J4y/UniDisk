@@ -14,6 +14,7 @@ import javax.faces.bean.ViewScoped;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -88,5 +89,30 @@ public class ProjectTable implements Serializable {
 
     public List<ProjectView> getProjectOfState(ProjectState state){
         return projects.stream().filter(p -> p.getStatus() == state).collect(Collectors.toList());
+    }
+
+    public void setWaiting(int projectId){
+        try{
+            new ProjectDAO().updateProjectState(projectId, ProjectState.WAITING);
+
+            updateProjectState(projectId, ProjectState.WAITING);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private void updateProjectState(int projectId, ProjectState state){
+        final Optional<ProjectView> p = this.projects.stream().filter((project) -> project.getId().equals(String.valueOf(projectId))).findFirst();
+        if(!p.isPresent())
+            return;
+        p.get().setStatus(state);
+    }
+    public void setIdle(int projectId){
+        try{
+            new ProjectDAO().updateProjectState(projectId, ProjectState.IDLE);
+            updateProjectState(projectId, ProjectState.IDLE);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }

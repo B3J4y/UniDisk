@@ -12,11 +12,15 @@ public class ProjectView implements Serializable {
     private String name;
     private ProjectState status;
     private String id;
+    private boolean canEdit;
+    private boolean canSetToIdle;
 
     public ProjectView(String name, ProjectState status, String id) {
         this.name = name;
         this.status = status;
         this.id = id;
+        this.canEdit = status == ProjectState.IDLE;
+        this.canSetToIdle = status == ProjectState.WAITING;
     }
 
     public static ProjectView fromProject(Project p){
@@ -63,5 +67,14 @@ public class ProjectView implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(getName());
+    }
+
+
+    public boolean getCanEdit() {
+        return canEdit;
+    }
+
+    public boolean isCanSetToIdle() {
+        return canSetToIdle;
     }
 }

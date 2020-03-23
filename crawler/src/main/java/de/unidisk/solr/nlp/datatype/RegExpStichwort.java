@@ -1,6 +1,6 @@
 package de.unidisk.solr.nlp.datatype;
 
-import de.unidisk.common.StichwortModifier;
+import de.unidisk.solr.nlp.basics.StichwortModifier;
 import de.unidisk.crawler.datatype.AbstractStichwort;
 
 import java.util.List;

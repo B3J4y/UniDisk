@@ -12,7 +12,11 @@ public interface ScoredInput {
     Input getInput();
 
     default String getUniName() {
-        return getSearchMetaData().getUniversity().getName();
+        final SearchMetaData searchMetaData = getSearchMetaData();
+        if(searchMetaData == null)
+                return null;
+
+        return searchMetaData.getUniversity().getName();
     }
 
 

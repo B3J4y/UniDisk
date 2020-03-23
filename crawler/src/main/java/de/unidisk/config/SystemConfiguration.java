@@ -11,35 +11,25 @@ import java.util.Properties;
  */
 public class SystemConfiguration {
   private static SystemConfiguration systemConfiguration;
-  private Properties properties;
-  private String[] possiblePaths = new String[]{
-          "/development/UniDisk/crawler/src/main/webapp/WEB-INF/classes/unidisk_productive.properties"};
   private String versionedFile = "unidisk.properties";
-
   private CrawlerConfiguration crawlerConfiguration;
   private SolrConfiguration solrConfiguration;
   private DatabaseConfiguration databaseConfiguration;
 
   private boolean production;
+  private long scoringInterval;
 
   protected SystemConfiguration() throws IOException {
-    properties = new Properties();
+    Properties properties = new Properties();
     InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(versionedFile);
-    for (int i = 0; i < possiblePaths.length; i++) {
-      if (resourceAsStream != null) {
-        break;
-      }
-      resourceAsStream = new FileInputStream(new File(possiblePaths[i]));
-    }
     properties.load(resourceAsStream);
 
     crawlerConfiguration = crawlConfigurationFromProperties(properties);
     solrConfiguration = solrConfigurationFromProperties(properties);
     databaseConfiguration = databaseConfigurationFromProperties(properties);
     production = properties.getProperty("environment.production").equals("1");
-
+    scoringInterval = Long.parseLong(properties.getProperty("scoring.interval"));
   }
-
 
   private static SolrConfiguration solrConfigurationFromProperties(Properties properties){
     final String prefix = "solr.";
@@ -63,10 +53,14 @@ public class SystemConfiguration {
     final String storageLocation = properties.getProperty(prefix+"storageLocation");
     final int maxDepth = Integer.parseInt(properties.getProperty(prefix+"maxDepth"));
     final int maxVisits = Integer.parseInt(properties.getProperty(prefix+"maxSeedVisits"));
+    final long uniCrawlInterval = Long.parseLong(properties.getProperty(prefix+"uni.interval"));
+    final long crawlInterval = Long.parseLong(properties.getProperty(prefix+"interval"));
     return new CrawlerConfiguration(
             storageLocation,
             maxDepth,
-            maxVisits
+            maxVisits,
+            uniCrawlInterval,
+            crawlInterval
     );
   }
 
@@ -107,5 +101,9 @@ public class SystemConfiguration {
 
   public boolean isProduction() {
     return production;
+  }
+
+  public long getScoringInterval() {
+    return scoringInterval;
   }
 }

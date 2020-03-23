@@ -10,6 +10,11 @@ public class MapMarker {
 
     String iconUrl;
 
+    public MapMarker(String topicName, int topicId) {
+        this.topicName = topicName;
+        this.topicId = topicId;
+    }
+
     public MapMarker(String topicName, int topicId, University university) {
         this.topicName = topicName;
         this.topicId = topicId;

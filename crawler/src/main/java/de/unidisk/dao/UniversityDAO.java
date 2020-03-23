@@ -69,4 +69,36 @@ public class UniversityDAO {
         currentSession.close();
         return universities;
     }
+
+    public List<University> getAll(long lastCrawl) {
+        Session currentSession = HibernateUtil.getSessionFactory().openSession();
+        Transaction tnx = currentSession.beginTransaction();
+
+        List<University> universities = currentSession.createQuery("select u from University u where abs(u.lastCrawl - :current ) > :period ", University.class)
+                .setParameter("period",lastCrawl)
+                .setParameter("current", System.currentTimeMillis())
+                .getResultList();
+        currentSession.close();
+        return universities;
+    }
+
+    public void setLastCrawl(int universityId, long timestamp){
+        final Optional<University> uni = get(universityId);
+        if(!uni.isPresent()){
+            return;
+        }
+
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+        final University u = uni.get();
+        u.setLastCrawl(timestamp);
+
+        currentSession.update(u);
+        transaction.commit();
+        currentSession.close();
+
+    }
 }

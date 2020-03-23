@@ -17,15 +17,13 @@ public class MockData {
 
     public static List<University> getMockUniversities(){
         return Arrays.asList(
-            new University("Universität Potsdam",52.4010314,13.0097211),
-                new University("TU Berlin",52.5125322,13.3247559),
-                new University("FH Potsdam", 52.4132004,13.0483612)
+            new University("Universität Potsdam",52.4010314,13.0097211,"https://www.uni-potsdam.de"),
+                new University("TU Berlin",52.5125322,13.3247559,"https://www.tu-berlin.de/menue/home"),
+                new University("FH Potsdam", 52.4132004,13.0483612,"https://www.fh-potsdam.de")
         );
     }
 
     public static List<Project> getMockProjects(){
-        final ArrayList<Project> project = new ArrayList<Project>();
-
         final Project p1 = new Project("E-Learning VR", ProjectState.RUNNING,
                 Arrays.asList(
                     new Topic(

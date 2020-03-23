@@ -19,7 +19,17 @@ public class HibernateUniversityRepo implements IUniversityRepository {
     }
 
     @Override
+    public List<University> getUniversities(long timeSinceLastCrawl) {
+        return new UniversityDAO().getAll(timeSinceLastCrawl);
+    }
+
+    @Override
     public Optional<University> getUniversity(int id) {
         return new UniversityDAO().get(id);
+    }
+
+    @Override
+    public void setLastCrawlTime(int universityId, long timestamp) {
+        new UniversityDAO().setLastCrawl(universityId,timestamp);
     }
 }

@@ -1,4 +1,4 @@
-package de.unidisk.common;
+package de.unidisk.solr.nlp.basics;
 
 /**
  * Created by carl on 21.03.17.

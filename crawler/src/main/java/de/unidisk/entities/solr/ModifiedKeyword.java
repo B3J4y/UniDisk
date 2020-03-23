@@ -1,6 +1,6 @@
 package de.unidisk.entities.solr;
 
-import de.unidisk.common.StichwortModifier;
+import de.unidisk.solr.nlp.basics.StichwortModifier;
 
 import java.util.List;
 

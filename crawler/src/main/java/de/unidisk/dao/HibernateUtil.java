@@ -1,5 +1,6 @@
 package de.unidisk.dao;
 
+import de.unidisk.config.SystemConfiguration;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -18,7 +19,7 @@ public class HibernateUtil {
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             Configuration config = new Configuration();
-            sessionFactory = config.configure(HibernateUtil.config).buildSessionFactory();
+            sessionFactory = config.configure(SystemConfiguration.getInstance().getDatabaseConfiguration().getConfigFile()).buildSessionFactory();
         }
         return sessionFactory;
     }

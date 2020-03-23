@@ -22,6 +22,12 @@ public class TopicScore implements ScoredInput {
     public TopicScore() {
     }
 
+    public TopicScore(SearchMetaData searchMetaData, Topic topic, double score) {
+        this.searchMetaData = searchMetaData;
+        this.topic = topic;
+        this.score = score;
+    }
+
     public TopicScore(Topic topic) {
         this.topic = topic;
     }

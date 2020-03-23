@@ -8,5 +8,5 @@ public interface IScoringService {
 
     List<ScoreResult> getKeywordScore(int projectId, int keywordId);
 
-    ScoreResult getTopicScore(int projectId, int topicId);
+    List<ScoreResult> getTopicScores(int projectId, int topicId);
 }

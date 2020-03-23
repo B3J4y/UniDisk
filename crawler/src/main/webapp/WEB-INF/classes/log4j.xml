@@ -37,9 +37,11 @@
     </logger>
 
     <logger name="org.hibernate">
-        <level value="info"/>
+        <level value="error"/>
     </logger>
-
+    <logger name="org.hibernate.sql">
+        <level value="error"/>
+    </logger>
     <root>
         <appender-ref ref="rootFileAppender"/>
     </root>

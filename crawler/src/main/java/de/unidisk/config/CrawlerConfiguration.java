@@ -7,11 +7,16 @@ public class CrawlerConfiguration {
     private String storageLocation;
     private int maxDepth;
     private int maxVisits;
+    private long uniCrawlInterval;
+    private long crawlInterval;
 
-    public CrawlerConfiguration(String storageLocation, int maxDepth, int maxVisits) {
+
+    public CrawlerConfiguration(String storageLocation, int maxDepth, int maxVisits, long uniCrawlInterval, long crawlInterval) {
         this.storageLocation = storageLocation;
         this.maxDepth = maxDepth;
         this.maxVisits = maxVisits;
+        this.uniCrawlInterval = uniCrawlInterval;
+        this.crawlInterval = crawlInterval;
     }
 
     public String getStorageLocation() {
@@ -24,5 +29,13 @@ public class CrawlerConfiguration {
 
     public int getMaxVisits() {
         return maxVisits;
+    }
+
+    public long getUniCrawlInterval() {
+        return uniCrawlInterval;
+    }
+
+    public long getCrawlInterval() {
+        return crawlInterval;
     }
 }

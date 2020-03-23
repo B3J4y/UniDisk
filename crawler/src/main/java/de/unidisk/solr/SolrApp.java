@@ -19,6 +19,7 @@ import de.unidisk.services.HibernateResultService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.util.List;
@@ -39,10 +40,6 @@ public class SolrApp {
         this.resultService = resultService;
     }
 
-    private String projectLockFileName(Project p){
-        return p.getId()+"_lock.unidisc";
-    }
-
     public void execute() throws Exception {
 
         final List<Project> pendingProjects = projectRepository.getProjects(ProjectState.WAITING);
@@ -53,23 +50,11 @@ public class SolrApp {
         }
 
         for(Project p : pendingProjects) {
-            final String lockFile = projectLockFileName(p);
-
-            FileInputStream in = new FileInputStream(lockFile);
-            java.nio.channels.FileLock lock = null;
-            try {
-                lock = in.getChannel().lock();
-            }catch(Exception e){
-                logger.error("Unable to lock project file.");
-                logger.error(e);
-                continue;
-            }
-
-            logger.info("Start processing project: " + p.getName());
+            logger.info("Start processing project " + p.getName() + " .");
             projectRepository.updateProjectState(p.getId(), ProjectState.RUNNING);
 
             logger.debug("Entering main");
-            logger.info("Read out csv or mysql");
+
             try {
 
                 final List<Topic> topics = p.getTopics();
@@ -77,6 +62,7 @@ public class SolrApp {
                     for(Keyword keyword : t.getKeywords()){
                         final List<ScoreResult> scores = this.scoringService.getKeywordScore(p.getId(),keyword.getId());
                         scores.forEach(score -> {
+                            logger.info("Keyword " + String.valueOf(score.getEntityId()) + ": " + String.valueOf(score.getScore()));
                             try {
                                 this.resultService.CreateKeywordScore(score);
                             } catch (EntityNotFoundException | MalformedURLException e) {
@@ -84,24 +70,33 @@ public class SolrApp {
                             }
                         });
                     }
-                    final ScoreResult topicScore = this.scoringService.getTopicScore(p.getId(), t.getId());
-                    this.resultService.CreateTopicScore(topicScore);
+                    final List<ScoreResult> topicScores = this.scoringService.getTopicScores(p.getId(), t.getId());
+                    topicScores.forEach(score -> {
+                        try {
+                            this.resultService.CreateTopicScore(score);
+                        } catch (EntityNotFoundException | MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                    });
                 }
+                logger.info("finished processing project " + p.getName() + " .");
                 projectRepository.updateProjectState(p.getId(),ProjectState.FINISHED);
             } catch (Exception e) {
+                logger.error("Error occured while processing project " + p.getName() + " .");
                 logger.error(e);
 
                 projectRepository.updateProjectState(p.getId(),ProjectState.ERROR);
-                e.getStackTrace();
 
-            }finally{
-                lock.close();
+                e.printStackTrace();
+
             }
         }
 
     }
     public static void main(String[] args) throws Exception {
-        final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(), new HibernateTopicRepo(), SolrConfiguration.getInstance());
+        final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(),
+                new HibernateTopicRepo(),
+                SolrConfiguration.getInstance());
         final IProjectRepository projectRepository = new ProjectDAO();
         final IResultService resultService = new HibernateResultService();
 

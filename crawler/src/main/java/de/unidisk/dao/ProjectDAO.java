@@ -216,7 +216,9 @@ public class ProjectDAO  implements IProjectRepository {
         if (!transaction.isActive()) {
             transaction.begin();
         }
-        List<MapMarker> scores = currentSession.createQuery("select new de.unidisk.view.model.MapMarker(tScore.topic.name,tScore.topic.id, tScore.searchMetaData.university) from TopicScore tScore where tScore.topic.projectId = :pId")
+        List<MapMarker> scores = currentSession.createQuery("select new de.unidisk.view.model.MapMarker(tScore.topic.name,tScore.topic.id) " +
+                "from TopicScore tScore where tScore.topic.projectId = :pId")
+
                 .setParameter("pId",pId).list();
 
         transaction.commit();

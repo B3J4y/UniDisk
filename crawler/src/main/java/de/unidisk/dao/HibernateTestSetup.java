@@ -1,7 +1,8 @@
-package de.unidisk.entities.hibernate;
+package de.unidisk.dao;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.dao.*;
+import de.unidisk.entities.hibernate.*;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.net.MalformedURLException;

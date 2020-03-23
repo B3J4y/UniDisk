@@ -6,10 +6,14 @@ import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.contracts.services.IResultService;
 
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
+@ManagedBean(name = "resultService")
+@ApplicationScoped
 public class HibernateResultService implements IResultService {
 
     @Override

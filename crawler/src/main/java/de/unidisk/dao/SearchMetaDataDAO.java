@@ -15,7 +15,7 @@ public class SearchMetaDataDAO {
     public SearchMetaData createMetaData(URL url, int universityId, Long timestamp) {
         final Optional<University> university = new UniversityDAO().get(universityId);
         if(!university.isPresent())
-            throw new IllegalArgumentException("University doesn't exists");
+            throw new IllegalArgumentException("University " + String.valueOf(universityId) + "  doesn't exist");
 
 
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();

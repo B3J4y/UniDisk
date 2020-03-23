@@ -32,6 +32,8 @@ public class SimpleCrawl implements ICrawler {
     private String[] whiteList;
     private String solrUrl;
     private int maxVisitsPerSeed;
+    private IProgressListener ProgessListener;
+
 
     public SimpleCrawl(String storageLocation, UniversitySeed[] seedList, String[] whiteList, String solrUrl, int maxVisitsPerSeed){
         this.storageLocation = storageLocation;
@@ -52,7 +54,7 @@ public class SimpleCrawl implements ICrawler {
     public SimpleCrawl(String storageLocation, UniversitySeed[] seeds, String solrUrl, int maxVisitsPerSeed){
         this.storageLocation = storageLocation;
         this.seedList = seeds;
-        this.whiteList = (String[]) Arrays.stream(seeds).map(UniversitySeed::getSeedUrl).toArray();
+        this.whiteList = Arrays.stream(seeds).map(UniversitySeed::getSeedUrl).toArray(String[]::new);
         this.solrUrl = solrUrl;
         this.maxVisitsPerSeed = maxVisitsPerSeed;
     }
@@ -72,10 +74,11 @@ public class SimpleCrawl implements ICrawler {
         int numberOfCrawlers = 1;
 
         CrawlConfig config = new CrawlConfig();
-        config.setCrawlStorageFolder(crawlStorageFolder);
 
+        config.setCrawlStorageFolder(crawlStorageFolder);
         // Instantiate the controller for this crawl.
         PageFetcher pageFetcher = new PageFetcher(config);
+
         RobotstxtConfig robotstxtConfig = new RobotstxtConfig();
         RobotstxtServer robotstxtServer = new RobotstxtServer(robotstxtConfig, pageFetcher);
         if (!isParallel) {
@@ -101,7 +104,6 @@ public class SimpleCrawl implements ICrawler {
             CrawlController.WebCrawlerFactory<UniversityCrawler> factory = CreateCrawler(seed);
             controllerTemp.start(factory, numberOfCrawlers);
         }
-
     }
 
     private CrawlController.WebCrawlerFactory<UniversityCrawler> CreateCrawler(UniversitySeed seed){
@@ -120,12 +122,6 @@ public class SimpleCrawl implements ICrawler {
         String html = htmlParseData.getHtml();
         String safe = Jsoup.clean(html, Whitelist.basic());
         Set<WebURL> links = htmlParseData.getOutgoingUrls();
-
-        System.out.println("---------------------------------------------------------");
-        System.out.println("Text length: " + safe.length());
-        System.out.println("Html length: " + html.length());
-        System.out.println("Number of outgoing links: " + links.size());
-        System.out.println("---------------------------------------------------------");
 
         final String url = page.getWebURL().toString();
         final String documentId = String.valueOf(url.hashCode());
@@ -151,6 +147,8 @@ public class SimpleCrawl implements ICrawler {
          for (UniversitySeed s : seedList) {
              logger.info("STARTING crawl with seed: "+ s);
              startCrawl(s.getSeedUrl());
+             if(ProgessListener !=null)
+                 ProgessListener.onSeedFinished(s);
              logger.info("FINISHED crawl with seed: "+ s);
          }
      }
@@ -163,6 +161,8 @@ public class SimpleCrawl implements ICrawler {
                  logger.info("STARTING crawl with seed: "+ s);
                  try {
                      startCrawl(s, true);
+                     if(ProgessListener !=null)
+                         ProgessListener.onSeedFinished(s);
                  } catch (Exception e) {
                      logger.error(e);
                  }
@@ -181,7 +181,13 @@ public class SimpleCrawl implements ICrawler {
         }
     }
 
+    public void setProgessListener(IProgressListener ProgessListener) {
+        this.ProgessListener = ProgessListener;
+    }
 
+    public interface IProgressListener {
 
+        void onSeedFinished(UniversitySeed seed);
+    }
 
 }

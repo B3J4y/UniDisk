@@ -38,32 +38,6 @@ public class SolrConnector {
         logger.debug("Leaving SolrConnector Constructor");
     }
 
-    public QueryResponse connectToSolr(String query) throws IOException, SolrServerException {
-        //TODO Hacky exception
-        if (! query.matches("\\*")) {
-            logger.info("Match");
-            query = "\"" + query + "\"";
-        }
-        logger.debug("Entering connectToSolr with query:" + query);
-        SolrQuery solrQuery = new SolrQuery("content:" + query);
-        solrQuery.set("indent", "true");
-        solrQuery.set("rows", limit);
-        solrQuery.setFields("id", "content", "title", "score", "url", "pageDepth");
-        solrQuery.set("wt", "json");
-        if (query.toLowerCase().matches("forsch[a-z]* lern[a-z]*") || query.toLowerCase().matches("entdeckend[a-z]* lern[a-z]*")) {
-            solrQuery.set("defType", "edismax");
-            solrQuery.set("qs", "10");
-        }
-
-        QueryResponse response = client.query(solrQuery);
-        SolrDocumentList docs = response.getResults();
-        logger.info("Quantitiv Result from " + query + ":" + docs.getNumFound());
-        if (docs.getNumFound() > limit) {
-            logger.warn("Limit Exceeded. Found more Docs in solr than queried. Increase the limit if you want to get more Docs");
-        }
-        logger.debug("Leaving connectToSolr");
-        return response;
-    }
 
     public QueryResponse query(SolrQuery query) throws IOException, SolrServerException {
         QueryResponse response = client.query(query);
@@ -73,39 +47,5 @@ public class SolrConnector {
             logger.warn("Limit Exceeded. Found more Docs in solr than queried. Increase the limit if you want to get more Docs");
         }
         return response;
-    }
-
-    public QueryResponse queryAllDocuments() throws IOException, SolrServerException {
-        SolrQuery solrQuery = new SolrQuery("*:*");
-        solrQuery.setRows(limit);
-        return client.query(solrQuery);
-    }
-
-    public void insertDocument(SolrInputDocument document) throws IOException, SolrServerException {
-        client.add(document);
-        client.commit();
-    }
-
-    public void insertDocuments(List<SolrInputDocument> documents) throws IOException, SolrServerException {
-        client.add(documents);
-        client.commit();
-    }
-
-    public void deleteDocument(SolrInputDocument document) throws IOException, SolrServerException {
-        client.deleteById(String.valueOf(document.get("id").getValue()));
-        client.commit();
-    }
-
-    public void deleteDocuments(SolrDocumentList documents) throws IOException, SolrServerException {
-        for (int i = 0; i < documents.getNumFound(); i++) {
-            SolrDocument document = documents.get(i);
-            String idIdentifier = SystemConfiguration.getInstance().getSolrConfiguration().getFieldProperty("id");
-            client.deleteById((String) document.getFieldValue(idIdentifier));
-        }
-        client.commit();
-    }
-
-    public String getServerUrl(){
-        return serverUrl;
     }
 }

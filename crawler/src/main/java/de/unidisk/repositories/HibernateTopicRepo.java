@@ -5,12 +5,15 @@ import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Topic;
 import de.unidisk.contracts.repositories.ITopicRepository;
+import de.unidisk.entities.hibernate.TopicScore;
 
+import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import java.util.List;
 import java.util.Optional;
 
-@ViewScoped
+@ApplicationScoped
 @ManagedBean(name = "topicRepository")
 public class HibernateTopicRepo implements ITopicRepository {
 
@@ -40,5 +43,15 @@ public class HibernateTopicRepo implements ITopicRepository {
     @Override
     public Optional<Topic> getTopic(int id) {
         return new TopicDAO().getTopic(id);
+    }
+
+    @Override
+    public List<TopicScore> getScores(int topicId) {
+        return new TopicDAO().getScoresFromKeywords(topicId);
+    }
+
+    @Override
+    public double getScore(int id) {
+        return new TopicDAO().getScore(id);
     }
 }

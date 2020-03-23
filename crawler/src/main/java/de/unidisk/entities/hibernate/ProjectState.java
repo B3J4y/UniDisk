@@ -5,6 +5,14 @@ public enum ProjectState {
     WAITING,
     RUNNING,
     FINISHED,
-    ERROR
+    ERROR;
+
+    public boolean isIdle(){
+        return IDLE.equals(this);
+    }
+
+    public boolean isWaiting(){
+        return WAITING.equals(this);
+    }
 }
 

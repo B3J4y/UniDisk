@@ -11,6 +11,7 @@ import de.unidisk.crawler.model.CrawlDocument;
 import de.unidisk.crawler.model.ScoreResult;
 
 import de.unidisk.entities.hibernate.Keyword;
+import de.unidisk.entities.hibernate.TopicScore;
 import de.unidisk.entities.hibernate.University;
 import de.unidisk.solr.SolrConnector;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -18,6 +19,8 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,15 +71,18 @@ public class SolrScoringService implements IScoringService {
 
 
     @Override
-    public ScoreResult getTopicScore(int projectId, int topicId) {
-        //TODO implement
-        return new ScoreResult(
-                topicId,
-                1,
-                0,
-                System.currentTimeMillis(),
-                ""
-        );
+    public List<ScoreResult> getTopicScores(int projectId, int topicId) {
+        final List<TopicScore> scores = topicRepository.getScores(topicId);
+        final List<ScoreResult> scoreResults = scores.stream().map(s ->
+             new ScoreResult(
+                    s.getId(),
+                    s.getScore(),
+                    s.getSearchMetaData().getUniversity().getId(),
+                    s.getSearchMetaData().getTimestamp(),
+                    s.getSearchMetaData().getUrl()
+            )
+        ).collect(Collectors.toList());
+        return scoreResults;
     }
 
     private List<SolrDocument> getKeyDocs(SolrConnector connector, String key) throws IOException, SolrServerException {

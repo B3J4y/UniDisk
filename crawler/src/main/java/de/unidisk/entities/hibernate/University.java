@@ -15,6 +15,10 @@ public class University {
     private double lng;
     private String seedUrl;
 
+    //in milliseconds
+    private long lastCrawl;
+
+
     public University() {
     }
 
@@ -22,10 +26,11 @@ public class University {
         this.name = name;
     }
 
-    public University(String name, double lat, double lng) {
+    public University(String name, double lat, double lng, String seedUrl) {
         this.name = name;
         this.lat = lat;
         this.lng = lng;
+        this.seedUrl = seedUrl;
     }
 
     public int getId() {
@@ -66,5 +71,13 @@ public class University {
 
     public void setSeedUrl(String seedUrl) {
         this.seedUrl = seedUrl;
+    }
+
+    public long getLastCrawl() {
+        return lastCrawl;
+    }
+
+    public void setLastCrawl(long lastCrawl) {
+        this.lastCrawl = lastCrawl;
     }
 }
