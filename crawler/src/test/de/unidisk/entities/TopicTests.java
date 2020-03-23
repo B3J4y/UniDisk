@@ -13,11 +13,10 @@ import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, ChildTests {
@@ -63,11 +62,13 @@ public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, Ch
         final Topic t = DataFactory.createTopic(1);
         final TopicDAO dao = new TopicDAO();
         final Topic dbTopic = dao.createTopic(t.getName(),parentProject.getId(),t.getKeywords().stream().map(Keyword::getName).collect(Collectors.toList()));
-
+        final KeywordDAO keywordDAO = new KeywordDAO();
 
         Assert.assertTrue(dbTopic.getKeywords().size() == 1);
         for (Keyword keyword : dbTopic.getKeywords()) {
             Assert.assertNotEquals(keyword.getId(),0);
+            assertTrue(keywordDAO.keywordExists(keyword.getId()));
+
         }
     }
 
@@ -144,5 +145,39 @@ public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, Ch
             return;
         }
         Assert.fail();
+    }
+
+    @Test
+    public void canGetTopicScoresFromKeywords(){
+
+    }
+
+    @Test
+    public void canGetTopicScore() throws MalformedURLException {
+        final Topic t = DataFactory.createTopic(2);
+        t.setProjectId(parentProject.getId());
+        final University u = new UniversityDAO().addUniversity(new University("UP",0,1,"https://www.google.com"));
+        final TopicDAO dao = new TopicDAO();
+        final Topic dbTopic = dao.createTopic(t.getName(), t.getProjectId(),t.getKeywords().stream().map(k -> k.getName()).collect(Collectors.toList()));
+
+        final Random random = new Random();
+        final Map<Integer,Double> keywordScoreMap = new HashMap<Integer,Double>();
+        dbTopic.getKeywords().forEach(k -> keywordScoreMap.put(k.getId(), random.nextDouble() * 10));
+
+        final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
+
+        final KeywordScoreDAO keywordScoreDAO = new KeywordScoreDAO();
+        double expectedScore = 0;
+        for(Map.Entry<Integer,Double> entry : keywordScoreMap.entrySet()){
+            final Keyword keyword = dbTopic.getKeywords().stream().filter(k -> k.getId() == entry.getKey()).findFirst().get();
+            final SearchMetaData searchMetaData = searchMetaDataDAO.createMetaData(new URL(u.getSeedUrl()), u.getId(), System.currentTimeMillis());
+            keywordScoreDAO.addScore(keyword, entry.getValue(),searchMetaData);
+            expectedScore += entry.getValue();
+        }
+        expectedScore = expectedScore/ keywordScoreMap.size();
+
+        final List<TopicScore> scores = dao.getScoresFromKeywords(dbTopic.getId());
+        assertEquals(1,scores.size());
+        assertEquals(expectedScore, scores.get(0).getScore());
     }
 }

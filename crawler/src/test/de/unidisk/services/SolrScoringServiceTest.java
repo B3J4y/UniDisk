@@ -70,7 +70,7 @@ public class SolrScoringServiceTest {
                 topicRepository,
                 SolrConfiguration.getInstance()
         );
-        final ScoreResult result = scoringService.getTopicScore(0,optionalTopic.get().getId());
+        final List<ScoreResult> result = scoringService.getTopicScores(0,optionalTopic.get().getId());
         assertNotNull(result);
 
     }

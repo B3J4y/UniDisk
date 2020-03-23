@@ -116,8 +116,8 @@ public class ProjectTest implements HibernateLifecycle, CRUDTest, ParentTests {
         final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
 
         final List<University> universities = Arrays.asList(
-            new University("1",1,1),
-                new University("2",2,2)
+            new University("1",1,1,""),
+                new University("2",2,2,"")
 
         );
 

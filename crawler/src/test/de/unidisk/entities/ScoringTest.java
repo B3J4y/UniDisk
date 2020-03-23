@@ -73,6 +73,6 @@ public class ScoringTest implements HibernateLifecycle {
         assertAll("Topic score is wrong",
                 () -> assertEquals(topic.getId(), scoredInput.getInput().getId()),
                 () -> assertEquals(.5, scoredInput.getScore()),
-                () -> assertEquals("Uni Potsdam", scoredInput.getUniName()));
+                () -> assertEquals(null, scoredInput.getUniName()));
     }
 }
