@@ -11,6 +11,7 @@ import org.primefaces.PrimeFaces;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +22,7 @@ public class ProjectResultTable {
 
     @ManagedProperty("#{projectRepository}")
     private IProjectRepository projectRepository;
-    private List<Result> results;
+    private List<Result> results = new ArrayList<>();
     private String projectId;
     private HashMap<Integer,String> topicIcons;
     private List<MapLegendItem> mapLegendItems;
@@ -29,39 +30,54 @@ public class ProjectResultTable {
 
     private boolean projectHasResults = false;
     private String projectStatusMessage;
+    private boolean projectExists = false;
+
+    private void setProjectNotExisting(){
+        results  = new ArrayList<>();
+        mapLegendItems = new ArrayList<>();
+        setupError = "Projekt existiert nicht.";
+        projectExists = false;
+    }
 
     public void load(String projectId){
         this.projectId = projectId;
-        results = projectRepository.getResults(this.projectId);
+
         topicIcons = new HashMap<Integer, String>();
+        if(projectId == null){
+            setProjectNotExisting();
+            return;
+        }
 
         final Project p = projectRepository.getProject(projectId);
 
         if(p == null){
-            setupError = "Projekt existiert nicht.";
+            setProjectNotExisting();
+            return;
         }
-        else {
-            projectHasResults = p.getProjectState() == ProjectState.FINISHED;
-            if(!projectHasResults){
-                if(p.getProjectState() == ProjectState.RUNNING){
-                    projectStatusMessage = "Das Projekt wird noch bearbeitet.";
-                }else if(p.getProjectState() == ProjectState.ERROR){
-                    projectStatusMessage = "Beim Bearbeiten des Projekts trat ein Fehler auf.";
-                }else if(p.getProjectState() == ProjectState.WAITING){
-                    projectStatusMessage = "Die Bearbeitung des Projekts steht noch aus.";
-                }
-            }else{
-                projectStatusMessage = null;
+
+        projectExists = true;
+        projectHasResults = p.getProjectState() == ProjectState.FINISHED;
+        if(!projectHasResults){
+            if(p.getProjectState() == ProjectState.RUNNING){
+                projectStatusMessage = "Das Projekt wird noch bearbeitet.";
+            }else if(p.getProjectState() == ProjectState.ERROR){
+                projectStatusMessage = "Beim Bearbeiten des Projekts trat ein Fehler auf.";
+            }else if(p.getProjectState() == ProjectState.WAITING){
+                projectStatusMessage = "Die Bearbeitung des Projekts steht noch aus.";
             }
-
-            mapLegendItems = p.getTopics().stream().map(t -> {
-                final String url = "https://img.icons8.com/material/4ac144/256/user-male.png";
-                topicIcons.put(t.getId(), url);
-                return new MapLegendItem(url, t.getName());
-            }).collect(Collectors.toList());
-
-            RefreshMap();
+        }else{
+            projectStatusMessage = null;
         }
+
+        results = projectRepository.getResults(this.projectId);
+        mapLegendItems = p.getTopics().stream().map(t -> {
+            final String url = "https://img.icons8.com/material/4ac144/256/user-male.png";
+            topicIcons.put(t.getId(), url);
+            return new MapLegendItem(url, t.getName());
+        }).collect(Collectors.toList());
+
+        RefreshMap();
+
     }
 
 
@@ -112,5 +128,9 @@ public class ProjectResultTable {
 
     public String getProjectStatusMessage() {
         return projectStatusMessage;
+    }
+
+    public boolean projectExists(){
+        return this.projectExists;
     }
 }
