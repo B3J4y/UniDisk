@@ -10,6 +10,9 @@ var maxScore = 0;
 var defaultLayer;
 var heatmapLayer;
 
+var lastResults = [];
+var visibleTopics = [];
+
 var currentZoom = initialZoom;
 
 function max(values) {
@@ -25,6 +28,8 @@ function getRndInteger(min, max) {
 }
 
 function generateRandom(count, maxDist, layers) {
+
+    //use for tests
     const testCount = 30;
 
     const features = [];
@@ -43,6 +48,17 @@ function generateRandom(count, maxDist, layers) {
     }
     const scores = features.map(f => parseInt(f.get("score")));
     maxScore = max(scores);
+}
+
+function toggleTopic(topicName){
+    const topicVisible = visibleTopics.includes(topicName);
+    if(topicVisible)
+        visibleTopics = visibleTopics.filter(t => t != topicName);
+    else
+        visibleTopics.push(topicName);
+    console.log(visibleTopics);
+    const newResults = lastResults.filter(r => visibleTopics.includes(r.topic));
+    setMapPoints(newResults);
 }
 
 function createFeature(lon, lat, score) {
@@ -71,20 +87,19 @@ let styleFunction = function(feature, resolution) {
     });
 };
 
+function setMapPoints(jsonMarker){
 
-function refreshMap(jsonMarker) {
-    console.log(jsonMarker);
     const marker = jsonMarker;
 
     const features = marker.map(m => {
         const lat = m.university.lat;
-        const lng = m.university.lng;
+    const lng = m.university.lng;
 
-        const score = m.score;
+    const score = m.score;
 
-        const feature = createFeature(lng, lat, score);
-        return feature;
-    });
+    const feature = createFeature(lng, lat, score);
+    return feature;
+});
 
     const scores = marker.map(m => m.score);
     maxScore = max(scores);
@@ -104,6 +119,13 @@ function refreshMap(jsonMarker) {
     oldFeatures.forEach(feature => layerSource.removeFeature(feature));
     features.forEach(f => layerSource.addFeature(f));
 });
+}
+
+function refreshMap(jsonMarker) {
+    console.log("Features",jsonMarker);
+    lastResults = jsonMarker;
+    visibleTopics = lastResults.map(r => r.topic);
+    setMapPoints(jsonMarker);
 }
 
 var PROJECTION_4326 = new ol.proj.Projection("EPSG:4326");

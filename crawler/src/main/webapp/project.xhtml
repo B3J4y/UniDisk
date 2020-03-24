@@ -110,12 +110,12 @@
                     <p:dataTable id="projectResultMapLegend"
                                  emptyMessage="Keine Stichwörter zugeordnet"
                                  var="item"
-                                 value="#{projectResultTable.mapLegendItems}" scrollable="false" scrollHeight="200">
+                                 value="#{projectResultTable.topics}" scrollable="false" scrollHeight="200">
 
 
                         <p:column headerText="Legende" >
-                            <p:graphicImage url="#{item.iconUrl}" style="width: 30px; height: 30px; margin-right: 16px;"/>
-                            <h:outputText value="#{item.name}" />
+                            <input type="checkbox" value="#{item}" checked="checked" onclick="toggleTopic('#{item}')" />
+                            <label>#{item}</label>
                         </p:column>
 
                     </p:dataTable>
