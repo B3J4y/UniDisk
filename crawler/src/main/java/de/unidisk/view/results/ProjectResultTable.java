@@ -82,14 +82,14 @@ public class ProjectResultTable {
 
 
     void RefreshMap(){
-        final List<MapMarker> marker = projectRepository.getMarker(this.projectId);
+        /*final List<MapMarker> marker = projectRepository.getMarker(this.projectId);
         marker.forEach(m -> {
             final String url = topicIcons.get(m.getTopicId());
 
             m.setIconUrl("https://img.icons8.com/material/4ac144/256/user-male.png");
-        });
+        });*/
         final Gson gson = new Gson();
-        String jsonMarker = gson.toJson(marker);
+        String jsonMarker = gson.toJson(results);
 
         PrimeFaces.current().executeScript("refreshMap("+jsonMarker+")");
     }
