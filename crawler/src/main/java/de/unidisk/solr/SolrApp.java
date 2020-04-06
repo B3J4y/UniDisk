@@ -52,7 +52,6 @@ public class SolrApp {
         for(Project p : pendingProjects) {
             logger.info("Start processing project " + p.getName() + " .");
             projectRepository.updateProjectState(p.getId(), ProjectState.RUNNING);
-
             logger.debug("Entering main");
 
             try {
@@ -81,12 +80,13 @@ public class SolrApp {
                 }
                 logger.info("finished processing project " + p.getName() + " .");
                 projectRepository.updateProjectState(p.getId(),ProjectState.FINISHED);
+
             } catch (Exception e) {
                 logger.error("Error occured while processing project " + p.getName() + " .");
                 logger.error(e);
 
                 projectRepository.updateProjectState(p.getId(),ProjectState.ERROR);
-
+                projectRepository.setProjectError(p.getId(), e.getMessage());
                 e.printStackTrace();
 
             }
