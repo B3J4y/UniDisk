@@ -54,7 +54,7 @@ public class SimpleCrawlTest {
      * @throws Exception
      */
     @Test
-    @DisabledIf("System.getenv(\"CI\") == '1'")
+    @Ignore
     public void shootTheMoon() throws Exception {
         final CrawlerConfiguration crawlerConfiguration = SystemConfiguration.getInstance().getCrawlerConfiguration();
         final UniversitySeed[] seeds = new UniversitySeed[]{

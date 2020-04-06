@@ -19,7 +19,6 @@ public interface IProjectRepository extends Serializable {
      * @return Project or null if none with id exists
      */
     Project getProject(String projectId);
-    List<KeywordItem> getProjectKeywords(String projectId);
 
     boolean deleteProject(String projectId);
     List<Result> getResults(String projectId);

@@ -92,6 +92,9 @@
                             </ui:include>
                         </div>
                     </h:panelGroup>
+
+                    <p>#{projectResultTable.project.processingError}</p>
+
                 </c:if>
                 <h:panelGroup id="resultWrapper" rendered="#{variablesView.view eq Views.Results }">
                     <ui:include src="project_results.xhtml" />

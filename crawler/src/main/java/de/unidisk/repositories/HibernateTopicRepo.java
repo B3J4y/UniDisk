@@ -1,5 +1,6 @@
 package de.unidisk.repositories;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.hibernate.Keyword;
@@ -16,7 +17,6 @@ import java.util.Optional;
 @ApplicationScoped
 @ManagedBean(name = "topicRepository")
 public class HibernateTopicRepo implements ITopicRepository {
-
 
     @Override
     public Topic createTopic(int projectId, String name) {
@@ -47,7 +47,12 @@ public class HibernateTopicRepo implements ITopicRepository {
 
     @Override
     public List<TopicScore> getScores(int topicId) {
-        return new TopicDAO().getScoresFromKeywords(topicId);
+        try {
+            return new TopicDAO().getScoresFromKeywords(topicId);
+        } catch (EntityNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override

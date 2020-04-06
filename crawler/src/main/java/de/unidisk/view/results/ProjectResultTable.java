@@ -29,6 +29,7 @@ public class ProjectResultTable {
     private HashMap<String,Boolean> vibisibilityMap = new HashMap<>();
 
     private String setupError;
+    private Project project;
 
     private boolean projectHasResults = false;
     private String projectStatusMessage;
@@ -51,7 +52,10 @@ public class ProjectResultTable {
         }
 
         final Project p = projectRepository.getProject(projectId);
-
+        this.project = p;
+        if(p.getProcessingError() !=null){
+            System.out.println(p.getProcessingError());
+        }
         if(p == null){
             setProjectNotExisting();
             return;
@@ -135,5 +139,9 @@ public class ProjectResultTable {
         if(vibisibilityMap.containsKey(name))
             return vibisibilityMap.get(name);
         return true;
+    }
+
+    public Project getProject() {
+        return project;
     }
 }

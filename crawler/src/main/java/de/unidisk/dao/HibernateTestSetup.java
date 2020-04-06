@@ -42,7 +42,11 @@ public class HibernateTestSetup {
                 return;
             }
             p.setId(dbProject.getId());
+
+
             projectDAO.updateProjectState(dbProject.getId(),p.getProjectState());
+            if(p.getProcessingError() != null)
+                projectDAO.setProjectError(p.getId(),p.getProcessingError());
             p.getTopics().forEach((topic) -> {
                 final Topic dbTopic = topicDAO.createTopic(topic.getName(),dbProject.getId()
                         ,topic.getKeywords().stream().map(Keyword::getName)

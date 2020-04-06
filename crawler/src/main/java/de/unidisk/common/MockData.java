@@ -70,6 +70,7 @@ public class MockData {
                         new Keyword("Digitalisierung")
                 ))
         ));
+        p4.setProcessingError("Fehler bei der Verarbeitung.");
 
 
         final Project p5 = new Project("E-Learning VR", ProjectState.IDLE,
