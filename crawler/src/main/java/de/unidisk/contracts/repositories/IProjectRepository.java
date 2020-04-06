@@ -29,4 +29,5 @@ public interface IProjectRepository extends Serializable {
     List<Project> getProjects(ProjectState state);
 
     void updateProjectState(int projectId, ProjectState state);
+    void setProjectError(int projectId, String message);
 }

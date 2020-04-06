@@ -20,6 +20,9 @@ public class Project {
     @Enumerated(EnumType.STRING)
     private ProjectState projectState;
 
+    @Column(nullable = true)
+    private String processingError;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "projectId", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Topic> topics;
@@ -61,10 +64,6 @@ public class Project {
         this.name = name;
     }
 
-    /**
-     * TODO @Jan: implement state
-     * @return
-     */
     public ProjectState getStatus() {
         return projectState;
     }
@@ -84,5 +83,13 @@ public class Project {
 
     public void setProjectState(ProjectState projectState) {
         this.projectState = projectState;
+    }
+
+    public String getProcessingError() {
+        return processingError;
+    }
+
+    public void setProcessingError(String processingError) {
+        this.processingError = processingError;
     }
 }

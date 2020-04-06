@@ -1,5 +1,6 @@
 package de.unidisk.dao;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
@@ -49,6 +50,25 @@ public class ProjectDAO  implements IProjectRepository {
         final Project project = p.get();
         project.setProjectState(state);
 
+        currentSession.update(project);
+        transaction.commit();
+        currentSession.close();
+    }
+
+    @Override
+    public void setProjectError(int projectId, String message) {
+        final Optional<Project> projectResult = findProjectById(projectId);
+        if(!projectResult.isPresent()){
+            return;
+        }
+
+        final Project project = projectResult.get();
+        project.setProcessingError(message);
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
         currentSession.update(project);
         transaction.commit();
         currentSession.close();

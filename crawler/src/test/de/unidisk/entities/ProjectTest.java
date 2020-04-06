@@ -31,6 +31,20 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
+    public void canSetProcessingError() {
+        ProjectDAO dao = new ProjectDAO();
+        final Project p = dao.createProject("test");
+        Assert.assertNotNull(p);
+        final String error = "test error";
+        dao.setProjectError(p.getId(), error);
+        final Project dbProject = dao.getProject(String.valueOf(p.getId()));
+        assertEquals(error,dbProject.getProcessingError());
+        dao.setProjectError(p.getId(),null);
+        final Project dbProjectNoError = dao.getProject(String.valueOf(p.getId()));
+        assertEquals(null,dbProjectNoError.getProcessingError());
+    }
+
+    @Test
     public void creatingDuplicateEntityReturnsExisting() {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject("test");

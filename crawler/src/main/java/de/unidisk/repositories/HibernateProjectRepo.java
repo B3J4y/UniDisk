@@ -67,4 +67,9 @@ public class HibernateProjectRepo implements IProjectRepository {
         projectDAO.updateProjectState(projectId,state);
     }
 
+    @Override
+    public void setProjectError(int projectId, String message) {
+        projectDAO.setProjectError(projectId,message);
+    }
+
 }
