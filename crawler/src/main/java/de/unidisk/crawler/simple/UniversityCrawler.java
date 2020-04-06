@@ -24,7 +24,7 @@ public class UniversityCrawler extends WebCrawler {
     private CarlTree urlTree;
     private String[] whitelistUrls;
     private CrawlConfiguration crawlConfiguration;
-    private HashSet<String> visitedPages =  new HashSet<>();
+    private int visitedPages =  0;
     private Function<Page,Void> pageProcessor;
 
     public UniversityCrawler(UniversitySeed seed, String[] whitelist, Function<Page,Void> pageProcessor, CrawlConfiguration configuration) {
@@ -37,10 +37,7 @@ public class UniversityCrawler extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        if(visitedPages.contains(href))
-            return false;
-
-        if(visitedPages.size() >= crawlConfiguration.getMaxPages())
+        if(visitedPages >= crawlConfiguration.getMaxPages())
             return false;
 
         boolean visitPage =  !crawlConfiguration.getFileIgnorePattern().matcher(href).matches()
@@ -59,7 +56,7 @@ public class UniversityCrawler extends WebCrawler {
                 return false;
             }
             urlTree.insertCarlsNodes(parentNode, childNode);
-            visitedPages.add(href);
+            visitedPages +=1;
         }
 
         return visitPage;
