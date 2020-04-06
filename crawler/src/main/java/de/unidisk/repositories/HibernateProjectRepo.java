@@ -36,13 +36,6 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
-    public List<KeywordItem> getProjectKeywords(String projectId) {
-        final Project p = projectDAO.findProject(projectId).get();
-
-        return p.getTopics().stream().map(( t) -> new KeywordItem(String.valueOf(t.getId()),t.getName(), t.getName() )).collect(Collectors.toList());
-    }
-
-    @Override
     public boolean deleteProject(String projectId) {
         return projectDAO.deleteProjectById(projectId);
     }
