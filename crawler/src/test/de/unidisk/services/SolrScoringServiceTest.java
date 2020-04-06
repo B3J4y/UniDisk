@@ -10,7 +10,10 @@ import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Topic;
 import de.unidisk.solr.services.SolrScoringService;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.DisabledIf;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -34,6 +37,7 @@ public class SolrScoringServiceTest {
 
 
     @Test
+    @DisabledIf("System.getenv(\"CI\") == '1'")
     public void canGetKeywordScores() throws IOException, SolrServerException {
         final String solrUrl = SolrConfiguration.getInstance().getUrl();
         final SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(solrUrl);
@@ -55,6 +59,7 @@ public class SolrScoringServiceTest {
     }
 
     @Test
+    @DisabledIf("System.getenv(\"CI\") == '1'")
     public void canGetTopicScore() throws IOException, SolrServerException {
         final String solrUrl = SolrConfiguration.getInstance().getUrl();
         final SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(solrUrl);

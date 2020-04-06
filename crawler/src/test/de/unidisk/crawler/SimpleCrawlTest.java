@@ -17,38 +17,23 @@ import org.apache.solr.common.util.NamedList;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.DisabledIf;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import java.io.IOException;
+import java.net.ConnectException;
+
+import static org.junit.Assert.fail;
 
 public class SimpleCrawlTest {
 
     PodamFactory podamFactory = new PodamFactoryImpl();
-
     @BeforeClass
     public static void setup() {
-       // Logger.getRootLogger().setLevel(Level.INFO);
-    }
 
-    /*
-     * automatically create a solr collection
-     * has protected access use instead:
-     * solr create_collection -c myCollection
-     */
-    @Test
-    public void createSimpleSolrCollection() throws IOException, SolrServerException {
-        final String solrUrl = SolrConfiguration.getInstance().getUrl();
-        HttpSolrClient client =
-                new HttpSolrClient.Builder(solrUrl).withConnectionTimeout(10000).withSocketTimeout(60000).build();
-
-        final SolrRequest request = new CollectionAdminRequest.ClusterStatus();
-
-        final NamedList<Object> response = client.request(request);
-        final NamedList<Object> cluster = (NamedList<Object>) response.get("cluster");
-        final java.util.List<String> liveNodes = (java.util.List<String>) cluster.get("live_nodes");
-
-        System.out.println("Found " + liveNodes.size() + " live nodes");
     }
 
     /**
@@ -56,9 +41,10 @@ public class SimpleCrawlTest {
      * set to ignore because of travis
      * @throws Exception
      */
-    @Ignore
     @Test
+    @DisabledIf("System.getenv(\"CI\") == '1'")
     public void testFieldInputAndQuery() throws Exception {
+
         SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(SolrConfiguration.getInstance().getUrl());
         simpleSolarSystem.sendPageToTheMoon(podamFactory.manufacturePojo(CrawlDocument.class));
     }
@@ -67,16 +53,18 @@ public class SimpleCrawlTest {
      * set to ignore because of travis
      * @throws Exception
      */
-    @Ignore
     @Test
+    @DisabledIf("System.getenv(\"CI\") == '1'")
     public void shootTheMoon() throws Exception {
         final CrawlerConfiguration crawlerConfiguration = SystemConfiguration.getInstance().getCrawlerConfiguration();
-        final UniversitySeed[] seeds = new UniversitySeed[]{};
+        final UniversitySeed[] seeds = new UniversitySeed[]{
+                new UniversitySeed("https://www.uni-potsdam.de/de/",0)
+        };
         ICrawler crawler = new SimpleCrawl(
                 crawlerConfiguration.getStorageLocation(),
                 seeds,
                 SolrConfiguration.getInstance().getUrl(),
-                crawlerConfiguration.getMaxVisits()
+                100
         );
         crawler.startCrawl(seeds[0].getSeedUrl());
     }

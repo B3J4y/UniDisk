@@ -1,10 +1,8 @@
 package de.unidisk.contracts.repositories;
 
-import de.unidisk.entities.hibernate.KeyWordScore;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.view.model.KeywordItem;
-import de.unidisk.view.model.MapMarker;
 import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
 
@@ -25,8 +23,6 @@ public interface IProjectRepository extends Serializable {
 
     boolean deleteProject(String projectId);
     List<Result> getResults(String projectId);
-
-    List<MapMarker> getMarker(String projectId);
 
     boolean canEdit(String projectId);
 

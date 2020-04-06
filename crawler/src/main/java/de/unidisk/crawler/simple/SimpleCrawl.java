@@ -96,9 +96,6 @@ public class SimpleCrawl implements ICrawler {
             // will reach the line after this only when crawling is finished.
             controller.start(factory, numberOfCrawlers);
         } else {
-            /**
-             * the same procedure but with a local controller
-             */
             CrawlController controllerTemp = new CrawlController(config, pageFetcher, robotstxtServer);
             controllerTemp.addSeed(seed.getSeedUrl());
             CrawlController.WebCrawlerFactory<UniversityCrawler> factory = CreateCrawler(seed);
@@ -109,7 +106,11 @@ public class SimpleCrawl implements ICrawler {
     private CrawlController.WebCrawlerFactory<UniversityCrawler> CreateCrawler(UniversitySeed seed){
         CrawlController.WebCrawlerFactory<UniversityCrawler> factory = () -> new UniversityCrawler(seed,
                 whiteList,
-                (page) -> processPage(page, seed.getUniversityId())
+                (page) -> processPage(page, seed.getUniversityId()),
+                new CrawlConfiguration(
+                        maxVisitsPerSeed
+
+                )
         );
         return factory;
     }

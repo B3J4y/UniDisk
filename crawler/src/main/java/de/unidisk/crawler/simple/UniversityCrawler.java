@@ -27,17 +27,16 @@ public class UniversityCrawler extends WebCrawler {
     private HashSet<String> visitedPages =  new HashSet<>();
     private Function<Page,Void> pageProcessor;
 
-    public UniversityCrawler(UniversitySeed seed, String[] whitelist, Function<Page,Void> pageProcessor) {
+    public UniversityCrawler(UniversitySeed seed, String[] whitelist, Function<Page,Void> pageProcessor, CrawlConfiguration configuration) {
         this.whitelistUrls = whitelist;
         urlTree  = new CarlTree(new CarlsTreeNode(seed.getSeedUrl()));
-        this.crawlConfiguration = CrawlConfiguration.Default();
+        this.crawlConfiguration = configuration;
         this.pageProcessor = pageProcessor;
     }
 
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        //Todo: überprüfen ob Fall eintritt
         if(visitedPages.contains(href))
             return false;
 
@@ -60,8 +59,9 @@ public class UniversityCrawler extends WebCrawler {
                 return false;
             }
             urlTree.insertCarlsNodes(parentNode, childNode);
+            visitedPages.add(href);
         }
-        visitedPages.add(href);
+
         return visitPage;
     }
 

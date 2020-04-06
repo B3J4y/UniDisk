@@ -3,7 +3,6 @@ package de.unidisk.dao;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
-import de.unidisk.view.model.MapMarker;
 import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
 import org.hibernate.Session;
@@ -201,24 +200,6 @@ public class ProjectDAO  implements IProjectRepository {
        List<Result> scores = currentSession.createQuery("select new de.unidisk.view.results.Result(t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
                " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
                 .setParameter("pId",pId).list();
-        transaction.commit();
-        currentSession.close();
-        return scores;
-    }
-
-    @Override
-    public List<MapMarker> getMarker(String projectId) {
-        int pId = Integer.parseInt(projectId);
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        List<MapMarker> scores = currentSession.createQuery("select new de.unidisk.view.model.MapMarker(tScore.topic.name,tScore.topic.id) " +
-                "from TopicScore tScore where tScore.topic.projectId = :pId")
-
-                .setParameter("pId",pId).list();
-
         transaction.commit();
         currentSession.close();
         return scores;

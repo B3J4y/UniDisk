@@ -20,6 +20,13 @@ public class CrawlConfiguration {
         this.fileIgnorePattern = fileIgnorePattern;
     }
 
+    public CrawlConfiguration(int maxPages) {
+        this.maxPages = maxPages;
+        this.maxLinkDepth = 3;
+        this.fileIgnorePattern = FILTERS;
+    }
+
+
     public int getMaxPages() {
         return maxPages;
     }

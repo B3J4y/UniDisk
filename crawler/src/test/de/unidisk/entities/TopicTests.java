@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, ChildTests {
+public class TopicTests implements HibernateLifecycle {
 
     Project parentProject;
 
@@ -42,14 +42,14 @@ public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, Ch
     }
 
     @Test
-    @Override
+
     public void canCreateEntity() {
         final Topic t = DataFactory.createTopic(0);
         final TopicDAO dao = new TopicDAO();
         Assert.assertNotNull(dao.createTopic(t.getName(),parentProject.getId()));
     }
 
-    @Override
+
     public void creatingDuplicateEntityThrowsError() {
         final Topic t = DataFactory.createTopic(0);
         final TopicDAO dao = new TopicDAO();
@@ -91,13 +91,9 @@ public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, Ch
         };
     }
 
-    @Override
-    public void canUpdateEntity() {
-
-    }
 
     @Test
-    @Override
+
     public void canDeleteEntity() {
         final Topic t = DataFactory.createTopic(0);
         final TopicDAO dao = new TopicDAO();
@@ -107,7 +103,6 @@ public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, Ch
     }
 
     @Test
-    @Override
     public void deletingEntityDeletesChildren() {
         TopicDAO dao = new TopicDAO();
         Topic valid = dao.createTopic("test", parentProject.getId());
@@ -118,7 +113,6 @@ public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, Ch
     }
 
     @Test
-    @Override
     public void findEntityReturnsData() {
         final Topic t = DataFactory.createTopic(0);
         final TopicDAO dao = new TopicDAO();
@@ -128,13 +122,8 @@ public class TopicTests implements HibernateLifecycle, CRUDTest, ParentTests, Ch
         Assert.assertEquals(topics.get(0).getName(), t.getName());
     }
 
-    @Override
-    public void findEntityReturnsNullIfMissing() {
-
-    }
 
     @Test
-    @Override
     public void createEntityFailsIfParentMissing() {
         final Topic t = DataFactory.createTopic(0);
         final TopicDAO dao = new TopicDAO();

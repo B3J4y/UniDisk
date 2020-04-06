@@ -26,8 +26,11 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,6 +55,7 @@ public class SolrTest {
     }
 
     @Test
+    @DisabledIf("System.getenv(\"CI\") == '1'")
     public void smokeTest() {
         SolrConnector connector = new SolrConnector(SolrConfiguration.getInstance());
         try {
@@ -65,6 +69,7 @@ public class SolrTest {
 
 
     @Test
+    @DisabledIf("System.getenv(\"CI\") == '1'")
     public void canParseCrawlDocument() throws IOException, SolrServerException {
         final CrawlDocument document = new CrawlDocument(
                 String.valueOf(System.currentTimeMillis()),

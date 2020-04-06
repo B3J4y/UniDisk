@@ -5,14 +5,12 @@ import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
-import de.unidisk.view.model.MapMarker;
 import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
 
 
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -52,12 +50,6 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public List<Result> getResults(String projectId) {
         return projectDAO.getResults(projectId);
-    }
-
-
-    @Override
-    public List<MapMarker> getMarker(String projectId) {
-        return projectDAO.getMarker(projectId);
     }
 
     @Override
