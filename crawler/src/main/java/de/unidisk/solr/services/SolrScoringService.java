@@ -61,9 +61,7 @@ public class SolrScoringService implements IScoringService {
                 );
             }).collect(Collectors.toList());
             return results;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             e.printStackTrace();
         }
 
@@ -76,7 +74,7 @@ public class SolrScoringService implements IScoringService {
         final List<TopicScore> scores = topicRepository.getScores(topicId);
         final List<ScoreResult> scoreResults = scores.stream().map(s ->
              new ScoreResult(
-                    s.getId(),
+                    s.getTopic().getId(),
                     s.getScore(),
                     s.getSearchMetaData().getUniversity().getId(),
                     0,
