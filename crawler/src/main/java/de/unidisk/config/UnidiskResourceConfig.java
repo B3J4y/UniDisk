@@ -3,10 +3,7 @@ package de.unidisk.config;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
-public class UnidiskResourceConfig extends ResourceConfig {
+public class UnidiskResourceConfig extends javax.ws.rs.core.Application {
 
-    public UnidiskResourceConfig() {
-        register(new InjectionBinder());
-        packages("de.unidisk");
-    }
+
 }

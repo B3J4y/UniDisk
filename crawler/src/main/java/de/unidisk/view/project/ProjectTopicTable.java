@@ -1,13 +1,17 @@
 package de.unidisk.view.project;
 
-import de.unidisk.MessagingCenter;
+import de.unidisk.dao.ProjectDAO;
+import de.unidisk.solr.SolrApp;
+import de.unidisk.view.MessagingCenter;
 
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.entities.hibernate.Topic;
-import de.unidisk.repositories.contracts.IProjectRepository;
-import de.unidisk.repositories.contracts.ITopicRepository;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.ITopicRepository;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.event.UnselectEvent;
 
@@ -22,6 +26,8 @@ import java.util.List;
 @ManagedBean(name = ProjectTopicTable.BEAN_NAME)
 @ViewScoped
 public class ProjectTopicTable {
+
+    static private final Logger logger = LogManager.getLogger(ProjectTopicTable.class.getName());
     public static final String BEAN_NAME = "projectTopicTable";
 
     private Project selectedProject;
@@ -176,6 +182,10 @@ public class ProjectTopicTable {
 
     }
 
+    public void setToWaiting(int projectId){
+
+    }
+
     public void addKeyword(){
 
         if(selectedTopic.getKeywords() == null)
@@ -251,6 +261,35 @@ public class ProjectTopicTable {
     }
 
     public boolean canEdit(){
-        return this.selectedProject != null && this.selectedProject.getProjectState() == ProjectState.WAITING;
+        return this.selectedProject != null && this.selectedProject.getProjectState() == ProjectState.IDLE;
+    }
+
+    public void setWaiting(int projectId){
+        try{
+            new ProjectDAO().updateProjectState(projectId, ProjectState.WAITING);
+            if(selectedProject != null && selectedProject.getId() == projectId){
+                logger.info("reset selected entities");
+                selectedProject = null;
+                selectedTopic = null;
+
+
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void setIdle(int projectId){
+        try{
+            new ProjectDAO().updateProjectState(projectId, ProjectState.IDLE);
+            if(selectedProject != null && selectedProject.getId() == projectId){
+                logger.info("reset selected entities");
+                selectedProject = null;
+                selectedTopic = null;
+
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }

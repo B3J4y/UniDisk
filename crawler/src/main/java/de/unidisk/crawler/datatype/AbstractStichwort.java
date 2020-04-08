@@ -1,7 +1,7 @@
 package de.unidisk.crawler.datatype;
 
-import de.unidisk.common.StichwortModifier;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
+import de.unidisk.solr.nlp.basics.StichwortModifier;
+import de.unidisk.config.SolrConfiguration;
 import org.apache.solr.client.solrj.SolrQuery;
 
 import java.util.List;
@@ -30,8 +30,21 @@ public abstract class AbstractStichwort implements Stichwort {
         if (!expression.endsWith(getEnd())) {
             expression += getEnd();
         }
-        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperty("content") + ":" + expression);
-        SolrStandardConfigurator.configureSolrQuery(solrQuery);
+        SolrQuery solrQuery = new SolrQuery(SolrConfiguration.getInstance().getFieldProperty("content") + ":" + expression);
+
+        SolrConfiguration.getInstance().configureSolrQuery(solrQuery);
+
+        for(String field : new String[]{
+                "id",
+                "title",
+                "content",
+                "datum",
+                "url",
+                "depth",
+                "universityId"
+        }){
+            solrQuery.addField(field);
+        }
         return solrQuery;
     }
 

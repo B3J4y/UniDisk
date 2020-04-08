@@ -1,6 +1,6 @@
 package de.unidisk.view.project.dialog;
 
-import de.unidisk.MessagingCenter;
+import de.unidisk.view.MessagingCenter;
 import de.unidisk.services.ProjectService;
 import org.primefaces.PrimeFaces;
 

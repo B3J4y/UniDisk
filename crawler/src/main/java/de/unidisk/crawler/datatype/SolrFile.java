@@ -1,7 +1,8 @@
 package de.unidisk.crawler.datatype;
 
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
-import org.apache.commons.lang.StringUtils;
+import de.unidisk.config.SolrConfiguration;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.io.BufferedReader;
@@ -13,7 +14,7 @@ import java.util.Date;
 /**
  * Data representation of a convertible solr file
  */
-public class SolrFile {
+public class  SolrFile {
     private Date modifiedDate;
     private String content;
     private String title;
@@ -47,10 +48,10 @@ public class SolrFile {
 
     public SolrInputDocument getSolrInputDocument() {
         SolrInputDocument document = new SolrInputDocument();
-        document.setField(SolrStandardConfigurator.getFieldProperty("id"), id);
-        document.setField(SolrStandardConfigurator.getFieldProperty("title"), title);
-        document.setField(SolrStandardConfigurator.getFieldProperty("content"), content);
-        document.setField(SolrStandardConfigurator.getFieldProperty("date"), modifiedDate);
+        document.setField(SolrConfiguration.getInstance().getFieldProperty("id"), id);
+        document.setField(SolrConfiguration.getInstance().getFieldProperty("title"), title);
+        document.setField(SolrConfiguration.getInstance().getFieldProperty("content"), content);
+        document.setField(SolrConfiguration.getInstance().getFieldProperty("date"), modifiedDate);
         return document;
     }
 }

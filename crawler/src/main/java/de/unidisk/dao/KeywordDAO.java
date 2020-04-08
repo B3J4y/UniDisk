@@ -1,15 +1,12 @@
 package de.unidisk.dao;
 
-import de.unidisk.HibernateUtil;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
 
-import de.unidisk.rest.TopicData;
 import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.query.Query;
 
 import java.util.ArrayList;

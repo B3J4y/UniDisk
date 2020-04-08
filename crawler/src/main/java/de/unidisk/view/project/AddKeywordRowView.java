@@ -1,6 +1,7 @@
 package de.unidisk.view.project;
 
 import de.unidisk.dao.ProjectDAO;
+import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.services.ProjectService;
 
 import javax.annotation.PostConstruct;
@@ -64,5 +65,7 @@ public class AddKeywordRowView implements Serializable {
         projects.remove(project);
 
     }
+
+
 
 }

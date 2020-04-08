@@ -1,6 +1,6 @@
 package de.unidisk.view.project;
 
-import de.unidisk.repositories.contracts.IProjectRepository;
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
 
 import javax.annotation.PostConstruct;

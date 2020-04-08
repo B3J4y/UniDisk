@@ -1,6 +1,5 @@
 package de.unidisk.entities;
 
-import de.unidisk.HibernateUtil;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Project;
 import org.junit.Assert;

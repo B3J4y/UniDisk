@@ -61,7 +61,8 @@
                             <f:facet name="title">
                                 <h:graphicImage library="images" style="height: 30px; width: 30px; " name="#{func:getStateIconUrl(projectState)}"/>
                             </f:facet>
-                            <p:dataTable id="projectTabProjects" widgetVar="projects1" var="project" value="#{dtAddRowView.getProjectOfState(projectState)}"
+                            <p:dataTable id="projectTabProjects" widgetVar="projects1"
+                                         var="project" value="#{dtAddRowView.getProjectOfState(projectState)}"
                                          editable="false"
                                          emptyMessage="Keine passenden Projekte"
                                          >
@@ -70,6 +71,20 @@
                                         <f:param name="projectId" value="#{project.id}" />
                                     </p:link>
                                     <div style="float:right;">
+
+                                        <p:commandButton value="Speichern" id="projectStatusButton" rendered="#{projectState.idle}"
+                                                         update=" stichwortPanel projectTopicHeader projectTabs projectTabProjects"
+                                                         action="#{dtAddRowView.setWaiting(project.id)}"
+                                                        style="margin-right:20px;"
+                                                         styleClass="ui-priority-primary"/>
+
+                                        <p:commandButton value="Abbruch" id="projectStatusIdleButton" rendered="#{projectState.waiting}"
+
+                                                         update=" stichwortPanel projectTopicHeader projectTabs projectTabProjects"
+                                                         action="#{dtAddRowView.setIdle(project.id)}"
+                                                         style="margin-right:20px;"
+                                                         styleClass="ui-priority-primary"/>
+
                                         <p:commandButton value="-" id="deleteButton2"
                                                          update=" stichwortPanel projectTopicHeader projectTabs projectTabProjects"
                                                          onclick="PF('projectDeleteDialog').show();"

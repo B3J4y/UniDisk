@@ -1,6 +1,6 @@
 package de.unidisk.entities;
 
-import de.unidisk.HibernateUtil;
+import de.unidisk.dao.HibernateUtil;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.entities.hibernate.*;
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-interface HibernateLifecycle {
+public interface HibernateLifecycle {
 
     @BeforeEach
     default void cleanUpDatabase() {

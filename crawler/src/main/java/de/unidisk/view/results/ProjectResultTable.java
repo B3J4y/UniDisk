@@ -3,10 +3,9 @@ package de.unidisk.view.results;
 import com.google.gson.Gson;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
-import de.unidisk.entities.hibernate.University;
-import de.unidisk.repositories.contracts.IProjectRepository;
-import de.unidisk.view.model.MapLegendItem;
-import de.unidisk.view.model.MapMarker;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.primefaces.PrimeFaces;
 
 import javax.faces.bean.ManagedBean;
@@ -15,19 +14,20 @@ import javax.faces.bean.ViewScoped;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @ManagedBean(name = "projectResultTable")
 @ViewScoped
 public class ProjectResultTable {
 
+    static private final Logger logger = LogManager.getLogger(ProjectResultTable.class.getName());
+
     @ManagedProperty("#{projectRepository}")
     private IProjectRepository projectRepository;
     private List<Result> results = new ArrayList<>();
     private String projectId;
-    private HashMap<Integer,String> topicIcons;
-    private List<MapLegendItem> mapLegendItems;
+    private HashMap<String,Boolean> vibisibilityMap = new HashMap<>();
+
     private String setupError;
 
     private boolean projectHasResults = false;
@@ -36,15 +36,15 @@ public class ProjectResultTable {
 
     private void setProjectNotExisting(){
         results  = new ArrayList<>();
-        mapLegendItems = new ArrayList<>();
         setupError = "Projekt existiert nicht.";
         projectExists = false;
     }
 
     public void load(String projectId){
+        if(this.projectId == projectId && results != null && results.size() > 0){
+            return;
+        }
         this.projectId = projectId;
-
-        topicIcons = new HashMap<Integer, String>();
         if(projectId == null){
             setProjectNotExisting();
             return;
@@ -72,27 +72,16 @@ public class ProjectResultTable {
         }
 
         results = projectRepository.getResults(this.projectId);
-        mapLegendItems = p.getTopics().stream().map(t -> {
-            final String url = "https://img.icons8.com/material/4ac144/256/user-male.png";
-            topicIcons.put(t.getId(), url);
-            return new MapLegendItem(url, t.getName());
-        }).collect(Collectors.toList());
-
-        RefreshMap();
+        vibisibilityMap.clear();
+        results.forEach(r -> vibisibilityMap.put(r.getTopic(),true));
+        RefreshMap(results);
 
     }
 
 
-    void RefreshMap(){
-        final List<MapMarker> marker = projectRepository.getMarker(this.projectId);
-        marker.forEach(m -> {
-            final String url = topicIcons.get(m.getTopicId());
-
-            m.setIconUrl("https://img.icons8.com/material/4ac144/256/user-male.png");
-        });
+    void RefreshMap(List<Result> visibleResults){
         final Gson gson = new Gson();
-        String jsonMarker = gson.toJson(marker);
-
+        String jsonMarker = gson.toJson(visibleResults);
         PrimeFaces.current().executeScript("refreshMap("+jsonMarker+")");
     }
 
@@ -110,10 +99,6 @@ public class ProjectResultTable {
 
     public void setProjectId(String projectId) {
         this.projectId = projectId;
-    }
-
-    public List<MapLegendItem> getMapLegendItems() {
-        return mapLegendItems;
     }
 
     public String getSetupError() {
@@ -134,5 +119,21 @@ public class ProjectResultTable {
 
     public boolean projectExists(){
         return this.projectExists;
+    }
+
+    public void toggleTopicVisibility(String topicName){
+        vibisibilityMap.put(topicName,!vibisibilityMap.get(topicName));
+        List<Result> visibleTopics = results.stream().filter(r -> vibisibilityMap.get(r.getTopic())).collect(Collectors.toList());
+        RefreshMap(visibleTopics);
+    }
+
+    public List<String> getTopics(){
+        return this.results.stream().map(Result::getTopic).collect(Collectors.toList());
+    }
+
+    public boolean topicIsVisible(String name){
+        if(vibisibilityMap.containsKey(name))
+            return vibisibilityMap.get(name);
+        return true;
     }
 }

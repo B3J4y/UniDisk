@@ -1,26 +1,63 @@
 package de.unidisk.solr;
 
-import de.unidisk.common.StichwortModifier;
+import de.unidisk.common.ApplicationState;
 import de.unidisk.config.SolrConfiguration;
+import de.unidisk.config.SystemConfiguration;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.services.IResultService;
+import de.unidisk.contracts.services.IScoringService;
+import de.unidisk.crawler.datatype.SolrStichwort;
 import de.unidisk.crawler.datatype.Stichwort;
 import de.unidisk.crawler.datatype.Variable;
-import de.unidisk.nlp.datatype.RegExpStichwort;
+import de.unidisk.crawler.model.CrawlDocument;
+import de.unidisk.crawler.model.ScoreResult;
+import de.unidisk.crawler.simple.SimpleSolarSystem;
+import de.unidisk.dao.HibernateTestSetup;
+import de.unidisk.dao.ProjectDAO;
+import de.unidisk.entities.hibernate.*;
+import de.unidisk.entities.solr.SolrDocument;
+import de.unidisk.repositories.HibernateKeywordRepo;
+import de.unidisk.repositories.HibernateTopicRepo;
+import de.unidisk.services.HibernateResultService;
+import de.unidisk.solr.nlp.datatype.RegExpStichwort;
+import de.unidisk.solr.services.SolrScoringService;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.DisabledIf;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SolrTest {
 
+    @BeforeAll
+    public void setup(){
+
+    }
+
     @Test
+    public void canLoadConfig(){
+        final SolrConfiguration config = SolrConfiguration.getInstance();
+       assertTrue(config.getCore().equals("unidisk"));
+    }
+
+    @Test
+    @DisabledIf("System.getenv(\"CI\") == '1'")
     public void smokeTest() {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.getTestUrl());
+        SolrConnector connector = new SolrConnector(SolrConfiguration.getInstance());
         try {
             Stichwort stichwort = new RegExpStichwort("Test");
             QueryResponse response = connector.query(stichwort.buildQuery(new ArrayList<>()));
@@ -30,56 +67,73 @@ public class SolrTest {
         }
     }
 
+
     @Test
-    public void testFieldInputAndQuery() throws Exception {
-        SolrConnector connector = new SolrConnector(SolrConfiguration.getTestUrl());
-        List<SolrInputDocument> docs = new ArrayList<>();
-        SolrInputDocument document = new SolrInputDocument();
-        document.addField(SolrConfiguration.getFieldProperty("id"), "1");
-        document.addField(SolrConfiguration.getFieldProperty("title"), "First Document");
-        document.addField(SolrConfiguration.getFieldProperty("content"), "Hi, this is the very first document");
-        document.addField(SolrConfiguration.getFieldProperty("date"), new Date());
-        connector.insertDocument(document);
-        docs.add(document.deepCopy());
-        document = new SolrInputDocument();
-        document.addField(SolrConfiguration.getFieldProperty("id"), "2");
-        document.addField(SolrConfiguration.getFieldProperty("title"), "Second Document");
-        document.addField(SolrConfiguration.getFieldProperty("content"), "Hi, this is the second document");
-        document.addField(SolrConfiguration.getFieldProperty("date"), "2017-03-03T00:00:00Z");
-        connector.insertDocument(document);
-        docs.add(document.deepCopy());
+    @DisabledIf("System.getenv(\"CI\") == '1'")
+    public void canParseCrawlDocument() throws IOException, SolrServerException {
+        final CrawlDocument document = new CrawlDocument(
+                String.valueOf(System.currentTimeMillis()),
+                "https://www.google.com",
+                "test",
+       "inhalt",
+                3,
+                System.currentTimeMillis(),
+        1
+        );
+        final SolrConfiguration solrConfiguration = SolrConfiguration.getInstance();
+        final SimpleSolarSystem solarSystem = new SimpleSolarSystem(solrConfiguration.getUrl());
+        solarSystem.sendPageToTheMoon(document);
+        final SolrConnector solrConnector = new SolrConnector(solrConfiguration);
+        final List<org.apache.solr.common.SolrDocument> docs = getKeyDocs(solrConnector, "inhalt");
+        assertTrue(docs.size() > 0);
 
-        Stichwort regexStichwort = new RegExpStichwort("document");
-        QueryResponse response = connector.query(regexStichwort.buildQuery(new ArrayList<>()));
-        assertEquals(2, response.getResults().getNumFound());
+        final List<ScoreResult> results = docs.stream().map(d -> {
+            final CrawlDocument crawlDocument = new CrawlDocument(d);
+            final int universityId = crawlDocument.universityId;
+            return new ScoreResult(
+                    0,
+                    (float) d.get("score"),
+                    universityId,
+                    crawlDocument.datum,
+                    crawlDocument.url
+            );
+        }).collect(Collectors.toList());
+        assertTrue(true);
+    }
 
-        regexStichwort = new RegExpStichwort("doc");
-        List<StichwortModifier> modifiers = new ArrayList<>();
-        modifiers.add(StichwortModifier.PART_OF_WORD);
-        response = connector.query(regexStichwort.buildQuery(modifiers));
-        assertEquals(2, response.getResults().getNumFound());
+    private List<org.apache.solr.common.SolrDocument> getKeyDocs(SolrConnector connector, String key) throws IOException, SolrServerException {
+        QueryResponse response = connector.query(new SolrStichwort(key).buildQuery(new ArrayList<>()));
+        SolrDocumentList solrList = response.getResults();
 
-        regexStichwort = new RegExpStichwort("second");
-        response = connector.query(regexStichwort.buildQuery(new ArrayList<>()));
-        assertEquals(1, response.getResults().getNumFound());
+        int sizeOfStichwortResult = Math.min((int) solrList.getNumFound(), SolrConfiguration.getInstance().getRowLimit());
+        ArrayList<org.apache.solr.common.SolrDocument> documents = new ArrayList<>();
+        for (int i = 0; i < sizeOfStichwortResult; i++) {
+            org.apache.solr.common.SolrDocument doc = solrList.get(i);
 
-        List<Stichwort> stichworte = new ArrayList<>();
-        stichworte.add(new RegExpStichwort("very"));
-        stichworte.add(new RegExpStichwort("second"));
-        Variable<Stichwort> variable = new Variable<>("Test Variable", stichworte);
-        modifiers = new ArrayList<>();
-        response = connector.query(variable.buildQuery(modifiers));
-        assertEquals(2, response.getResults().getNumFound());
+            documents.add(doc);
+        }
+        return documents;
+    }
+    @Test
+    public void solrAppTest(){
+        final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(), new HibernateTopicRepo(), SolrConfiguration.getInstance());
+        final IProjectRepository projectRepository = new ProjectDAO();
+        final IResultService resultService = new HibernateResultService();
+        final ApplicationState state = new ApplicationState(
+                Arrays.asList(new Project("test", ProjectState.IDLE, Arrays.asList(
+                        new Topic("Test", 0, Arrays.asList(new Keyword("test",0)))
+                ))), Arrays.asList(new University("potsdam",0,0,"https://www.uni-potsdam.de/de/"))
+        );
+        HibernateTestSetup.Setup(state);
 
-        stichworte = new ArrayList<>();
-        stichworte.add(new RegExpStichwort("none"));
-        stichworte.add(new RegExpStichwort("second"));
-        variable = new Variable<>("Test Variable", stichworte);
-        response = connector.query(variable.buildQuery(modifiers));
-        assertEquals(1, response.getResults().getNumFound());
 
-        for (SolrInputDocument doc : docs) {
-            connector.deleteDocument(doc);
+        SolrApp sapp = new SolrApp(projectRepository,scoringService,resultService);
+        try {
+            sapp.execute();
+            assertTrue(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
         }
     }
 }

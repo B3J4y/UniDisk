@@ -49,3 +49,21 @@ former id might not exist anymore and the page is unable to load.
 
 ##### org.hibernate.id.IdentifierGenerationException: could not read a hi value - you need to populate the table: hibernate_sequence
 This error occurs if you truncate the hibernate_sequence table. Delete the database instance and restart the server to fix this problem.
+
+### Solr
+Follow the installation guide from https://lucene.apache.org/solr/guide/7_0/index.html.
+
+#### Setup
+If solr isn't running execute `solr start -p 8983`. The further setup will use port 8983 as default.
+If you chose another one make sure to adapt the urls and commands.
+##### Create Core
+
+Run `solr create -c unidisc`. After the command finished you should see the message 
+_Created new core 'unidisc'_ in the console/terminal. You should now see the
+unidisc core section at http://localhost:8983/solr/#/unidisc/core-overview.  
+
+##### Verify Setup
+
+The test case `testFieldInputAndQuery` in _SimpleCrawlTest_ should now run successfully.
+You can also run `shootTheMoon` which crawls websites and posts the result to solr. The test doesn't
+terminate but the number of documents in the *unidisc core* should increase.

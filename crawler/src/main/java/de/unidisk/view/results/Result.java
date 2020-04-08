@@ -1,14 +1,18 @@
 package de.unidisk.view.results;
 
+import de.unidisk.entities.hibernate.University;
+
 public class Result {
     String topic;
+    University university;
     double score;
-    int entryCount;
+    long entryCount;
 
-    public Result(String topic, double score, int entryCount) {
+    public Result(String topic, double score, long entryCount, University university) {
         this.topic = topic;
         this.score = score;
         this.entryCount = entryCount;
+        this.university = university;
     }
 
     public String getTopic() {
@@ -27,11 +31,15 @@ public class Result {
         this.score = score;
     }
 
-    public int getEntryCount() {
+    public long getEntryCount() {
         return entryCount;
     }
 
-    public void setEntryCount(int entryCount) {
+    public void setEntryCount(long entryCount) {
         this.entryCount = entryCount;
+    }
+
+    public University getUniversity() {
+        return university;
     }
 }

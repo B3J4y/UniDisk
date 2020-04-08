@@ -6,10 +6,12 @@ import de.unidisk.entities.hibernate.ProjectState;
 public final class ProjectStateMapper {
     public static String mapToFriendlyName(ProjectState state){
         switch(state){
+            case IDLE:
+                return "Vorbereitung";
             case ERROR:
                 return "Fehler";
             case WAITING:
-                return "In Vorbereitung";
+                return "Bereit";
             case FINISHED:
                 return "Abgeschlossen";
 
@@ -25,6 +27,8 @@ public final class ProjectStateMapper {
      */
     public static String getStateIconUrl(ProjectState state){
         switch(state){
+            case IDLE:
+                return "state_idle.png";
             case ERROR:
                 return "state_error.png";
             case RUNNING:

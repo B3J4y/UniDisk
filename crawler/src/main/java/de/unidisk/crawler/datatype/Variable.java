@@ -1,7 +1,8 @@
 package de.unidisk.crawler.datatype;
 
-import de.unidisk.common.StichwortModifier;
-import de.unidisk.crawler.solr.SolrStandardConfigurator;
+import de.unidisk.solr.nlp.basics.StichwortModifier;
+
+import de.unidisk.config.SolrConfiguration;
 import org.apache.solr.client.solrj.SolrQuery;
 
 import java.util.List;
@@ -43,8 +44,8 @@ public class Variable<K extends Stichwort> {
         queryBuilder.deleteCharAt(queryBuilder.length() - 1);
         queryBuilder.append(stichworte.get(0).getEnd());
 
-        SolrQuery solrQuery = new SolrQuery(SolrStandardConfigurator.getFieldProperty("content") + ":" + queryBuilder.toString());
-        SolrStandardConfigurator.configureSolrQuery(solrQuery);
+        SolrQuery solrQuery = new SolrQuery(SolrConfiguration.getInstance().getFieldProperty("content") + ":" + queryBuilder.toString());
+        SolrConfiguration.getInstance().configureSolrQuery(solrQuery);
         return solrQuery;
     }
 

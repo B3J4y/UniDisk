@@ -15,7 +15,9 @@
                          scrollHeight="200"
                          emptyMessage="Keine Projektergebnisse vorhanden"
             >
-
+                <p:column headerText="Universität">
+                    <h:outputText value="#{result.university.name}" />
+                </p:column>
                 <p:column headerText="Thema">
                     <h:outputText value="#{result.topic}" />
                 </p:column>

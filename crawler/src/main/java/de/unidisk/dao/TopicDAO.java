@@ -1,18 +1,15 @@
 package de.unidisk.dao;
 
-import de.unidisk.HibernateUtil;
-import de.unidisk.entities.hibernate.Keyword;
-import de.unidisk.entities.hibernate.Project;
-import de.unidisk.entities.hibernate.Topic;
+import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class TopicDAO {
@@ -46,17 +43,6 @@ public class TopicDAO {
         if (!transaction.isActive()) {
             transaction.begin();
         }
-
-/*
-        List<Integer> searchMetaDataIs = currentSession.createQuery("select m.id from TopicScore t INNER JOIN SearchMetaData  m ON t.searchMetaData.id = m.id WHERE t.topic.id = :id", Integer.class)
-                .setParameter("id",topicId).getResultList();
-        List<Integer> searchMetaDataIds2 = currentSession.createQuery("select ks.id from Keyword k INNER JOIN KeyWordScore ks ON k.id = ks.keyword.id WHERE k.topicId = :id", Integer.class)
-                .setParameter("id", topicId).getResultList();
-        List<Integer> metaDataIds = Stream.concat(searchMetaDataIs.stream(), searchMetaDataIds2.stream()).collect(Collectors.toList());
-
-        currentSession.createQuery("delete from TopicScore  s where  s.topic.id = :id").setParameter("id", topicId).executeUpdate();*/
-
-
         String hql = "delete from Topic where id = :id";
         Query q = currentSession.createQuery(hql).setParameter("id", topicId);
         q.executeUpdate();
@@ -135,4 +121,66 @@ public class TopicDAO {
         currentSession.close();
         return optTopic;
     }
+
+    public Optional<Topic> getTopic(int id) {
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+        Optional<Topic> optTopic = currentSession.createQuery("select t from Topic t where t.id = :id", Topic.class)
+                .setParameter("id", id)
+                .uniqueResultOptional();
+
+        transaction.commit();
+        currentSession.close();
+        return optTopic;
+    }
+
+    public double getScore(int id){
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+        double score = (Double) currentSession.createQuery("select sum(k.score)/COUNT (k.id) from KeyWordScore k where keyword.topicId = :id").setParameter("id",id).uniqueResult();
+
+        transaction.commit();
+        currentSession.close();
+        return score;
+    }
+
+    public List<TopicScore> getScoresFromKeywords(int topicId){
+        final Optional<Topic> t = getTopic(topicId);
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+        List<Score> scores= currentSession.createQuery("select new de.unidisk.dao.Score((sum(k.score)/COUNT (k.id)), k.searchMetaData.university.id) " +
+                "from KeyWordScore k where k.keyword.topicId = :topicId group by k.searchMetaData.university.id ").setParameter("topicId",topicId).list();
+        List<Integer> uniIds = scores.stream().map(s -> s.getUniversityId()).collect(Collectors.toList());
+        List<University> universities = currentSession.createQuery("select u from University u where u.id in :ids").setParameter("ids", uniIds).list();
+        HashMap<Integer,University> universityHashMap = new HashMap<Integer,University>();
+        for(University u : universities)
+            universityHashMap.put(u.getId(),u);
+
+        transaction.commit();
+        currentSession.close();
+        return scores.stream().map(s -> new TopicScore(
+                fromUniversity(universityHashMap.get(s.getUniversityId())),
+                t.get(),
+                s.getScore()
+        )).collect(Collectors.toList());
+    }
+
+    private SearchMetaData fromUniversity(University u){
+        return new SearchMetaData(
+                u.getSeedUrl(),
+                u,
+                null
+        );
+    }
+
+
 }

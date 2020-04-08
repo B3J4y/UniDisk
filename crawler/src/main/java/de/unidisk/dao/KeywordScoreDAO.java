@@ -1,14 +1,12 @@
 package de.unidisk.dao;
 
-import de.unidisk.HibernateUtil;
 import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import java.security.Key;
 import java.util.Optional;
 
-public class KeywordScoreDAO implements Scoring {
+public class KeywordScoreDAO implements ScoringDAO {
     public KeywordScoreDAO() {
     }
 

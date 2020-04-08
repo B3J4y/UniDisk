@@ -1,16 +1,19 @@
 package de.unidisk.dao;
 
-import de.unidisk.HibernateUtil;
 import de.unidisk.entities.hibernate.*;
-import de.unidisk.view.model.MapMarker;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.view.model.KeywordItem;
+import de.unidisk.view.project.ProjectView;
+import de.unidisk.view.results.Result;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class ProjectDAO  {
+public class ProjectDAO  implements IProjectRepository {
     public ProjectDAO() {
     }
 
@@ -25,7 +28,7 @@ public class ProjectDAO  {
             transaction.begin();
         }
         Project project = new Project(name);
-        project.setProjectState(ProjectState.WAITING);
+        project.setProjectState(ProjectState.IDLE);
         currentSession.save(project);
 
         transaction.commit();
@@ -49,6 +52,25 @@ public class ProjectDAO  {
         currentSession.update(project);
         transaction.commit();
         currentSession.close();
+    }
+
+    @Override
+    public List<ProjectView> getProjects() {
+        return getAll().stream().map(ProjectView::fromProject).collect(Collectors.toList());
+    }
+
+    @Override
+    public Project getProject(String projectId) {
+        int id = Integer.parseInt(projectId);
+        final Optional<Project> p  = findProjectById(id);
+        if(p.isPresent())
+            return p.get();
+        return null;
+    }
+
+    @Override
+    public List<KeywordItem> getProjectKeywords(String projectId) {
+        return null;
     }
 
     public boolean deleteProject(String name){
@@ -100,7 +122,7 @@ public class ProjectDAO  {
         Optional<ProjectState> state = (Optional<ProjectState>) stateQuery.uniqueResultOptional();
         transaction.commit();
         currentSession.close();
-        return state.isPresent() ? state.get() == ProjectState.WAITING : false;
+        return state.isPresent() ? state.get() == ProjectState.IDLE : false;
     }
 
     public Optional<Project> findProjectById(int id) {
@@ -164,7 +186,7 @@ public class ProjectDAO  {
         return project;
     }
 
-    public List<KeyWordScore> getResults(String projectId)
+    public List<Result> getResults(String projectId)
     {
         int pId = Integer.parseInt(projectId);
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -172,33 +194,28 @@ public class ProjectDAO  {
         if (!transaction.isActive()) {
             transaction.begin();
         }
-        //currentSession.createQuery("select t from TopicScore t where t.topic.id in (select t.id from topic t where t.projectId = :pId)", TopicScore.class).setParameter("pId",pId);
-        List<KeyWordScore> scores = currentSession.createQuery("select kScore from KeyWordScore kScore where kScore.keyword.topicId in " +
-                "(select t.id from Topic t where t.projectId = :pId)", KeyWordScore.class)
+
+
+
+       List<Result> scores = currentSession.createQuery("select new de.unidisk.view.results.Result(t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
+               " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
                 .setParameter("pId",pId).list();
-        /*List<KeyWordScore> scores = currentSession.createQuery("select score from Topic t " +
-                "INNER JOIN Keyword k ON t.id = k.topicId " +
-                "LEFT JOIN KeyWordScore  score ON score.keyword.id = k.id " +
-                "WHERE t.projectId = :pId", KeyWordScore.class)
-                .setParameter("pId",pId)
-                .list();*/
         transaction.commit();
         currentSession.close();
         return scores;
     }
 
-    public List<MapMarker> getMapMarker(String projectId){
-        int pId = Integer.parseInt(projectId);
+    @Override
+    public List<Project> getProjects(ProjectState state){
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction transaction = currentSession.getTransaction();
         if (!transaction.isActive()) {
             transaction.begin();
         }
-        List<MapMarker> scores = currentSession.createQuery("select new de.unidisk.view.model.MapMarker(tScore.topic.name,tScore.topic.id, tScore.searchMetaData.university) from TopicScore tScore where tScore.topic.projectId = :pId")
-                .setParameter("pId",pId).list();
 
+        List<Project> project = currentSession.createQuery("select p from Project p where p.projectState = :state", Project.class).setParameter("state",state).list();
         transaction.commit();
         currentSession.close();
-        return scores;
+        return project;
     }
 }

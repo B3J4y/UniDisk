@@ -6,6 +6,7 @@ out/
 /crawler/*.iml
 /website/*.iml
 
+/crawler/src/main/webapp/node_modules
 *.class
 /crawler/.idea/workspace.xml
 /crawler/target/*

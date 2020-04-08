@@ -3,16 +3,16 @@ package de.unidisk.entities.hibernate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 @Entity
 public class KeyWordScore implements ScoredInput {
     @Id
+    @GeneratedValue
     private int id;
+
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private SearchMetaData searchMetaData;
 
     @OneToOne

@@ -3,11 +3,13 @@ package de.unidisk.entities;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.entities.util.TestFactory;
+import de.unidisk.view.results.Result;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,15 +55,23 @@ class KeywordScoreTest implements HibernateLifecycle{
     }
 
     @Test
-    void getResultsReturnsValidData(){
+    void getResultsReturnsValidData() throws MalformedURLException {
         final Project p = new ProjectDAO().createProject("");
         final Topic t = new TopicDAO().createTopic("", p.getId());
         final Keyword k = new KeywordDAO().addKeyword("",t.getId());
         final KeywordScoreDAO dao = new KeywordScoreDAO();
-        dao.createKeywordScore(k.getId(),5);
+        final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
+        final University university = new UniversityDAO().addUniversity("test");
+        long now = ZonedDateTime.now().toEpochSecond();
+        final SearchMetaData searchMetaData1 = searchMetaDataDAO.createMetaData(new URL("https://www.google.com"), university.getId(), now);
+        final SearchMetaData searchMetaData2 = searchMetaDataDAO.createMetaData(new URL("https://www.google.com?q=solr"), university.getId(), now);
+        final KeyWordScore score1 = dao.createKeywordScore(k.getId(),5);
+        final KeyWordScore score2 = dao.createKeywordScore(k.getId(),7);
+        dao.setMetaData(score1.getId(),searchMetaData1.getId());
+        dao.setMetaData(score2.getId(),searchMetaData2.getId());
 
-        final List<KeyWordScore> results = new ProjectDAO().getResults(String.valueOf(p.getId()));
-        assertEquals(results.size(),1);
+        final List<Result> results = new ProjectDAO().getResults(String.valueOf(p.getId()));
+        assertEquals(results.size(),2);
         assertEquals(results.get(0).getScore(), 5);
     }
 
