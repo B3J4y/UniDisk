@@ -27,7 +27,7 @@ public class HibernateUtil {
     }
 
     public static <T> T execute(Function<Session,T> action){
-        Session sess = getSessionFactory().getCurrentSession();
+        Session sess = getSessionFactory().openSession();
         Transaction tx = null;
         try {
             tx = sess.beginTransaction();

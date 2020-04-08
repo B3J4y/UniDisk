@@ -12,6 +12,8 @@ import de.unidisk.contracts.services.IResultService;
 import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.UniCrawlService;
 import de.unidisk.dao.HibernateTestSetup;
+import de.unidisk.dao.HibernateUtil;
+import de.unidisk.entities.hibernate.Project;
 import de.unidisk.solr.SolrApp;
 import de.unidisk.solr.services.SolrScoringService;
 import org.apache.log4j.LogManager;
@@ -62,6 +64,11 @@ public class TestSetupBean {
         SystemConfiguration config = SystemConfiguration.getInstance();
         if(config.getDatabaseConfiguration().isInitializeMockData()){
             final ApplicationState state = MockData.getMockState();
+            try {
+                HibernateUtil.truncateTable(Project.class);
+            }catch(Exception e){
+                //fails for h2 database
+            }
             HibernateTestSetup.Setup(state);
         }
         setupCrawlJob();

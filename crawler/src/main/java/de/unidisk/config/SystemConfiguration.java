@@ -28,7 +28,7 @@ public class SystemConfiguration {
     solrConfiguration = solrConfigurationFromProperties(properties);
     databaseConfiguration = databaseConfigurationFromProperties(properties);
     production = properties.getProperty("environment.production").equals("1");
-    scoringInterval = Long.parseLong(properties.getProperty("scoring.interval"));
+    scoringInterval = Long.parseLong(properties.getProperty("scoring.interval").trim());
   }
 
   private static SolrConfiguration solrConfigurationFromProperties(Properties properties){
