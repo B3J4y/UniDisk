@@ -55,38 +55,37 @@ public class SolrApp {
             logger.debug("Entering main");
 
             try {
-
                 final List<Topic> topics = p.getTopics();
                 for(Topic t : topics){
                     for(Keyword keyword : t.getKeywords()){
                         final List<ScoreResult> scores = this.scoringService.getKeywordScore(p.getId(),keyword.getId());
-                        scores.forEach(score -> {
-                            logger.info("Keyword " + String.valueOf(score.getEntityId()) + ": " + String.valueOf(score.getScore()));
-                            try {
-                                this.resultService.CreateKeywordScore(score);
-                            } catch (EntityNotFoundException | MalformedURLException e) {
-                                e.printStackTrace();
-                            }
-                        });
+                        for(ScoreResult score : scores) {
+                            logger.info("Keyword " + score.getEntityId() + ": " + score.getScore());
+                            this.resultService.CreateKeywordScore(score);
+                        }
                     }
                     final List<ScoreResult> topicScores = this.scoringService.getTopicScores(p.getId(), t.getId());
-                    topicScores.forEach(score -> {
-                        try {
-                            this.resultService.CreateTopicScore(score);
-                        } catch (EntityNotFoundException | MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                    for(ScoreResult score : topicScores) {
+
+                        this.resultService.CreateTopicScore(score);
+                    }
                 }
                 logger.info("finished processing project " + p.getName() + " .");
                 projectRepository.updateProjectState(p.getId(),ProjectState.FINISHED);
 
             } catch (Exception e) {
+                if(e instanceof EntityNotFoundException){
+                    projectRepository.setProjectError(p.getId(), "Ein Stichwort oder Thema konnte nicht gefunden werden.");
+                }else if(e instanceof MalformedURLException){
+                    projectRepository.setProjectError(p.getId(), "Die Webseite einer Universtität konnte nicht gefunden werden.");
+                }else{
+                    projectRepository.setProjectError(p.getId(), e.getLocalizedMessage());
+                }
                 logger.error("Error occured while processing project " + p.getName() + " .");
                 logger.error(e);
 
                 projectRepository.updateProjectState(p.getId(),ProjectState.ERROR);
-                projectRepository.setProjectError(p.getId(), e.getMessage());
+
                 e.printStackTrace();
 
             }
