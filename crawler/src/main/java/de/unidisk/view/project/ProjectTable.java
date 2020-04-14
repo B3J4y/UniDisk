@@ -26,6 +26,7 @@ public class ProjectTable implements Serializable {
     private List<ProjectState> projectStates;
     private java.util.List<ProjectView> projects;
     private String deletionError;
+    private int projectReleaseId;
 
     public ProjectTable() {
     }
@@ -114,5 +115,13 @@ public class ProjectTable implements Serializable {
         }catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    public int getProjectReleaseId() {
+        return projectReleaseId;
+    }
+
+    public void setProjectReleaseId(int projectReleaseId) {
+        this.projectReleaseId = projectReleaseId;
     }
 }

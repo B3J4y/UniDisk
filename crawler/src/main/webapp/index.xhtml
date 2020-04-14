@@ -46,6 +46,10 @@
         <ui:param name="updateOnDelete" value="stichwortPanel projectTabs" />
     </ui:include>
 
+    <ui:include src="components/projects/ReleaseProjectDialog.xhtml">
+        <ui:param name="updateOnRelease" value="stichwortPanel projectTopicHeader projectTabs" />
+    </ui:include>
+
     <!-- the data table -->
     <div class="row">
         <div class="col-lg-4">
@@ -72,9 +76,10 @@
                                     </p:link>
                                     <div style="float:right;">
 
-                                        <p:commandButton value="Freigeben" id="projectStatusButton" rendered="#{projectState.idle}"
-                                                         update=" stichwortPanel projectTopicHeader projectTabs projectTabProjects"
-                                                         action="#{dtAddRowView.setWaiting(project.id)}"
+                                        <p:commandButton value="Freigeben" id="projectStatusButton"
+                                                         rendered="#{projectState.idle}"
+                                                         action="#{dtAddRowView.setProjectReleaseId(project.id)}"
+                                                        onclick="PF('projectReleaseDialog').show();"
                                                         style="margin-right:20px;"
                                                          styleClass="ui-priority-primary"/>
 
