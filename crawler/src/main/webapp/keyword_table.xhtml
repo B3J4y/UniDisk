@@ -48,7 +48,7 @@ Include Parameter:
                     <p:panelGrid columns="1" layout="grid"  styleClass="ui-noborder">
                     <h:outputText value="Neues Stichwort" />
 
-                    <p:remoteCommand name="addNewKeyword" update="projectTopicKeywords newKeywordForm" actionListener="#{projectTopicTable.addKeyword}"/>
+                    <p:remoteCommand name="addNewKeyword" update="#{updateOnCreated}  projectTopicKeywords newKeywordForm" actionListener="#{projectTopicTable.addKeyword}"/>
 
                     <p:panelGrid columns="3" layout="grid"  styleClass="ui-noborder">
                         <p:inputText placeholder="Stichwort..." value="#{projectTopicTable.newKeyword}"
@@ -56,7 +56,7 @@ Include Parameter:
                                      onkeypress="if (event.keyCode == 13) { addNewKeyword(); return false; }"
                         />
                         <p:watermark for="newKeywordInput" value="Stichwort..." id="watermark_newKeywordInput" />
-                        <p:commandButton style="margin-left: 16px;" value="+" update="#{addNewKeyword}" action="#{projectTopicTable.addKeyword}"/>
+                        <p:commandButton style="margin-left: 16px;" value="+" update="#{updateOnCreated} projectTopicKeywords newKeywordForm" action="#{projectTopicTable.addKeyword}"/>
                     </p:panelGrid>
 
 
