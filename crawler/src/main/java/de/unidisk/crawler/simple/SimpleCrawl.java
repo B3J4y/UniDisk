@@ -9,7 +9,6 @@ import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
-import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -19,7 +18,6 @@ import org.jsoup.safety.Whitelist;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.Set;
 
 public class SimpleCrawl implements ICrawler {
 
@@ -31,32 +29,16 @@ public class SimpleCrawl implements ICrawler {
     private UniversitySeed[] seedList;
     private String[] whiteList;
     private String solrUrl;
-    private int maxVisitsPerSeed;
-    private IProgressListener ProgessListener;
+    private CrawlConfiguration crawlConfiguration;
+    private IProgressListener progressListener;
 
 
-    public SimpleCrawl(String storageLocation, UniversitySeed[] seedList, String[] whiteList, String solrUrl, int maxVisitsPerSeed){
-        this.storageLocation = storageLocation;
-        this.seedList = seedList;
-        this.whiteList = whiteList;
-        this.solrUrl = solrUrl;
-        this.maxVisitsPerSeed = maxVisitsPerSeed;
-    }
-
-    public SimpleCrawl(String storageLocation, UniversitySeed seed, String solrUrl, int maxVisitsPerSeed){
-        this.storageLocation = storageLocation;
-        this.seedList = new UniversitySeed[]{seed};
-        this.whiteList = new String[]{seed.getSeedUrl()};
-        this.solrUrl = solrUrl;
-        this.maxVisitsPerSeed = maxVisitsPerSeed;
-    }
-
-    public SimpleCrawl(String storageLocation, UniversitySeed[] seeds, String solrUrl, int maxVisitsPerSeed){
+    public SimpleCrawl(String storageLocation, UniversitySeed[] seeds, String solrUrl, CrawlConfiguration crawlConfiguration){
         this.storageLocation = storageLocation;
         this.seedList = seeds;
         this.whiteList = Arrays.stream(seeds).map(UniversitySeed::getSeedUrl).toArray(String[]::new);
         this.solrUrl = solrUrl;
-        this.maxVisitsPerSeed = maxVisitsPerSeed;
+        this.crawlConfiguration = crawlConfiguration;
     }
 
     public void startCrawl(String seed) throws Exception {
@@ -74,7 +56,8 @@ public class SimpleCrawl implements ICrawler {
         int numberOfCrawlers = 1;
 
         CrawlConfig config = new CrawlConfig();
-
+        config.setMaxDepthOfCrawling(crawlConfiguration.getMaxLinkDepth());
+        config.setMaxPagesToFetch(crawlConfiguration.getMaxPages());
         config.setCrawlStorageFolder(crawlStorageFolder);
         // Instantiate the controller for this crawl.
         PageFetcher pageFetcher = new PageFetcher(config);
@@ -104,13 +87,10 @@ public class SimpleCrawl implements ICrawler {
     }
 
     private CrawlController.WebCrawlerFactory<UniversityCrawler> CreateCrawler(UniversitySeed seed){
-        CrawlController.WebCrawlerFactory<UniversityCrawler> factory = () -> new UniversityCrawler(seed,
+        CrawlController.WebCrawlerFactory<UniversityCrawler> factory = () -> new UniversityCrawler(
                 whiteList,
                 (page) -> processPage(page, seed.getUniversityId()),
-                new CrawlConfiguration(
-                        maxVisitsPerSeed
-
-                )
+                this.crawlConfiguration
         );
         return factory;
     }
@@ -122,8 +102,6 @@ public class SimpleCrawl implements ICrawler {
         HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
         String html = htmlParseData.getHtml();
         String safe = Jsoup.clean(html, Whitelist.basic());
-        Set<WebURL> links = htmlParseData.getOutgoingUrls();
-
         final String url = page.getWebURL().toString();
         final String documentId = String.valueOf(url.hashCode());
         final long timestamp = System.currentTimeMillis();
@@ -148,8 +126,8 @@ public class SimpleCrawl implements ICrawler {
          for (UniversitySeed s : seedList) {
              logger.info("STARTING crawl with seed: "+ s);
              startCrawl(s.getSeedUrl());
-             if(ProgessListener !=null)
-                 ProgessListener.onSeedFinished(s);
+             if(progressListener !=null)
+                 progressListener.onSeedFinished(s);
              logger.info("FINISHED crawl with seed: "+ s);
          }
      }
@@ -162,8 +140,8 @@ public class SimpleCrawl implements ICrawler {
                  logger.info("STARTING crawl with seed: "+ s);
                  try {
                      startCrawl(s, true);
-                     if(ProgessListener !=null)
-                         ProgessListener.onSeedFinished(s);
+                     if(progressListener !=null)
+                         progressListener.onSeedFinished(s);
                  } catch (Exception e) {
                      logger.error(e);
                  }
@@ -182,8 +160,8 @@ public class SimpleCrawl implements ICrawler {
         }
     }
 
-    public void setProgessListener(IProgressListener ProgessListener) {
-        this.ProgessListener = ProgessListener;
+    public void setProgressListener(IProgressListener progressListener) {
+        this.progressListener = progressListener;
     }
 
     public interface IProgressListener {
