@@ -17,7 +17,7 @@ import java.util.Optional;
 public class HibernateResultService implements IResultService {
 
     @Override
-    public void CreateKeywordScore(ScoreResult result) throws EntityNotFoundException, MalformedURLException {
+    public void createKeywordScore(ScoreResult result) throws EntityNotFoundException, MalformedURLException {
         final KeywordDAO kDao = new KeywordDAO();
         final Optional<Keyword> k = kDao.get(result.getEntityId());
         if(!k.isPresent())
@@ -33,7 +33,7 @@ public class HibernateResultService implements IResultService {
     }
 
     @Override
-    public void CreateTopicScore(ScoreResult result) throws EntityNotFoundException, MalformedURLException {
+    public void createTopicScore(ScoreResult result) throws EntityNotFoundException, MalformedURLException {
         final TopicDAO tDao = new TopicDAO();
         final Optional<Topic> topic = tDao.getTopic(result.getEntityId());
         final boolean topicExists = topic.isPresent();

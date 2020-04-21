@@ -46,13 +46,8 @@ public class HibernateTopicRepo implements ITopicRepository {
     }
 
     @Override
-    public List<TopicScore> getScores(int topicId) {
-        try {
-            return new TopicDAO().getScoresFromKeywords(topicId);
-        } catch (EntityNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public List<TopicScore> getScores(int topicId) throws EntityNotFoundException {
+        return new TopicDAO().getScoresFromKeywords(topicId);
     }
 
     @Override

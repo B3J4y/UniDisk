@@ -10,6 +10,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ public class ProjectDAO  implements IProjectRepository {
         project.setProjectState(ProjectState.IDLE);
         return  HibernateUtil.execute(session -> {
             session.save(project);
+            project.setTopics(new ArrayList<>());
             return project;
         });
     }
@@ -47,6 +49,10 @@ public class ProjectDAO  implements IProjectRepository {
 
     @Override
     public void setProjectError(int projectId, String message) {
+        if(message == null){
+            clearProjectError(projectId);
+            return;
+        }
         final Optional<Project> projectResult = findProjectById(projectId);
         if(!projectResult.isPresent()){
             return;
@@ -61,15 +67,19 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
+    public void clearProjectError(int projectId) {
+        setProjectError(projectId,"");
+    }
+
+    @Override
     public List<ProjectView> getProjects() {
         return getAll().stream().map(ProjectView::fromProject).collect(Collectors.toList());
     }
 
     @Override
-    public Project getProject(String projectId) {
+    public Optional<Project> getProject(String projectId) {
         int id = Integer.parseInt(projectId);
-        final Optional<Project> p  = findProjectById(id);
-        return p.orElse(null);
+        return findProjectById(id);
     }
 
     public boolean deleteProject(String name){
@@ -99,35 +109,35 @@ public class ProjectDAO  implements IProjectRepository {
     public boolean canEdit(String projectId){
         int pId = Integer.parseInt(projectId);
         return HibernateUtil.execute(session -> {
-            Query stateQuery = session.createQuery("select p.projectState from Project p WHERE p.id = :pId")
-                    .setParameter("pId", pId);
-            Optional<ProjectState> state = (Optional<ProjectState>) stateQuery.uniqueResultOptional();
+            Optional<ProjectState> state =  (Optional<ProjectState>) session.createQuery("select p.projectState from Project p WHERE p.id = :pId")
+                    .setParameter("pId", pId).uniqueResultOptional();
+
             return state.isPresent() ? state.get() == ProjectState.IDLE : false;
         });
     }
 
-    public Optional<Project> findProjectById(int id) {
+    private Optional<Project> findProjectById(int id) {
         return HibernateUtil.execute(session ->  {
-            Optional<Project> optProj = session.createQuery("select p from Project p where p.id = :id", Project.class)
+            return session.createQuery("select p from Project p where p.id = :id", Project.class)
                     .setParameter("id", id)
                     .uniqueResultOptional();
-            return optProj;
+
         });
     }
 
     public Optional<Project> findProject(String name) {
         return HibernateUtil.execute(session ->  {
-            Optional<Project> optProj = session.createQuery("select p from Project p where p.name like :name", Project.class)
+            return  session.createQuery("select p from Project p where p.name like :name", Project.class)
                     .setParameter("name", name)
                     .uniqueResultOptional();
-            return optProj;
+
         });
     }
 
     public List<Project> getAll() {
        return HibernateUtil.execute((session -> {
-           List<Project> project = session.createQuery("select p from Project p", Project.class).list();
-           return project;
+           return session.createQuery("select p from Project p", Project.class).list();
+
        }));
     }
 
@@ -135,18 +145,16 @@ public class ProjectDAO  implements IProjectRepository {
     {
         int pId = Integer.parseInt(projectId);
         return HibernateUtil.execute((session -> {
-            List<Result> scores = session.createQuery("select new de.unidisk.view.results.Result(t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
+            return  session.createQuery("select new de.unidisk.view.results.Result(t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
                     " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
                     .setParameter("pId",pId).list();
-            return scores;
         }));
     }
 
     @Override
     public List<Project> getProjects(ProjectState state){
         return HibernateUtil.execute((session -> {
-            List<Project> project = session.createQuery("select p from Project p where p.projectState = :state", Project.class).setParameter("state",state).list();
-            return project;
+            return session.createQuery("select p from Project p where p.projectState = :state", Project.class).setParameter("state",state).list();
         }));
     }
 }

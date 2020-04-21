@@ -6,7 +6,6 @@ import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.model.ScoreResult;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
-import de.unidisk.repositories.HibernateUniversityRepo;
 import de.unidisk.solr.services.SolrScoringService;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Keyword;
@@ -19,8 +18,6 @@ import de.unidisk.services.HibernateResultService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.net.MalformedURLException;
 import java.util.List;
 
@@ -61,13 +58,13 @@ public class SolrApp {
                         final List<ScoreResult> scores = this.scoringService.getKeywordScore(p.getId(),keyword.getId());
                         for(ScoreResult score : scores) {
                             logger.info("Keyword " + score.getEntityId() + ": " + score.getScore());
-                            this.resultService.CreateKeywordScore(score);
+                            this.resultService.createKeywordScore(score);
                         }
                     }
                     final List<ScoreResult> topicScores = this.scoringService.getTopicScores(p.getId(), t.getId());
                     for(ScoreResult score : topicScores) {
 
-                        this.resultService.CreateTopicScore(score);
+                        this.resultService.createTopicScore(score);
                     }
                 }
                 logger.info("finished processing project " + p.getName() + " .");

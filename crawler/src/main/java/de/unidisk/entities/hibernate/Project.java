@@ -64,10 +64,6 @@ public class Project {
         this.name = name;
     }
 
-    public ProjectState getStatus() {
-        return projectState;
-    }
-
     public void addTopic(Topic topic) {
         if (topics == null) {
             topics = new ArrayList<>();

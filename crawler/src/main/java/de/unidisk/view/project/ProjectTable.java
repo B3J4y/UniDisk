@@ -42,7 +42,7 @@ public class ProjectTable implements Serializable {
             projects.add(
                     new ProjectView(
                             newProject.getName(),
-                            newProject.getStatus(),
+                            newProject.getProjectState(),
                             String.valueOf(newProject.getId())
                     )
             );

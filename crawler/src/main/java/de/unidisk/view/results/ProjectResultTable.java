@@ -14,6 +14,7 @@ import javax.faces.bean.ViewScoped;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ManagedBean(name = "projectResultTable")
@@ -51,24 +52,28 @@ public class ProjectResultTable {
             return;
         }
 
-        final Project p = projectRepository.getProject(projectId);
-        this.project = p;
-        if(p.getProcessingError() !=null){
-            System.out.println(p.getProcessingError());
-        }
-        if(p == null){
+        final Optional<Project> p = projectRepository.getProject(projectId);
+
+        if(!p.isPresent()){
             setProjectNotExisting();
             return;
+        }else{
+            this.project = p.get();
         }
 
+        if(project.getProcessingError() !=null){
+            System.out.println(project.getProcessingError());
+        }
+
+
         projectExists = true;
-        projectHasResults = p.getProjectState() == ProjectState.FINISHED;
+        projectHasResults = project.getProjectState() == ProjectState.FINISHED;
         if(!projectHasResults){
-            if(p.getProjectState() == ProjectState.RUNNING){
+            if(project.getProjectState() == ProjectState.RUNNING){
                 projectStatusMessage = "Das Projekt wird noch bearbeitet.";
-            }else if(p.getProjectState() == ProjectState.ERROR){
+            }else if(project.getProjectState() == ProjectState.ERROR){
                 projectStatusMessage = "Beim Bearbeiten des Projekts trat ein Fehler auf.";
-            }else if(p.getProjectState() == ProjectState.WAITING){
+            }else if(project.getProjectState() == ProjectState.WAITING){
                 projectStatusMessage = "Die Bearbeitung des Projekts steht noch aus.";
             }
         }else{

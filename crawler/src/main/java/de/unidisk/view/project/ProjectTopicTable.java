@@ -22,6 +22,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @ManagedBean(name = ProjectTopicTable.BEAN_NAME)
 @ViewScoped
@@ -70,11 +71,12 @@ public class ProjectTopicTable {
 
 
     public void setProject(String projectId){
+        final Optional<Project> optional = projectRepository.getProject(projectId);
 
-        selectedProject = projectRepository.getProject(projectId);
-        if(selectedProject == null){
+        if(!optional.isPresent()){
 
         }else {
+            selectedProject = optional.get();
             if (selectedProject.getTopics().size() > 0)
                 setSelectedTopic(selectedProject.getTopics().get(0));
             else

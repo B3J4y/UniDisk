@@ -60,7 +60,7 @@ public class TopicDAO {
 
     public Topic createTopic(String name, int projectId){
         ProjectDAO p = new ProjectDAO();
-        Optional<Project> project =  p.findProjectById(projectId);
+        Optional<Project> project =  p.getProject(String.valueOf(projectId));
         if(!project.isPresent())
             throw new IllegalArgumentException("Project with given id doesn't exist");
 
@@ -114,22 +114,27 @@ public class TopicDAO {
     }
 
     public List<TopicScore> getScoresFromKeywords(int topicId) throws EntityNotFoundException {
-        final Optional<Topic> t = getTopic(topicId);
-        if(!t.isPresent())
+        final Optional<Topic> topic = getTopic(topicId);
+        if(!topic.isPresent())
             throw new EntityNotFoundException(Topic.class,topicId);
 
         return execute(session -> {
+            //Load required data
             List<Score> scores = session.createQuery("select new de.unidisk.dao.Score((sum(k.score)/COUNT (k.id)), k.searchMetaData.university.id) " +
-                    "from KeyWordScore k where k.keyword.topicId = :topicId group by k.searchMetaData.university.id ").setParameter("topicId", topicId).list();
-            List<Integer> uniIds = scores.stream().map(s -> s.getUniversityId()).collect(Collectors.toList());
-            List<University> universities = session.createQuery("select u from University u where u.id in :ids").setParameter("ids", uniIds).list();
+                    "from KeyWordScore k where k.keyword.topicId = :topicId group by k.searchMetaData.university.id ", Score.class).setParameter("topicId", topicId).list();
+            List<Integer> uniIds = scores.stream().map(Score::getUniversityId).collect(Collectors.toList());
+            List<University> universities = session.createQuery("select u from University u where u.id in :ids", University.class).setParameter("ids", uniIds).list();
+
+            //put universities into map
             HashMap<Integer, University> universityHashMap = new HashMap<Integer, University>();
-            for (University u : universities)
-                universityHashMap.put(u.getId(), u);
-            return scores.stream().map(s -> new TopicScore(
-                    fromUniversity(universityHashMap.get(s.getUniversityId())),
-                    t.get(),
-                    s.getScore()
+            for (University university : universities)
+                universityHashMap.put(university.getId(), university);
+
+            //combine data to form results
+            return scores.stream().map(score -> new TopicScore(
+                    fromUniversity(universityHashMap.get(score.getUniversityId())),
+                    topic.get(),
+                    score.getScore()
             )).collect(Collectors.toList());
         });
     }

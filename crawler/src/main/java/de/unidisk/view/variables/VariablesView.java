@@ -6,6 +6,7 @@ import de.unidisk.contracts.repositories.IProjectRepository;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
+import java.util.Optional;
 
 @ManagedBean(name = "variablesView")
 @ViewScoped
@@ -31,8 +32,8 @@ public class VariablesView {
     }
 
     public void load(){
-        final Project p = service.getProject(projectId);
-        project = p;
+        final Optional<Project> p = service.getProject(projectId);
+        p.ifPresent(value -> project = value);
     }
     private String projectSelected = "test";
 
