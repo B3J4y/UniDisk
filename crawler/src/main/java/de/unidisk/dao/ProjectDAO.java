@@ -112,7 +112,7 @@ public class ProjectDAO  implements IProjectRepository {
             Optional<ProjectState> state =  (Optional<ProjectState>) session.createQuery("select p.projectState from Project p WHERE p.id = :pId")
                     .setParameter("pId", pId).uniqueResultOptional();
 
-            return state.isPresent() ? state.get() == ProjectState.IDLE : false;
+            return state.isPresent() && state.get() == ProjectState.IDLE;
         });
     }
 
