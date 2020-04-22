@@ -8,6 +8,7 @@ import org.hibernate.query.Query;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -126,13 +127,13 @@ public class TopicDAO {
             List<University> universities = session.createQuery("select u from University u where u.id in :ids", University.class).setParameter("ids", uniIds).list();
 
             //put universities into map
-            HashMap<Integer, University> universityHashMap = new HashMap<Integer, University>();
-            for (University university : universities)
-                universityHashMap.put(university.getId(), university);
+            Map<Integer, University> universityMap = universities
+                    .stream()
+                    .collect(Collectors.toMap(University::getId,Function.identity()));
 
             //combine data to form results
             return scores.stream().map(score -> new TopicScore(
-                    fromUniversity(universityHashMap.get(score.getUniversityId())),
+                    fromUniversity(universityMap.get(score.getUniversityId())),
                     topic.get(),
                     score.getScore()
             )).collect(Collectors.toList());
