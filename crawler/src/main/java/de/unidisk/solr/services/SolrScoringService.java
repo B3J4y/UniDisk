@@ -1,5 +1,6 @@
 package de.unidisk.solr.services;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.config.SolrConfiguration;
 import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
@@ -61,9 +62,7 @@ public class SolrScoringService implements IScoringService {
                 );
             }).collect(Collectors.toList());
             return results;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             e.printStackTrace();
         }
 
@@ -72,11 +71,11 @@ public class SolrScoringService implements IScoringService {
 
 
     @Override
-    public List<ScoreResult> getTopicScores(int projectId, int topicId) {
+    public List<ScoreResult> getTopicScores(int projectId, int topicId) throws EntityNotFoundException {
         final List<TopicScore> scores = topicRepository.getScores(topicId);
         final List<ScoreResult> scoreResults = scores.stream().map(s ->
              new ScoreResult(
-                    s.getId(),
+                    s.getTopic().getId(),
                     s.getScore(),
                     s.getSearchMetaData().getUniversity().getId(),
                     0,

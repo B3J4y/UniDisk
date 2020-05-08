@@ -8,6 +8,7 @@ import de.unidisk.view.results.Result;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
 public interface IProjectRepository extends Serializable {
 
@@ -16,10 +17,9 @@ public interface IProjectRepository extends Serializable {
     /**
      * Load the project with the given id.
      * @param projectId
-     * @return Project or null if none with id exists
+     * @return
      */
-    Project getProject(String projectId);
-    List<KeywordItem> getProjectKeywords(String projectId);
+    Optional<Project> getProject(String projectId);
 
     boolean deleteProject(String projectId);
     List<Result> getResults(String projectId);
@@ -29,4 +29,6 @@ public interface IProjectRepository extends Serializable {
     List<Project> getProjects(ProjectState state);
 
     void updateProjectState(int projectId, ProjectState state);
+    void setProjectError(int projectId, String message);
+    void clearProjectError(int projectId);
 }

@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
 @ManagedBean(name = KeywordTable.BEAN_NAME)
 @ViewScoped
 public class KeywordTable implements Serializable {
@@ -52,7 +53,7 @@ public class KeywordTable implements Serializable {
         inputKeyword.setKeyword(null);
         inputKeyword.setVariable(null);
         System.out.println("new keyword id: " + newKeyword.getId());
-        this.keywords.add(newKeyword);*/
+        this.keywords.add(newKeyword);
     }
 
     public void deleteKeyword(KeywordItem item){
@@ -75,4 +76,4 @@ public class KeywordTable implements Serializable {
     public boolean canEdit(){
         return this.canEditProject;
     }
-}
+}*/

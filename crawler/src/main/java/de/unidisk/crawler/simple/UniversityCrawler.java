@@ -10,6 +10,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -18,18 +19,12 @@ import java.util.regex.Pattern;
 
 public class UniversityCrawler extends WebCrawler {
 
-    /**
-     * tree to ensure max depth
-     */
-    private CarlTree urlTree;
-    private String[] whitelistUrls;
+    private HashSet<String> whitelistUrls;
     private CrawlConfiguration crawlConfiguration;
-    private int visitedPages =  0;
     private Function<Page,Void> pageProcessor;
 
-    public UniversityCrawler(UniversitySeed seed, String[] whitelist, Function<Page,Void> pageProcessor, CrawlConfiguration configuration) {
-        this.whitelistUrls = whitelist;
-        urlTree  = new CarlTree(new CarlsTreeNode(seed.getSeedUrl()));
+    public UniversityCrawler(String[] whitelist, Function<Page,Void> pageProcessor, CrawlConfiguration configuration) {
+        this.whitelistUrls = new HashSet<String>(Arrays.asList(whitelist));
         this.crawlConfiguration = configuration;
         this.pageProcessor = pageProcessor;
     }
@@ -37,39 +32,14 @@ public class UniversityCrawler extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        if(visitedPages >= crawlConfiguration.getMaxPages())
-            return false;
-
         boolean visitPage =  !crawlConfiguration.getFileIgnorePattern().matcher(href).matches()
                 && checkWhiteList(url);
-
-        if (visitPage) {
-            String parent = referringPage.getWebURL().getURL();
-            String child = url.getURL();
-            CarlsTreeNode parentNode = new CarlsTreeNode(parent);
-            CarlsTreeNode childNode = new CarlsTreeNode(child);
-            CarlTree copy = urlTree;
-            copy.insertCarlsNodes(parentNode, childNode);
-            int depth = copy.getPathToRoot(childNode).length;
-            childNode.setCarlsDepth(depth);
-            if (depth > crawlConfiguration.getMaxLinkDepth()) {
-                return false;
-            }
-            urlTree.insertCarlsNodes(parentNode, childNode);
-            visitedPages +=1;
-        }
-
         return visitPage;
     }
 
     private boolean checkWhiteList(WebURL url) {
         String urlString = url.toString();
-        for (String s : this.whitelistUrls) {
-            if (urlString.contains(s)){
-                return true;
-            }
-        }
-        return false;
+        return whitelistUrls.contains(urlString);
     }
 
 

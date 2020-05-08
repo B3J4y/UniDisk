@@ -3,8 +3,10 @@ package de.unidisk.dao;
 import de.unidisk.config.SystemConfiguration;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
+import java.util.function.Function;
 
 
 public class HibernateUtil {
@@ -22,6 +24,24 @@ public class HibernateUtil {
             sessionFactory = config.configure(SystemConfiguration.getInstance().getDatabaseConfiguration().getConfigFile()).buildSessionFactory();
         }
         return sessionFactory;
+    }
+
+    public static <T> T execute(Function<Session,T> action){
+        Session sess = getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = sess.beginTransaction();
+            final T result = action.apply(sess);
+            tx.commit();
+            return result;
+        }
+        catch (Exception e) {
+            if (tx!=null) tx.rollback();
+            throw e;
+        }
+        finally {
+            sess.close();
+        }
     }
 
     public static void setSessionFactory(DatabaseConfig dbConfig) {

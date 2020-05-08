@@ -6,6 +6,7 @@ import de.unidisk.config.SolrConfiguration;
 import de.unidisk.config.SystemConfiguration;
 import de.unidisk.crawler.model.CrawlDocument;
 import de.unidisk.crawler.model.UniversitySeed;
+import de.unidisk.crawler.simple.CrawlConfiguration;
 import de.unidisk.crawler.simple.ICrawler;
 import de.unidisk.crawler.simple.SimpleCrawl;
 import de.unidisk.crawler.simple.SimpleSolarSystem;
@@ -54,7 +55,7 @@ public class SimpleCrawlTest {
      * @throws Exception
      */
     @Test
-    @DisabledIf("System.getenv(\"CI\") == '1'")
+    @Ignore
     public void shootTheMoon() throws Exception {
         final CrawlerConfiguration crawlerConfiguration = SystemConfiguration.getInstance().getCrawlerConfiguration();
         final UniversitySeed[] seeds = new UniversitySeed[]{
@@ -64,7 +65,7 @@ public class SimpleCrawlTest {
                 crawlerConfiguration.getStorageLocation(),
                 seeds,
                 SolrConfiguration.getInstance().getUrl(),
-                100
+                CrawlConfiguration.fromCrawlerConfiguration(crawlerConfiguration)
         );
         crawler.startCrawl(seeds[0].getSeedUrl());
     }

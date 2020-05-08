@@ -22,7 +22,7 @@ public class ProjectService implements IProjectService {
 
     @Override
     public Project getProject(String projectId) {
-        return projectRepository.getProject(projectId);
+        return projectRepository.getProject(projectId).get();
     }
 
 

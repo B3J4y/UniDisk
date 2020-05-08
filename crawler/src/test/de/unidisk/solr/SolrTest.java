@@ -51,7 +51,7 @@ public class SolrTest {
     @Test
     public void canLoadConfig(){
         final SolrConfiguration config = SolrConfiguration.getInstance();
-       assertTrue(config.getCore().equals("unidisk"));
+       assertTrue(config.getCore().equals("unidisc"));
     }
 
     @Test

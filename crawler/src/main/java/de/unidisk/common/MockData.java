@@ -24,7 +24,7 @@ public class MockData {
     }
 
     public static List<Project> getMockProjects(){
-        final Project p1 = new Project("E-Learning VR", ProjectState.RUNNING,
+        final Project p1 = new Project("E-Learning VR", ProjectState.IDLE,
                 Arrays.asList(
                     new Topic(
                         "Geräte",0, Arrays.asList(
@@ -40,7 +40,7 @@ public class MockData {
                             )
                         ),
                     new Topic(
-                            "Software", 1, Arrays.asList(
+                            "Software", 0, Arrays.asList(
                             new Keyword("Microsoft"),
                             new Keyword("O365"),
                             new Keyword("Moodle"),
@@ -68,36 +68,26 @@ public class MockData {
                 new Topic("E-Learning", 0, Arrays.asList(
                         new Keyword("digital"),
                         new Keyword("Digitalisierung")
-                ))
-        ));
-
-
-        final Project p5 = new Project("E-Learning VR", ProjectState.IDLE,
-                Arrays.asList(
-                        new Topic(
-                                "Geräte",0, Arrays.asList(
-                                new Keyword(
-                                        "Tablet"
-                                ),
-
-                                new Keyword(
-                                        "Smartphone"
-                                ),
-                                new Keyword("Laptop"),
-                                new Keyword("IOT")
-                        )
+                )),
+                new Topic(
+                        "Geräte",0, Arrays.asList(
+                        new Keyword(
+                                "Tablet"
                         ),
-                        new Topic(
-                                "Software", 1, Arrays.asList(
-                                new Keyword("Microsoft"),
-                                new Keyword("O365"),
-                                new Keyword("Moodle"),
-                                new Keyword("Office")
-                        )
-                        )
-                )
-        );
 
-        return Arrays.asList(p1,p2,p3,p4,p5);
+                        new Keyword(
+                                "Smartphone"
+                        ),
+                        new Keyword("Laptop"),
+                        new Keyword("IOT")
+                )
+                )
+        ));
+        p4.setProcessingError("Fehler bei der Verarbeitung.");
+
+
+
+
+        return Arrays.asList(p1,p2,p3,p4);
     }
 }

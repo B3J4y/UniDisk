@@ -40,7 +40,7 @@ Include Parameter:
                 <div style="float:right;">
                 <c:if test="#{projectTopicTable.canEdit()}">
 
-                <p:commandButton value="-"
+                <p:commandButton icon="fa fa-times"
                                  update="projectTopicTable #{updateOnDelete}"
                                  action="#{projectTopicTable.deleteTopic(topic.id)}" />
                 </c:if>

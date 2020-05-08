@@ -19,6 +19,7 @@ public class CrawlerConfiguration {
         this.crawlInterval = crawlInterval;
     }
 
+
     public String getStorageLocation() {
         return storageLocation;
     }

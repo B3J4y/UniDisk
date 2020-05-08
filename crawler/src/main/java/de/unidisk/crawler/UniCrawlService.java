@@ -5,6 +5,7 @@ import de.unidisk.config.SolrConfiguration;
 import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IUniversityRepository;
 import de.unidisk.crawler.model.UniversitySeed;
+import de.unidisk.crawler.simple.CrawlConfiguration;
 import de.unidisk.crawler.simple.SimpleCrawl;
 import de.unidisk.entities.hibernate.University;
 import org.apache.log4j.LogManager;
@@ -41,13 +42,15 @@ public class UniCrawlService implements SimpleCrawl.IProgressListener {
         UniversitySeed[] urlArr = new UniversitySeed[seeds.size()];
         urlArr = seeds.toArray(urlArr);
         final CrawlerConfiguration crawlerConfiguration = SystemConfiguration.getInstance().getCrawlerConfiguration();
+        final CrawlConfiguration crawlConfiguration =   CrawlConfiguration.fromCrawlerConfiguration(crawlerConfiguration);
+
         final SimpleCrawl crawler = new SimpleCrawl(
                 crawlerConfiguration.getStorageLocation(),
                 urlArr,
                 SolrConfiguration.getInstance().getUrl(),
-                crawlerConfiguration.getMaxVisits()
+                crawlConfiguration
         );
-        crawler.setProgessListener(this);
+        crawler.setProgressListener(this);
         crawler.startParallelCrawls();
     }
 

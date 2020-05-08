@@ -1,5 +1,6 @@
 package de.unidisk.dao;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
@@ -9,11 +10,13 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ProjectDAO  implements IProjectRepository {
+
     public ProjectDAO() {
     }
 
@@ -22,18 +25,13 @@ public class ProjectDAO  implements IProjectRepository {
         if (existingProject.isPresent()) {
             return existingProject.get();
         }
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
         Project project = new Project(name);
         project.setProjectState(ProjectState.IDLE);
-        currentSession.save(project);
-
-        transaction.commit();
-        currentSession.close();
-        return project;
+        return  HibernateUtil.execute(session -> {
+            session.save(project);
+            project.setTopics(new ArrayList<>());
+            return project;
+        });
     }
 
     public void updateProjectState(int projectId, ProjectState state) {
@@ -41,17 +39,36 @@ public class ProjectDAO  implements IProjectRepository {
         if (!p.isPresent()) {
             return;
         }
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
         final Project project = p.get();
         project.setProjectState(state);
+        HibernateUtil.execute(session -> {
+            session.update(project);
+            return null;
+        });
+    }
 
-        currentSession.update(project);
-        transaction.commit();
-        currentSession.close();
+    @Override
+    public void setProjectError(int projectId, String message) {
+        if(message == null){
+            clearProjectError(projectId);
+            return;
+        }
+        final Optional<Project> projectResult = findProjectById(projectId);
+        if(!projectResult.isPresent()){
+            return;
+        }
+
+        final Project project = projectResult.get();
+        project.setProcessingError(message);
+        HibernateUtil.execute(session -> {
+            session.update(project);
+            return null;
+        });
+    }
+
+    @Override
+    public void clearProjectError(int projectId) {
+        setProjectError(projectId,"");
     }
 
     @Override
@@ -60,35 +77,20 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
-    public Project getProject(String projectId) {
+    public Optional<Project> getProject(String projectId) {
         int id = Integer.parseInt(projectId);
-        final Optional<Project> p  = findProjectById(id);
-        if(p.isPresent())
-            return p.get();
-        return null;
-    }
-
-    @Override
-    public List<KeywordItem> getProjectKeywords(String projectId) {
-        return null;
+        return findProjectById(id);
     }
 
     public boolean deleteProject(String name){
-
         Optional<Project> project = findProject(name);
         if(!project.isPresent())
             return false;
 
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        currentSession.delete(project.get());
-
-        transaction.commit();
-        currentSession.close();
-        return true;
+        return HibernateUtil.execute(session -> {
+            session.delete(project.get());
+            return true;
+        });
     }
 
     public boolean deleteProjectById(String id){
@@ -97,125 +99,62 @@ public class ProjectDAO  implements IProjectRepository {
         if(!project.isPresent())
             return false;
 
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        currentSession.delete(project.get());
 
-        transaction.commit();
-        currentSession.close();
-        return true;
+        return HibernateUtil.execute(session -> {
+            session.delete(project.get());
+            return true;
+        });
     }
 
     public boolean canEdit(String projectId){
         int pId = Integer.parseInt(projectId);
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        Query stateQuery = currentSession.createQuery("select p.projectState from Project p WHERE p.id = :pId")
-                .setParameter("pId",pId)
-                ;
-        Optional<ProjectState> state = (Optional<ProjectState>) stateQuery.uniqueResultOptional();
-        transaction.commit();
-        currentSession.close();
-        return state.isPresent() ? state.get() == ProjectState.IDLE : false;
+        return HibernateUtil.execute(session -> {
+            Optional<ProjectState> state =  (Optional<ProjectState>) session.createQuery("select p.projectState from Project p WHERE p.id = :pId")
+                    .setParameter("pId", pId).uniqueResultOptional();
+
+            return state.isPresent() && state.get() == ProjectState.IDLE;
+        });
     }
 
-    public Optional<Project> findProjectById(int id) {
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
+    private Optional<Project> findProjectById(int id) {
+        return HibernateUtil.execute(session ->  {
+            return session.createQuery("select p from Project p where p.id = :id", Project.class)
+                    .setParameter("id", id)
+                    .uniqueResultOptional();
 
-        Optional<Project> optProj = currentSession.createQuery("select p from Project p where p.id = :id", Project.class)
-                .setParameter("id", id)
-                .uniqueResultOptional();
-
-        transaction.commit();
-        currentSession.close();
-        return optProj;
+        });
     }
 
     public Optional<Project> findProject(String name) {
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
+        return HibernateUtil.execute(session ->  {
+            return  session.createQuery("select p from Project p where p.name like :name", Project.class)
+                    .setParameter("name", name)
+                    .uniqueResultOptional();
 
-        Optional<Project> optProj = currentSession.createQuery("select p from Project p where p.name like :name", Project.class)
-                .setParameter("name", name)
-                .uniqueResultOptional();
-
-        transaction.commit();
-        currentSession.close();
-        return optProj;
-    }
-
-    public void addTopicToProject(String name, String topicName) {
-        Project project = findProject(name).orElseThrow(() -> new IllegalArgumentException("Project not found"));
-        TopicDAO topicDAO = new TopicDAO();
-        Topic topic = topicDAO.findOrCreateTopic(topicName)
-                .orElseThrow(() -> new IllegalArgumentException("Could not create Topic"));
-        project.addTopic(topic);
-
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        currentSession.update(project);
-        transaction.commit();
-        currentSession.close();
+        });
     }
 
     public List<Project> getAll() {
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        List<Project> project = currentSession.createQuery("select p from Project p", Project.class).list();
-        transaction.commit();
-        currentSession.close();
-        return project;
+       return HibernateUtil.execute((session -> {
+           return session.createQuery("select p from Project p", Project.class).list();
+
+       }));
     }
 
     public List<Result> getResults(String projectId)
     {
         int pId = Integer.parseInt(projectId);
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-
-
-
-       List<Result> scores = currentSession.createQuery("select new de.unidisk.view.results.Result(t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
-               " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
-                .setParameter("pId",pId).list();
-        transaction.commit();
-        currentSession.close();
-        return scores;
+        return HibernateUtil.execute((session -> {
+            return  session.createQuery("select new de.unidisk.view.results.Result(t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
+                    " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
+                    .setParameter("pId",pId).list();
+        }));
     }
 
     @Override
     public List<Project> getProjects(ProjectState state){
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-
-        List<Project> project = currentSession.createQuery("select p from Project p where p.projectState = :state", Project.class).setParameter("state",state).list();
-        transaction.commit();
-        currentSession.close();
-        return project;
+        return HibernateUtil.execute((session -> {
+            return session.createQuery("select p from Project p where p.projectState = :state", Project.class).setParameter("state",state).list();
+        }));
     }
 }

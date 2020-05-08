@@ -1,5 +1,6 @@
 package de.unidisk.dao;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -7,9 +8,12 @@ import org.hibernate.query.Query;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static de.unidisk.dao.HibernateUtil.execute;
 
 
 public class TopicDAO {
@@ -22,19 +26,6 @@ public class TopicDAO {
         });
 
         return topics;
-    }
-
-    <T> T execute(Function<Session,T> action){
-        T value = null;
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        value = action.apply(currentSession);
-        transaction.commit();
-        currentSession.close();
-        return value;
     }
 
     public boolean deleteTopic(int topicId){
@@ -70,7 +61,7 @@ public class TopicDAO {
 
     public Topic createTopic(String name, int projectId){
         ProjectDAO p = new ProjectDAO();
-        Optional<Project> project =  p.findProjectById(projectId);
+        Optional<Project> project =  p.getProject(String.valueOf(projectId));
         if(!project.isPresent())
             throw new IllegalArgumentException("Project with given id doesn't exist");
 
@@ -107,71 +98,46 @@ public class TopicDAO {
         return topic;
     }
 
-    public Optional<Topic> findOrCreateTopic(String name) {
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        Optional<Topic> optTopic = currentSession.createQuery("select t from Topic t where t.name like :name", Topic.class)
-                .setParameter("name", name)
-                .uniqueResultOptional();
-
-        transaction.commit();
-        currentSession.close();
-        return optTopic;
-    }
-
     public Optional<Topic> getTopic(int id) {
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        Optional<Topic> optTopic = currentSession.createQuery("select t from Topic t where t.id = :id", Topic.class)
-                .setParameter("id", id)
-                .uniqueResultOptional();
-
-        transaction.commit();
-        currentSession.close();
-        return optTopic;
+       return execute(session -> {
+           Optional<Topic> optTopic = session.createQuery("select t from Topic t where t.id = :id", Topic.class)
+                   .setParameter("id", id)
+                   .uniqueResultOptional();
+           return optTopic;
+       });
     }
 
     public double getScore(int id){
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        double score = (Double) currentSession.createQuery("select sum(k.score)/COUNT (k.id) from KeyWordScore k where keyword.topicId = :id").setParameter("id",id).uniqueResult();
-
-        transaction.commit();
-        currentSession.close();
-        return score;
+        return execute(session -> {
+            double score = (Double) session.createQuery("select sum(k.score)/COUNT (k.id) from KeyWordScore k where keyword.topicId = :id").setParameter("id", id).uniqueResult();
+            return score;
+        });
     }
 
-    public List<TopicScore> getScoresFromKeywords(int topicId){
-        final Optional<Topic> t = getTopic(topicId);
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        List<Score> scores= currentSession.createQuery("select new de.unidisk.dao.Score((sum(k.score)/COUNT (k.id)), k.searchMetaData.university.id) " +
-                "from KeyWordScore k where k.keyword.topicId = :topicId group by k.searchMetaData.university.id ").setParameter("topicId",topicId).list();
-        List<Integer> uniIds = scores.stream().map(s -> s.getUniversityId()).collect(Collectors.toList());
-        List<University> universities = currentSession.createQuery("select u from University u where u.id in :ids").setParameter("ids", uniIds).list();
-        HashMap<Integer,University> universityHashMap = new HashMap<Integer,University>();
-        for(University u : universities)
-            universityHashMap.put(u.getId(),u);
+    public List<TopicScore> getScoresFromKeywords(int topicId) throws EntityNotFoundException {
+        final Optional<Topic> topic = getTopic(topicId);
+        if(!topic.isPresent())
+            throw new EntityNotFoundException(Topic.class,topicId);
 
-        transaction.commit();
-        currentSession.close();
-        return scores.stream().map(s -> new TopicScore(
-                fromUniversity(universityHashMap.get(s.getUniversityId())),
-                t.get(),
-                s.getScore()
-        )).collect(Collectors.toList());
+        return execute(session -> {
+            //Load required data
+            List<Score> scores = session.createQuery("select new de.unidisk.dao.Score((sum(k.score)/COUNT (k.id)), k.searchMetaData.university.id) " +
+                    "from KeyWordScore k where k.keyword.topicId = :topicId group by k.searchMetaData.university.id ", Score.class).setParameter("topicId", topicId).list();
+            List<Integer> uniIds = scores.stream().map(Score::getUniversityId).collect(Collectors.toList());
+            List<University> universities = session.createQuery("select u from University u where u.id in :ids", University.class).setParameter("ids", uniIds).list();
+
+            //put universities into map
+            Map<Integer, University> universityMap = universities
+                    .stream()
+                    .collect(Collectors.toMap(University::getId,Function.identity()));
+
+            //combine data to form results
+            return scores.stream().map(score -> new TopicScore(
+                    fromUniversity(universityMap.get(score.getUniversityId())),
+                    topic.get(),
+                    score.getScore()
+            )).collect(Collectors.toList());
+        });
     }
 
     private SearchMetaData fromUniversity(University u){

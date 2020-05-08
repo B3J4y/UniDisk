@@ -24,22 +24,14 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public List<ProjectView> getProjects() {
         List<ProjectView> projects = projectDAO.getAll().stream()
-                .map(project -> new ProjectView(project.getName(), project.getStatus(), String.valueOf(project.getId())))
+                .map(project -> new ProjectView(project.getName(), project.getProjectState(), String.valueOf(project.getId())))
                 .collect(Collectors.toList());
         return projects;
     }
 
     @Override
-    public Project getProject(String projectId) {
-        final Optional<Project> p = projectDAO.findProjectById(Integer.parseInt(projectId));
-        return p.isPresent() ? p.get() : null;
-    }
-
-    @Override
-    public List<KeywordItem> getProjectKeywords(String projectId) {
-        final Project p = projectDAO.findProject(projectId).get();
-
-        return p.getTopics().stream().map(( t) -> new KeywordItem(String.valueOf(t.getId()),t.getName(), t.getName() )).collect(Collectors.toList());
+    public Optional<Project> getProject(String projectId) {
+        return projectDAO.getProject(projectId);
     }
 
     @Override
@@ -65,6 +57,16 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public void updateProjectState(int projectId, ProjectState state) {
         projectDAO.updateProjectState(projectId,state);
+    }
+
+    @Override
+    public void setProjectError(int projectId, String message) {
+        projectDAO.setProjectError(projectId,message);
+    }
+
+    @Override
+    public void clearProjectError(int projectId) {
+        projectDAO.clearProjectError(projectId);
     }
 
 }

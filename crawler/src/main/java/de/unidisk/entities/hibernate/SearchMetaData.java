@@ -1,15 +1,14 @@
 package de.unidisk.entities.hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 @Entity
 public class SearchMetaData {
     @Id
     @GeneratedValue
     private int id;
+
+    @Column(columnDefinition="TEXT")
     private String url;
     
     @OneToOne

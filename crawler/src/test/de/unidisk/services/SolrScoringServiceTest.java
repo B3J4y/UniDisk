@@ -1,5 +1,6 @@
 package de.unidisk.services;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.config.SolrConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
@@ -60,7 +61,7 @@ public class SolrScoringServiceTest {
 
     @Test
     @DisabledIf("System.getenv(\"CI\") == '1'")
-    public void canGetTopicScore() throws IOException, SolrServerException {
+    public void canGetTopicScore() throws IOException, SolrServerException, EntityNotFoundException {
         final String solrUrl = SolrConfiguration.getInstance().getUrl();
         final SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(solrUrl);
         final Topic topic = new Topic(

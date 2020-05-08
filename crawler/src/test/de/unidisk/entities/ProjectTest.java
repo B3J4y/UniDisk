@@ -25,9 +25,28 @@ public class ProjectTest implements HibernateLifecycle {
 
     @Test
     public void canCreateEntity() {
-        ProjectDAO dao = new ProjectDAO();
+        final ProjectDAO dao = new ProjectDAO();
+        final Project p = dao.createProject("test");
+        Assert.assertNotNull(p);
+        assertEquals("test",p.getName());
+        assertEquals(ProjectState.IDLE,p.getProjectState());
+        assertEquals(0,p.getTopics().size());
+    }
 
-        Assert.assertNotNull(dao.createProject("test"));
+    @Test
+    public void canSetProcessingError() {
+        ProjectDAO dao = new ProjectDAO();
+        final Project p = dao.createProject("test");
+        Assert.assertNotNull(p);
+        final String error = "test error";
+        dao.setProjectError(p.getId(), error);
+        final Optional<Project> optionalDbProject = dao.getProject(String.valueOf(p.getId()));
+        final Project dbProject = optionalDbProject.get();
+        assertEquals(error,dbProject.getProcessingError());
+        dao.clearProjectError(p.getId());
+        final Optional<Project> optionalDbProjectNoError = dao.getProject(String.valueOf(p.getId()));
+        final Project dbProjectNoError = optionalDbProjectNoError.get();
+        assertEquals("",dbProjectNoError.getProcessingError());
     }
 
     @Test
@@ -44,7 +63,7 @@ public class ProjectTest implements HibernateLifecycle {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject("test");
         dao.deleteProjectById(String.valueOf(valid.getId()));
-        Optional<Project> dbProject = dao.findProjectById(valid.getId());
+        Optional<Project> dbProject = dao.getProject(String.valueOf(valid.getId()));
         Assert.assertNotNull(dbProject);
         Assert.assertFalse(dbProject.isPresent());
     }
@@ -56,7 +75,7 @@ public class ProjectTest implements HibernateLifecycle {
         TopicDAO tDao = new TopicDAO();
         tDao.createTopic("test",valid.getId());
         dao.deleteProjectById(String.valueOf(valid.getId()));
-        Optional<Project> dbProject = dao.findProjectById(valid.getId());
+        Optional<Project> dbProject = dao.getProject(String.valueOf(valid.getId()));
 
 
         Assert.assertNotNull(dbProject);
@@ -76,7 +95,7 @@ public class ProjectTest implements HibernateLifecycle {
     public void findEntityReturnsData() {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject("test");
-        Optional<Project> projectResult = dao.findProjectById(valid.getId());
+        Optional<Project> projectResult = dao.getProject(String.valueOf(valid.getId()));
         Assert.assertTrue(projectResult.isPresent());
         Project dbProject = projectResult.get();
         Assert.assertEquals(valid.getName(),dbProject.getName());
@@ -86,7 +105,7 @@ public class ProjectTest implements HibernateLifecycle {
     @Test
     public void findEntityReturnsNullIfMissing() {
         ProjectDAO dao = new ProjectDAO();
-        Optional<Project> dbProject = dao.findProjectById(5555555);
+        Optional<Project> dbProject = dao.getProject("5555555");
         Assert.assertFalse(dbProject.isPresent());
     }
 

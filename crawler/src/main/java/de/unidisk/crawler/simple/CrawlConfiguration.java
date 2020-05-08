@@ -1,5 +1,7 @@
 package de.unidisk.crawler.simple;
 
+import de.unidisk.config.CrawlerConfiguration;
+
 import java.util.regex.Pattern;
 
 public class CrawlConfiguration {
@@ -18,6 +20,18 @@ public class CrawlConfiguration {
         this.maxPages = maxPages;
         this.maxLinkDepth = maxLinkDepth;
         this.fileIgnorePattern = fileIgnorePattern;
+    }
+
+    public static CrawlConfiguration fromCrawlerConfiguration(CrawlerConfiguration configuration){
+        return new CrawlConfiguration(
+                configuration.getMaxVisits(),
+                configuration.getMaxDepth()
+        );
+    }
+    public CrawlConfiguration(int maxPages, int maxLinkDepth) {
+        this.maxPages = maxPages;
+        this.maxLinkDepth = maxLinkDepth;
+        this.fileIgnorePattern = FILTERS;
     }
 
     public CrawlConfiguration(int maxPages) {

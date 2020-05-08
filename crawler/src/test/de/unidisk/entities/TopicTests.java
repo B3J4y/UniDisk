@@ -1,5 +1,6 @@
 package de.unidisk.entities;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.entities.templates.CRUDTest;
@@ -142,7 +143,7 @@ public class TopicTests implements HibernateLifecycle {
     }
 
     @Test
-    public void canGetTopicScore() throws MalformedURLException {
+    public void canGetTopicScore() throws MalformedURLException, EntityNotFoundException {
         final Topic t = DataFactory.createTopic(2);
         t.setProjectId(parentProject.getId());
         final University u = new UniversityDAO().addUniversity(new University("UP",0,1,"https://www.google.com"));
