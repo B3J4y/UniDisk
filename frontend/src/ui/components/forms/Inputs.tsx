@@ -1,10 +1,6 @@
-import { Box, Paper, TextField, TextFieldProps } from '@material-ui/core';
-import Image from 'material-ui-image';
-import React from 'react';
-import Dropzone, { DropzoneRef, DropzoneProps } from 'react-dropzone';
+import { TextField, TextFieldProps } from '@material-ui/core';
 import moment from 'moment';
-import Button, { ButtonProps } from '@material-ui/core/Button';
-import { CircularProgress } from '@material-ui/core';
+import React from 'react';
 
 export type DateFieldProps = TextFieldProps & {
   value: Date;
@@ -91,84 +87,5 @@ export function TimeField(props: TimeFieldProps) {
         shrink: true,
       }}
     />
-  );
-}
-
-type Props = {
-  onChange?: (image: any) => void;
-  imageUrl?: string | null;
-  onRef?: (ref: DropzoneRef) => void;
-};
-
-export function PaperDropzone(props: Props & DropzoneProps & React.RefAttributes<DropzoneRef>) {
-  const [imageSrc, setImage] = React.useState<string | null>(props.imageUrl ?? null);
-  React.useEffect(() => {
-    setImage(props.imageUrl ?? null);
-  }, [props.imageUrl]);
-
-  return (
-    <Paper>
-      {imageSrc !== null && <Image width="100%" aspectRatio={16 / 9} src={imageSrc} />}
-      {imageSrc === null && (
-        <Box p={2}>
-          <Dropzone
-            {...props}
-            ref={(node) => {
-              if (props.onRef && node !== null) props.onRef(node);
-            }}
-            multiple={false}
-            accept=".jpg,.png,.jpeg"
-            onDrop={(acceptedFiles) => {
-              if (props.onChange) {
-                props.onChange(acceptedFiles[0]);
-              }
-              if (acceptedFiles.length > 0) {
-                const file = URL.createObjectURL(acceptedFiles[0]);
-                setImage(file);
-              }
-            }}
-          >
-            {({ getRootProps, getInputProps }) => (
-              <section style={{ cursor: 'default' }}>
-                <div {...getRootProps()}>
-                  <input {...getInputProps()} />
-                  <p>Datei ablegen oder anklicken um Bild hochzuladen</p>
-                </div>
-              </section>
-            )}
-          </Dropzone>
-        </Box>
-      )}
-    </Paper>
-  );
-}
-
-export function ActionButton(
-  props: {
-    action: () => () => Promise<void>;
-    value: string;
-    loadingBuilder?: () => React.ReactNode;
-  } & ButtonProps,
-) {
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const { loadingBuilder, action, value } = props;
-
-  // if (loadingBuilder) return loadingBuilder();
-
-  return (
-    <Button
-      onClick={async () => {
-        if (loading) return;
-
-        setLoading(true);
-        const task = action();
-        await task();
-        setLoading(false);
-      }}
-      {...props}
-    >
-      {loading && <CircularProgress />}
-      {!loading && value}
-    </Button>
   );
 }

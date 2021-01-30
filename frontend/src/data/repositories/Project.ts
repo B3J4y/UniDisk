@@ -9,14 +9,12 @@ export type UpdateProjectArgs = {
   projectId: Project['id'];
 };
 
-export type DeleteProjectArgs = {
-  projectId: Project['id'];
-};
-
 export interface ProjectRepository {
   findAll(): Promise<Project[]>;
 
+  get(id: Project['id']): Promise<Project | undefined>;
+
   create(args: CreateProjectArgs): Promise<Project>;
   update(args: UpdateProjectArgs): Promise<Project>;
-  delete(args: DeleteProjectArgs): Promise<void>;
+  delete(id: Project['id']): Promise<void>;
 }

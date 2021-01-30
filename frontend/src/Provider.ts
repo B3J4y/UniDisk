@@ -1,16 +1,32 @@
+import { ProjectRepository } from 'data/repositories';
+import { ProjectAllContainer, ProjectDetailContainer } from 'model';
+import React, { useContext } from 'react';
+import { ProjectRepositoryStub } from 'remote/stubs/ProjectRepository';
 import { EventBus } from 'services/event/bus';
 import IAuthenticationService from './data/services/Authentication';
 import { AuthStub } from './remote/services/Authentication';
 
 const eventBus = new EventBus();
 
-export const AuthenticationService = (): IAuthenticationService => {
-  // return new FirebaseAuthService(UserRepository());
-  return new AuthStub();
+const getProjectRepository = (): ProjectRepository => {
+  return new ProjectRepositoryStub();
 };
 
-function getUserId(): Promise<string> {
-  return AuthenticationService()
-    .getAuthToken()
-    .then((token) => token.userId);
+export const provider = {
+  getAllProjectContainer: () => {
+    return new ProjectAllContainer(getProjectRepository(), eventBus);
+  },
+  getProjectDetailContainer: () => {
+    return new ProjectDetailContainer(getProjectRepository(), eventBus);
+  },
+};
+
+export const ProviderContext = React.createContext(provider);
+
+export function useProvider() {
+  return useContext(ProviderContext);
 }
+
+export const AuthenticationService = (): IAuthenticationService => {
+  return new AuthStub();
+};

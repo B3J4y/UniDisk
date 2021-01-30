@@ -1,5 +1,6 @@
 import React from 'react';
+import { ProjectOverviewPage } from './project';
 
 export function Dashboard() {
-  return <h1>dashboard</h1>;
+  return <ProjectOverviewPage />;
 }

@@ -1,6 +1,6 @@
 import { Operation, Resource } from 'data/Resource';
 import { EventBus } from 'services/event/bus';
-import { DeleteEvent, EntityEvent } from 'services/event/events';
+import { DeleteEvent, EntityEvent } from 'services/event';
 import { Container } from 'unstated-typescript';
 
 export type EntityDetailState<T> = {
@@ -106,6 +106,13 @@ export abstract class EntityDetailStateContainer<
     }
   }
 
+  public setEntity(entity: TEntity): void {
+    this.setState({
+      ...this.state,
+      entity: Resource.success(entity),
+    });
+  }
+
   public async delete(): Promise<void> {
     this.setState({
       ...this.state,
@@ -173,8 +180,10 @@ export abstract class EntityAllStateContainer<
     });
 
     this.eventBus.subscribe<TDelete>(deleteName, (event) => {
-      if (!this.state.entities.data) return;
-      const newItems = this.state.entities.data.filter((article) => article.id !== event.id);
+      const entites = this.state.entities.data;
+      if (!entites) return;
+
+      const newItems = entites.filter((entity) => entity.id !== event.id);
       this.setState({
         ...this.state,
         entities: Resource.success(newItems),
