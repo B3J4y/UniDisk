@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton } from '@material-ui/core';
+import { Box, Grid, IconButton, Link } from '@material-ui/core';
 import AppBar from '@material-ui/core/AppBar';
 import Collapse from '@material-ui/core/Collapse';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -10,18 +10,14 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import DescriptionIcon from '@material-ui/icons/Description';
 import ExitToApp from '@material-ui/icons/ExitToApp';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import PersonIcon from '@material-ui/icons/Person';
 import { THEME } from 'config';
 import { UserContainer } from 'model/LoginState';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Subscribe } from 'unstated-typescript';
-import GroupIcon from '@material-ui/icons/Group';
-import LocationCityIcon from '@material-ui/icons/LocationCity';
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -65,9 +61,11 @@ function MyAppBar() {
       <Toolbar>
         <Grid container xs={12} justify="space-between">
           <Grid item xs={9} container alignItems="center">
-            <Typography variant="h6" noWrap style={{ color: THEME.colorOnPrimary }}>
-              Unidisk
-            </Typography>
+            <Link href="/">
+              <Typography variant="h6" noWrap style={{ color: THEME.colorOnPrimary }}>
+                Unidisk
+              </Typography>
+            </Link>
           </Grid>
 
           <Box>
@@ -185,6 +183,20 @@ export default function DefaultDrawer({ children }: { children: any }) {
           </List>
         </div>
       </Drawer>
+      <main className={classes.content}>
+        <Toolbar />
+        {children}
+      </main>
+    </div>
+  );
+}
+
+export function DefaultHeader({ children }: { children: any }) {
+  const classes = useStyles();
+  return (
+    <div className={classes.root}>
+      <CssBaseline />
+      <MyAppBar />
       <main className={classes.content}>
         <Toolbar />
         {children}
