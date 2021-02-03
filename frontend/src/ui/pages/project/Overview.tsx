@@ -7,24 +7,23 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
   Paper,
   TextField,
   Toolbar,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Keyword, Project, ProjectState, Topic } from 'data/entity';
+import InfoIcon from '@material-ui/icons/Info';
+import { Project, ProjectState, Topic } from 'data/entity';
+import { ProjectDetailContainer } from 'model';
 import { useProvider } from 'Provider';
 import React, { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import AlertDialog from 'ui/components/form/AlertDialog';
 import { Column } from 'ui/components/form/Column';
+import { ProjectTopics } from 'ui/components/project/TopicTable';
 import { Center } from 'ui/components/util/Center';
 import { Subscribe } from 'unstated-typescript';
-import InfoIcon from '@material-ui/icons/Info';
-import { useHistory } from 'react-router-dom';
-import { KeywordRecommedation } from 'remote/services/KeywordRecommendation';
-import { ProjectDetailContainer } from 'model';
 
 export function ProjectOverviewPage() {
   const provider = useProvider();
@@ -166,7 +165,7 @@ function ProjectSelectionTable(props: ProjectSelectionTableProps) {
           </Grid>
 
           <Grid item>
-            <CreateProjectButton />
+            <CreateProjectButton existingProjectNames={projects.map((project) => project.name)} />
           </Grid>
         </Grid>
       </Toolbar>
@@ -180,8 +179,7 @@ function ProjectSelectionTable(props: ProjectSelectionTableProps) {
                 key={project.id}
                 button
                 selected={isSelected}
-                onClick={(event) => {
-                  // setSelected(project);
+                onClick={() => {
                   onSelect(project);
                 }}
               >
@@ -275,17 +273,30 @@ function NoProjectsView() {
   );
 }
 
-function CreateProjectButton() {
+type CreateProjectButtonProps = {
+  existingProjectNames: string[];
+};
+function CreateProjectButton(props: CreateProjectButtonProps) {
   const provider = useProvider();
   const [name, setName] = React.useState('');
+
+  const { existingProjectNames } = props;
 
   return (
     <AlertDialog
       title="Neues Projekt"
       content={<TextField placeholder="Projektname" onChange={(e) => setName(e.target.value)} />}
       action={async () => {
+        const projectName = name.trim();
+        const projectNameAvailable = !existingProjectNames.includes(projectName);
+        if (!projectNameAvailable) {
+          return {
+            success: false,
+            error: 'Projektname bereits vergeben.',
+          };
+        }
         const container = provider.getProjectDetailContainer();
-        await container.create({ name });
+        await container.create({ name: projectName });
 
         const result = {
           success: container.state.save.isFinished,
@@ -305,366 +316,5 @@ function CreateProjectButton() {
         );
       }}
     />
-  );
-}
-
-type ProjectTopicsProps = {
-  projectId: Project['id'];
-  selected?: Topic;
-  onSelect: (topic: Topic) => void;
-  topics: Topic[];
-  disabled?: boolean;
-};
-function ProjectTopics(props: ProjectTopicsProps) {
-  const disabled = props.disabled ?? false;
-  const [selected, setSelected] = React.useState(props.selected);
-  const { onSelect, topics } = props;
-
-  useEffect(() => {
-    setSelected(props.selected);
-  }, [props.selected]);
-
-  return (
-    <Grid container xs={12} spacing={2}>
-      <Grid item xs={6}>
-        <Paper>
-          <Toolbar>
-            <Grid container justify="space-between" alignItems="center">
-              <h2>Themen</h2>
-            </Grid>
-          </Toolbar>
-          <CreateTopicForm
-            projectId={props.projectId}
-            onCreated={(topic) => {
-              // setTopics([...topics, topic]);
-            }}
-          />
-          <List style={{ paddingBottom: 0 }}>
-            {topics.map((topic) => {
-              return (
-                <TopicItem
-                  key={topic.id}
-                  topic={topic}
-                  disabled={disabled}
-                  selected={selected?.id === topic.id}
-                  onSelect={() => onSelect(topic)}
-                />
-              );
-            })}
-          </List>
-        </Paper>
-      </Grid>
-      <Grid item xs={6}>
-        {selected && <TopicKeywords topicId={selected?.id} keywords={selected?.keywords ?? []} />}
-      </Grid>
-    </Grid>
-  );
-}
-
-type TopicKeywordsProps = {
-  topicId: Topic['id'];
-  keywords: Keyword[];
-  disabled?: boolean;
-};
-
-function TopicKeywords(props: TopicKeywordsProps) {
-  const disabled = props.disabled ?? false;
-  const provider = useProvider();
-  const { keywords } = props;
-  return (
-    <Paper>
-      <Toolbar>
-        <Grid container justify="space-between" alignItems="center">
-          <h2>Stichworte</h2>
-        </Grid>
-      </Toolbar>
-      <CreateKeywordForm topicId={props.topicId} topicKeywords={keywords.map((k) => k.name)} />
-      <List style={{ paddingBottom: 0 }}>
-        {keywords.map((keyword) => {
-          return (
-            <ListItem key={keyword.id}>
-              <ListItemText primary={keyword.name} />
-              {!disabled && (
-                <ListItemSecondaryAction>
-                  <Button
-                    onClick={async () => {
-                      const container = provider.getKeywordDetailContainer();
-                      container.setEntity(keyword);
-                      await container.delete();
-                    }}
-                  >
-                    X
-                  </Button>
-                </ListItemSecondaryAction>
-              )}
-            </ListItem>
-          );
-        })}
-      </List>
-    </Paper>
-  );
-}
-
-type CreateTopicFormProps = {
-  projectId: Project['id'];
-  onCreated: (topic: Topic) => void;
-};
-
-function CreateTopicForm(props: CreateTopicFormProps) {
-  const { projectId, onCreated } = props;
-  const provider = useProvider();
-  const [name, setName] = React.useState('');
-  const [container, setContainer] = React.useState(provider.getTopicDetailContainer());
-
-  return (
-    <Subscribe to={[container]}>
-      {(container) => {
-        const createTopic = async () => {
-          await container.create({
-            name,
-            projectId,
-          });
-
-          if (container.state.save.isFinished) {
-            setName('');
-            setContainer(provider.getTopicDetailContainer());
-            onCreated(container.state.entity.data!);
-          }
-        };
-
-        return (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              createTopic();
-            }}
-          >
-            <Box p={2}>
-              <Grid container justify="space-between" alignItems="center" spacing={2}>
-                <Grid item style={{ flexGrow: 1, display: 'flex' }}>
-                  <TextField
-                    onChange={(e) => {
-                      setName(e.target.value);
-                    }}
-                    fullWidth
-                    value={name}
-                    variant="outlined"
-                    placeholder="Thema..."
-                  />
-                </Grid>
-                <Grid item>
-                  <Button type="submit">+</Button>
-                </Grid>
-              </Grid>
-            </Box>
-          </form>
-        );
-      }}
-    </Subscribe>
-  );
-}
-
-type CreateKeywordFormProps = {
-  topicId: Topic['id'];
-  topicKeywords: string[];
-  disabled?: boolean;
-};
-
-function CreateKeywordForm(props: CreateKeywordFormProps) {
-  const { topicId, topicKeywords } = props;
-  const provider = useProvider();
-  const disabled = props.disabled ?? false;
-  const [name, setName] = React.useState('');
-  const [container, setContainer] = React.useState(provider.getKeywordDetailContainer());
-
-  const [loading, setLoading] = React.useState(false);
-  const [recommendations, setRecommendations] = React.useState<KeywordRecommedation[] | undefined>(
-    undefined,
-  );
-  const [showRecommendations, setShowRecommendations] = React.useState(false);
-
-  const [inputError, setInputError] = React.useState<string | undefined>(undefined);
-
-  const x = async () => {
-    try {
-      const results = await provider.getKeywordRecommendationService().search(name);
-      const filtered = results.filter((result) => !topicKeywords.includes(result.keyword));
-      setRecommendations(filtered);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    setLoading(true);
-    x();
-  }, [name]);
-
-  const keywordRecommendationClass = 'keyword-rec-item';
-
-  return (
-    <Subscribe to={[container]}>
-      {(container) => {
-        const createKeyword = async (keyword: string, reset: boolean = false) => {
-          await container.create({
-            name: keyword,
-            topicId,
-          });
-
-          if (container.state.save.isFinished) {
-            if (reset) {
-              setName('');
-              setRecommendations(undefined);
-              setShowRecommendations(false);
-            }
-            setContainer(provider.getKeywordDetailContainer());
-          }
-        };
-
-        return (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (topicKeywords.includes(name)) {
-                setInputError('Stichwort kann Thema nur einmal zugewiesen werden.');
-                return;
-              }
-              createKeyword(name, true);
-            }}
-          >
-            <Box p={2}>
-              <Grid container alignItems="center" spacing={2}>
-                <Grid item style={{ position: 'relative', display: 'flex', flexGrow: 1 }}>
-                  <TextField
-                    onBlur={(e) => {
-                      if (e.relatedTarget) {
-                        const className = (e.relatedTarget as { className?: string }).className;
-                        // Ignore keyword selection otherwise the selected keyword is not used
-                        if (className?.includes(keywordRecommendationClass) ?? false) return;
-                      }
-                      setShowRecommendations(false);
-                    }}
-                    onFocus={() => {
-                      setShowRecommendations(true);
-                    }}
-                    onChange={(e) => {
-                      setInputError(undefined);
-                      setShowRecommendations(true);
-                      setName(e.target.value);
-                    }}
-                    fullWidth
-                    value={name}
-                    variant="outlined"
-                    placeholder="Stichwort..."
-                  />
-                  <div style={{ position: 'absolute', bottom: '-60px', zIndex: 2, width: '100%' }}>
-                    {recommendations && showRecommendations && recommendations.length > 0 && (
-                      <List style={{ background: 'white' }}>
-                        {recommendations.map((r) => {
-                          return (
-                            <ListItem
-                              className={keywordRecommendationClass}
-                              button
-                              onClick={() => {
-                                createKeyword(r.keyword, false);
-
-                                setRecommendations(
-                                  recommendations.filter((k) => r.keyword !== k.keyword),
-                                );
-                              }}
-                            >
-                              <ListItemText primary={r.keyword} />
-                            </ListItem>
-                          );
-                        })}
-                      </List>
-                    )}
-                  </div>
-                </Grid>
-                <Grid item>
-                  <Button type="submit">+</Button>
-                </Grid>
-              </Grid>
-              <Grid>
-                {inputError && <p style={{ color: 'red', marginBottom: 0 }}>{inputError}</p>}
-              </Grid>
-            </Box>
-          </form>
-        );
-      }}
-    </Subscribe>
-  );
-}
-
-type TopicItemProps = {
-  topic: Topic;
-  disabled?: boolean;
-  selected: boolean;
-  onSelect: () => void;
-};
-
-function TopicItem(props: TopicItemProps) {
-  const provider = useProvider();
-  const disabled = props.disabled ?? false;
-  const { topic, selected, onSelect } = props;
-  const [name, setName] = React.useState(topic.name);
-
-  return (
-    <ListItem
-      key={topic.id}
-      button
-      disabled={disabled}
-      selected={selected}
-      onClick={(event) => {
-        onSelect();
-      }}
-    >
-      <ListItemText
-        primary={
-          <TextField
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={async (e) => {
-              if (name !== topic.name) {
-                const container = provider.getTopicDetailContainer();
-                container.setEntity(topic);
-                await container.update({ id: topic.id, name });
-              }
-            }}
-          />
-        }
-      />
-      <ListItemSecondaryAction>
-        <AlertDialog
-          title="Thema löschen"
-          contentText={`Soll das Thema ${topic.name} wirklich gelöscht werden? Alle Stichworte werden ebenfalls gelöscht.`}
-          action={async () => {
-            const container = provider.getTopicDetailContainer();
-            container.setEntity(topic);
-            await container.delete();
-            const { state } = container;
-
-            return {
-              success: state.delete.isFinished,
-              error: state.delete.hasError ? 'Thema konnte nicht gelöscht werden.' : undefined,
-            };
-          }}
-          builder={(setOpen) => {
-            return (
-              <IconButton
-                edge="end"
-                aria-label="delete"
-                onClick={() => {
-                  setOpen(true);
-                }}
-              >
-                {' '}
-                <DeleteIcon />
-              </IconButton>
-            );
-          }}
-        />
-      </ListItemSecondaryAction>
-    </ListItem>
   );
 }

@@ -43,6 +43,7 @@ export default function AlertDialog(props: AlertDialogProps) {
             <DialogContentText id="alert-dialog-description">{contentText}</DialogContentText>
           )}
           {content && content}
+          {error && <p style={{ color: 'red' }}>{error}</p>}
         </DialogContent>
         <DialogActions>
           {!isLoading && (
