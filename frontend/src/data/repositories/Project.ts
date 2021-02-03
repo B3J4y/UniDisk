@@ -1,4 +1,4 @@
-import { Project } from 'data/entity';
+import { Project, ProjectDetails } from 'data/entity';
 
 export type CreateProjectArgs = {
   name: string;
@@ -12,7 +12,7 @@ export type UpdateProjectArgs = {
 export interface ProjectRepository {
   findAll(): Promise<Project[]>;
 
-  get(id: Project['id']): Promise<Project | undefined>;
+  get(id: Project['id']): Promise<ProjectDetails | undefined>;
 
   create(args: CreateProjectArgs): Promise<Project>;
   update(args: UpdateProjectArgs): Promise<Project>;

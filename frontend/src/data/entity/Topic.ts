@@ -5,3 +5,5 @@ export type Topic = {
   name: string;
   keywords?: Keyword[];
 };
+
+export type TopicDetails = Required<Topic>;

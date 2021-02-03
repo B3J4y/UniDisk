@@ -1,9 +1,8 @@
 import { Box, CircularProgress } from '@material-ui/core';
 import { THEME } from 'config';
-
 import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
-import DefaultLayout from 'ui/pages/layouts/Default';
+import { HeaderLayout } from 'ui/pages/layouts/Default';
 import { Subscribe } from 'unstated-typescript';
 import { UserContainer } from './model/LoginState';
 
@@ -40,10 +39,10 @@ function LoadingScreen() {
 
 export const RouteWrapper = ({
   component: Component,
-
   isPrivate = false,
+  layout,
   ...rest
-}: any) => {
+}: any & { layout?: 'default' | 'header' | 'none' }) => {
   return (
     <Subscribe to={[UserContainer]}>
       {(c) => {
@@ -81,11 +80,13 @@ export const RouteWrapper = ({
           <Route
             {...rest}
             render={(props) => {
-              return (
-                <DefaultLayout>
-                  <Component {...props} />
-                </DefaultLayout>
-              );
+              const child = <Component {...props} />;
+
+              if (layout === 'none') {
+                return child;
+              }
+
+              return HeaderLayout(child);
             }}
           />
         );

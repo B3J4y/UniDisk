@@ -1,10 +1,9 @@
+import { Project } from 'data/entity';
 import { ProjectRepository } from 'data/repositories';
-
 import { Resource } from 'data/Resource';
 import { EntityAllState, EntityAllStateContainer } from 'model/base';
-import { EventBus } from 'services/event/bus';
 import { ProjectCreatedEvent, ProjectDeletedEvent, ProjectUpdatedEvent } from 'services/event';
-import { Project } from 'data/entity';
+import { EventBus } from 'services/event/bus';
 
 export type ProjectAllState = EntityAllState<Project>;
 

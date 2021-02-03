@@ -1,25 +1,34 @@
-import { Project } from 'data/entity';
+import { Project, ProjectDetails } from 'data/entity';
 import { CreateProjectArgs, ProjectRepository, UpdateProjectArgs } from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';
 import { EntityDetailState, EntityDetailStateContainer } from 'model/base';
-import { ProjectCreatedEvent, ProjectDeletedEvent, ProjectUpdatedEvent } from 'services/event';
+import {
+  KeywordCreatedEvent,
+  KeywordDeletedEvent,
+  ProjectCreatedEvent,
+  ProjectDeletedEvent,
+  ProjectUpdatedEvent,
+  TopicCreatedEvent,
+  TopicDeletedEvent,
+  TopicUpdatedEvent,
+} from 'services/event';
 import { EventBus } from 'services/event/bus';
 
-export type ProjectDetailState = EntityDetailState<Project>;
+export type ProjectDetailState = EntityDetailState<ProjectDetails>;
 
 export class ProjectDetailContainer extends EntityDetailStateContainer<
-  Project,
+  ProjectDetails,
   CreateProjectArgs,
   UpdateProjectArgs,
   ProjectDetailState
 > {
-  protected onCreate(entity: Project): void {
+  protected onCreate(entity: ProjectDetails): void {
     this.eventBus.publish(new ProjectCreatedEvent(entity));
   }
-  protected onUpdate(entity: Project): void {
+  protected onUpdate(entity: ProjectDetails): void {
     this.eventBus.publish(new ProjectUpdatedEvent(entity));
   }
-  protected onDelete(entity: Project): void {
+  protected onDelete(entity: ProjectDetails): void {
     this.eventBus.publish(new ProjectDeletedEvent(entity.id));
   }
 
@@ -28,13 +37,109 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   }
   public constructor(private repository: ProjectRepository, private eventBus: EventBus) {
     super();
+
+    eventBus.subscribe(TopicCreatedEvent, (event: TopicCreatedEvent) => {
+      const project = this.state.entity.data;
+      if (!project || project.id !== event.projectId) return;
+
+      const newProject = {
+        ...project,
+        topics: [...project.topics, { ...event.entity, keywords: [] }],
+      };
+
+      this.setState({
+        entity: Resource.success(newProject),
+      });
+    });
+
+    eventBus.subscribe(TopicUpdatedEvent, (event: TopicUpdatedEvent) => {
+      const project = this.state.entity.data;
+      if (!project) return;
+
+      const newProject = {
+        ...project,
+        topics: project.topics.map((topic) =>
+          topic.id !== event.entity.id ? topic : { ...topic, ...event.entity },
+        ),
+      };
+
+      this.setState({
+        entity: Resource.success(newProject),
+      });
+    });
+
+    eventBus.subscribe(TopicDeletedEvent, (event: TopicDeletedEvent) => {
+      const project = this.state.entity.data;
+      if (!project) return;
+
+      const topics = project.topics.filter((topic) => topic.id !== event.id);
+      if (topics.length === project.topics.length) {
+        return;
+      }
+
+      const newProject = {
+        ...project,
+        topics,
+      };
+
+      this.setState({
+        entity: Resource.success(newProject),
+      });
+    });
+
+    eventBus.subscribe(KeywordCreatedEvent, (event: KeywordCreatedEvent) => {
+      const project = this.state.entity.data;
+      if (!project) return;
+
+      const { topics } = project;
+
+      const topic = topics.find((topic) => topic.id === event.topicId);
+      if (!topic) return;
+
+      const newTopic = {
+        ...topic,
+        keywords: [...topic.keywords, event.entity],
+      };
+
+      const updatedProject = {
+        ...project,
+        topics: topics.map((t) => (t.id === newTopic.id ? newTopic : t)),
+      };
+      console.log({ newTopic, updatedProject });
+
+      this.setState({ ...this.state, entity: Resource.success(updatedProject) });
+    });
+
+    eventBus.subscribe(KeywordDeletedEvent, (event: KeywordDeletedEvent) => {
+      const project = this.state.entity.data;
+      if (!project) return;
+
+      const { topics } = project;
+
+      const topic = topics.find((topic) =>
+        topic.keywords.some((keyword) => keyword.id === event.id),
+      );
+      if (!topic) return;
+
+      const newTopic = {
+        ...topic,
+        keywords: topic.keywords.filter((keyword) => keyword.id !== event.id),
+      };
+
+      const updatedProject = {
+        ...project,
+        topics: topics.map((t) => (t.id === newTopic.id ? newTopic : t)),
+      };
+
+      this.setState({ ...this.state, entity: Resource.success(updatedProject) });
+    });
   }
 
   protected executeDelete(id: string): Promise<void> {
     return this.repository.delete(id);
   }
 
-  protected find(id: string): Promise<Project | null> {
+  protected find(id: string): Promise<ProjectDetails | null> {
     return this.repository.get(id).then((val) => val ?? null);
   }
 
@@ -42,10 +147,10 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
     return { entity: Resource.idle(), save: Operation.idle(), delete: Operation.idle() };
   }
 
-  protected executeCreate(vars: CreateProjectArgs): Promise<Project> {
-    return this.repository.create(vars);
+  protected executeCreate(vars: CreateProjectArgs): Promise<ProjectDetails> {
+    return this.repository.create(vars).then((project) => ({ ...project, topics: [] }));
   }
-  protected executeUpdate(vars: UpdateProjectArgs): Promise<Project> {
-    return this.repository.update(vars);
+  protected executeUpdate(vars: UpdateProjectArgs): Promise<ProjectDetails> {
+    return this.repository.update(vars).then((project) => ({ ...project, topics: [] }));
   }
 }

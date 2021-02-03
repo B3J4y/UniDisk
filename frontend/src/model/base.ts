@@ -30,7 +30,7 @@ export abstract class EntityDetailStateContainer<
 
   protected abstract executeDelete(id: string): Promise<void>;
 
-  protected onCreate(entity: TEntity): void {}
+  protected onCreate(entity: TEntity, vars: TCreateVars): void {}
   protected onUpdate(entity: TEntity): void {}
   protected onDelete(entity: TEntity): void {}
 
@@ -73,7 +73,7 @@ export abstract class EntityDetailStateContainer<
         save: Operation.success(),
         entity: Resource.success(entity),
       });
-      this.onCreate(entity);
+      this.onCreate(entity, vars);
     } catch (e) {
       console.error(e);
       this.setState({
@@ -159,9 +159,10 @@ export abstract class EntityAllStateContainer<
     const { create, update, delete: deleteName } = events;
 
     this.eventBus.subscribe<TCreate>(create, (event) => {
-      if (!this.state.entities.data) return;
+      const items = this.state.entities.data;
+      if (!items) return;
+      const newItems = [...items, event.entity];
 
-      const newItems = [...this.state.entities.data, event.entity];
       this.setState({
         ...this.state,
         entities: Resource.success(newItems),
