@@ -2,20 +2,17 @@ package de.unidisk.view;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
-import de.unidisk.config.SolrConfiguration;
 import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.repositories.IUniversityRepository;
 import de.unidisk.contracts.services.IResultService;
-import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.UniCrawlService;
 import de.unidisk.dao.HibernateTestSetup;
 import de.unidisk.dao.HibernateUtil;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.solr.SolrApp;
-import de.unidisk.solr.services.SolrScoringService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -107,7 +104,7 @@ public class TestSetupBean {
             scoringTimer.cancel();
 
 
-        scoringTimer = new Timer();
+       /* scoringTimer = new Timer();
         final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository, SolrConfiguration.getInstance());
         solrApp = new SolrApp(projectRepository,scoringService,resultService);
         scoringTimer.scheduleAtFixedRate(new TimerTask() {
@@ -120,7 +117,7 @@ public class TestSetupBean {
                     e.printStackTrace();
                 }
             }
-        } , 0,SystemConfiguration.getInstance().getScoringInterval());
+        } , 0,SystemConfiguration.getInstance().getScoringInterval());*/
     }
 
     public IUniversityRepository getUniversityRepository() {
