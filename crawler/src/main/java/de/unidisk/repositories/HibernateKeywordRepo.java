@@ -15,4 +15,9 @@ public class HibernateKeywordRepo implements IKeywordRepository {
     public Optional<Keyword> getKeyword(int keywordId) {
         return new KeywordDAO().get(keywordId);
     }
+
+    @Override
+    public Keyword createKeyword(CreateKeywordArgs args) {
+        return new KeywordDAO().addKeyword(args.getName(), Integer.parseInt(args.getTopicId()));
+    }
 }
