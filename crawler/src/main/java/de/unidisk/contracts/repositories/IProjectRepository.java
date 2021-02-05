@@ -39,6 +39,7 @@ public interface IProjectRepository extends Serializable {
      * @return
      */
     Optional<Project> getProject(String projectId);
+    Optional<Project> getProjectDetails(String projectId);
 
     Project createProject(CreateProjectArgs args);
     Project updateProject(String id, String name);

@@ -15,6 +15,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.security.Principal;
 import java.util.*;
 import java.util.function.Function;
 
@@ -37,8 +38,17 @@ public class ProjectServiceRest {
     @GET
     @Path("{id}")
     @Produces({ MediaType.APPLICATION_JSON})
-    public Response project(@PathParam("id") String id){
-        return runProject(id, project -> Response.ok(project).build());
+    @AuthNeeded
+    public Response project(@PathParam("id") String id,@Context SecurityContext context){
+        final Optional<Project> project = this.projectRepository.getProjectDetails(id);
+        if(!project.isPresent()){
+            return Response.status(404).build();
+        }
+        final Project p = project.get();
+        if(!p.getUserId().equals(getContextUserId(context))){
+            return Response.status(Response.Status.FORBIDDEN).entity("Only owner of project is allowed to access it.").build();
+        }
+        return Response.ok(p).build();
     }
 
 
@@ -58,8 +68,9 @@ public class ProjectServiceRest {
     @Path("{id}")
     @Produces( MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response updateProject(UpdateProjectDto dto, @PathParam("id") String id){
-        return runProject(id, project -> {
+    @AuthNeeded
+    public Response updateProject(UpdateProjectDto dto, @PathParam("id") String id, @Context SecurityContext context ){
+        return runProject(id,context, project -> {
             final Project updated = this.projectRepository.updateProject(id,dto.getName());
             return Response.ok(updated).build();
         }
@@ -69,8 +80,9 @@ public class ProjectServiceRest {
 
     @POST
     @Path("{id}/enqueue")
-    public Response enqueueProject(String id){
-        return runProject(id, project -> {
+    @AuthNeeded
+    public Response enqueueProject(String id,@Context SecurityContext context ){
+        return runProject(id, context, project -> {
             final ProjectState currentState = project.getProjectState();
                     if(currentState == ProjectState.IDLE){
                         this.projectRepository.updateProjectState(Integer.parseInt(id), ProjectState.WAITING);
@@ -85,8 +97,9 @@ public class ProjectServiceRest {
 
     @POST
     @Path("{id}/dequeue")
-    public Response dequeueProject(String id){
-        return runProject(id, project -> {
+    @AuthNeeded
+    public Response dequeueProject(String id,@Context SecurityContext context ){
+        return runProject(id, context, project -> {
                     final ProjectState currentState = project.getProjectState();
                     if(currentState == ProjectState.WAITING || currentState == ProjectState.ERROR){
                         this.projectRepository.updateProjectState(Integer.parseInt(id), ProjectState.IDLE);
@@ -101,9 +114,10 @@ public class ProjectServiceRest {
 
     @DELETE
     @Path("{id}")
-    @Produces({ MediaType.APPLICATION_JSON})
-    public Response deleteProject(@PathParam("id") String id){
-        return runProject(id, project -> {
+    @Produces(MediaType.APPLICATION_JSON)
+    @AuthNeeded
+    public Response deleteProject(@PathParam("id") String id, @Context SecurityContext context ){
+        return runProject(id,context, project -> {
             final boolean deleted = this.projectRepository.deleteProject(id);
             return Response.ok(deleted).build();
         });
@@ -115,11 +129,20 @@ public class ProjectServiceRest {
      * @param task function to be invoked if project exists
      * @return
      */
-    private Response runProject(String id, Function<Project, Response> task){
+    private Response runProject(String id, SecurityContext context, Function<Project, Response> task){
         final Optional<Project> project = this.projectRepository.getProject(id);
         if(!project.isPresent()){
             return Response.status(404).build();
         }
+        final Project p = project.get();
+        if(!p.getUserId().equals(getContextUserId(context))){
+            return Response.status(Response.Status.FORBIDDEN).entity("Only owner of project is allowed to access it.").build();
+        }
         return task.apply(project.get());
+    }
+
+    private String getContextUserId(SecurityContext context){
+        final ContextUser user = (ContextUser) context.getUserPrincipal();
+        return user.getId();
     }
 }

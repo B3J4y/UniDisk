@@ -104,6 +104,19 @@ public class ProjectDAO  implements IProjectRepository {
         return findProjectById(id);
     }
 
+    @Override
+    public Optional<Project> getProjectDetails(String projectId) {
+        return HibernateUtil.execute(session ->  {
+            return session.createQuery("select p from Project p " +
+                    "LEFT JOIN Topic t ON p.id = t.projectId " +
+                    "LEFT JOIN Keyword  k ON t.id = k.topicId " +
+                    "where p.id = :id", Project.class)
+                    .setParameter("id", Integer.parseInt(projectId))
+                    .uniqueResultOptional();
+
+        });
+    }
+
     public boolean deleteProject(String name){
         Optional<Project> project = findProject(name);
         if(!project.isPresent())

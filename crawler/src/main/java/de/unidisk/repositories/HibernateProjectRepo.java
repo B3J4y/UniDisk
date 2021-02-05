@@ -40,6 +40,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
+    public Optional<Project> getProjectDetails(String projectId) {
+        return projectDAO.getProjectDetails(projectId);
+    }
+
+    @Override
     public Project createProject(CreateProjectArgs args) {
         return this.projectDAO.createProject(args);
     }
