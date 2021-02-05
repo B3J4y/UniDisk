@@ -1,6 +1,7 @@
 package de.unidisk.entities;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.entities.templates.CRUDTest;
@@ -39,7 +40,7 @@ public class TopicTests implements HibernateLifecycle {
     @BeforeEach
     void createParentProject(){
         final ProjectDAO pDao = new ProjectDAO();
-        parentProject = pDao.createProject("test");
+        parentProject = pDao.createProject(new IProjectRepository.CreateProjectArgs("test","test"));
     }
 
     @Test

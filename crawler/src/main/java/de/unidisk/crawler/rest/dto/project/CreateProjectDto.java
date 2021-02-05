@@ -2,7 +2,7 @@ package de.unidisk.crawler.rest.dto.project;
 
 public class CreateProjectDto {
 
-    public String name;
+    String name;
 
     public CreateProjectDto() {
     }

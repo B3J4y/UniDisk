@@ -1,5 +1,6 @@
 package de.unidisk.entities;
 
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.dao.TopicDAO;
@@ -18,7 +19,7 @@ class KeywordTest implements HibernateLifecycle, CRUDTest, ChildTests {
 
     @BeforeEach
     void setupTopic(){
-        Project p = new ProjectDAO().createProject("p");
+        Project p = new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs("p","test"));
         parentTopic = new TopicDAO().createTopic("n",p.getId());
     }
 

@@ -1,8 +1,11 @@
 package de.unidisk.crawler.rest.dto.project;
 
+import de.unidisk.entities.hibernate.ProjectState;
+
 public class UpdateProjectDto {
 
-    public String name;
+    String name;
+
 
     public UpdateProjectDto() {
     }
@@ -14,4 +17,5 @@ public class UpdateProjectDto {
     public void setName(String name) {
         this.name = name;
     }
+
 }

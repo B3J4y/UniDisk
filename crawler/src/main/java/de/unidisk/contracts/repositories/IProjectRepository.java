@@ -2,7 +2,6 @@ package de.unidisk.contracts.repositories;
 
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
-import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
 
@@ -12,7 +11,27 @@ import java.util.Optional;
 
 public interface IProjectRepository extends Serializable {
 
+    public static class CreateProjectArgs {
+        final String userId;
+        final String name;
+
+        public CreateProjectArgs(String userId, String name) {
+            this.userId = userId;
+            this.name = name;
+        }
+
+        public String getUserId() {
+            return userId;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
     List<ProjectView> getProjects();
+
+    List<Project> getUserProjects(String userId);
 
     /**
      * Load the project with the given id.
@@ -21,7 +40,11 @@ public interface IProjectRepository extends Serializable {
      */
     Optional<Project> getProject(String projectId);
 
+    Project createProject(CreateProjectArgs args);
+    Project updateProject(String id, String name);
     boolean deleteProject(String projectId);
+
+
     List<Result> getResults(String projectId);
 
     boolean canEdit(String projectId);

@@ -20,18 +20,30 @@ public class ProjectDAO  implements IProjectRepository {
     public ProjectDAO() {
     }
 
-    public Project createProject(String name) {
-        Optional<Project> existingProject = findProject(name);
-        if (existingProject.isPresent()) {
-            return existingProject.get();
-        }
-        Project project = new Project(name);
+    public Project createProject(CreateProjectArgs args) {
+        Project project = new Project(args.getName());
+        project.setUserId(args.getUserId());
         project.setProjectState(ProjectState.IDLE);
         return  HibernateUtil.execute(session -> {
             session.save(project);
             project.setTopics(new ArrayList<>());
             return project;
         });
+    }
+
+    @Override
+    public Project updateProject(String id, String name) {
+        final Optional<Project> p = findProjectById(Integer.parseInt(id));
+        if (!p.isPresent()) {
+            return null;
+        }
+        final Project project = p.get();
+        project.setName(name);
+        HibernateUtil.execute(session -> {
+            session.update(project);
+            return null;
+        });
+        return project;
     }
 
     public void updateProjectState(int projectId, ProjectState state) {
@@ -74,6 +86,16 @@ public class ProjectDAO  implements IProjectRepository {
     @Override
     public List<ProjectView> getProjects() {
         return getAll().stream().map(ProjectView::fromProject).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Project> getUserProjects(String userId) {
+       return HibernateUtil.execute(session ->  {
+            return session.createQuery("select p from Project p where p.userId = :userId", Project.class)
+                    .setParameter("userId", userId)
+                    .list();
+
+        });
     }
 
     @Override

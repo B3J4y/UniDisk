@@ -1,5 +1,6 @@
 package de.unidisk.entities.util;
 
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.dao.TopicDAO;
@@ -26,11 +27,11 @@ public final class TestFactory {
     }
 
     public static Project createRawProject(){
-        return new ProjectDAO().createProject(UUID.randomUUID().toString());
+        return new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(UUID.randomUUID().toString(),"test"));
     }
 
     public static Keyword createKeyword(){
-        Project p = new ProjectDAO().createProject(UUID.randomUUID().toString());
+        Project p = new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(UUID.randomUUID().toString(),"test"));
         Topic t = new TopicDAO().createTopic(UUID.randomUUID().toString(),p.getId());
         Keyword k = new KeywordDAO().addKeyword(UUID.randomUUID().toString(),t.getId());
         return k;

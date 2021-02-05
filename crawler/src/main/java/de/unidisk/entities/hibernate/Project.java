@@ -8,6 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(
+        uniqueConstraints={
+                @UniqueConstraint(columnNames = {"name", "userId"})
+                },
+        indexes =    {
+                @Index(columnList = "userId", name = "project_user_id_idx"),
+        }
+)
 public class Project {
     @Id
 
@@ -16,6 +24,9 @@ public class Project {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    private String userId;
 
     @Enumerated(EnumType.STRING)
     private ProjectState projectState;
@@ -87,5 +98,13 @@ public class Project {
 
     public void setProcessingError(String processingError) {
         this.processingError = processingError;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

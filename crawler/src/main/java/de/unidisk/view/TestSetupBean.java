@@ -68,8 +68,8 @@ public class TestSetupBean {
             }
             HibernateTestSetup.Setup(state);
         }
-        setupCrawlJob();
-        setupScoringJob();
+       // setupCrawlJob();
+       // setupScoringJob();
     }
 
     @PreDestroy

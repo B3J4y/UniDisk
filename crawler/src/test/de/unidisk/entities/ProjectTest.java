@@ -2,6 +2,7 @@ package de.unidisk.entities;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.view.results.Result;
@@ -23,12 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProjectTest implements HibernateLifecycle {
 
+    private IProjectRepository.CreateProjectArgs createArgs(String name){
+        return new IProjectRepository.CreateProjectArgs("test",name);
+    }
     @Test
     public void canCreateEntity() {
         final ProjectDAO dao = new ProjectDAO();
-        final Project p = dao.createProject("test");
+        final Project p = dao.createProject(createArgs("test"));
         Assert.assertNotNull(p);
-        assertEquals("test",p.getName());
+        assertEquals(createArgs("test"),p.getName());
         assertEquals(ProjectState.IDLE,p.getProjectState());
         assertEquals(0,p.getTopics().size());
     }
@@ -36,7 +40,7 @@ public class ProjectTest implements HibernateLifecycle {
     @Test
     public void canSetProcessingError() {
         ProjectDAO dao = new ProjectDAO();
-        final Project p = dao.createProject("test");
+        final Project p = dao.createProject(createArgs("test"));
         Assert.assertNotNull(p);
         final String error = "test error";
         dao.setProjectError(p.getId(), error);
@@ -52,8 +56,8 @@ public class ProjectTest implements HibernateLifecycle {
     @Test
     public void creatingDuplicateEntityReturnsExisting() {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
-        Project duplicate = dao.createProject("test");
+        Project valid = dao.createProject(createArgs("test"));
+        Project duplicate = dao.createProject(createArgs("test"));
         Assert.assertNotNull(duplicate);
         Assert.assertEquals(valid.getId(), duplicate.getId());
     }
@@ -61,7 +65,7 @@ public class ProjectTest implements HibernateLifecycle {
     @Test
     public void canDeleteEntity() {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
+        Project valid = dao.createProject(createArgs("test"));
         dao.deleteProjectById(String.valueOf(valid.getId()));
         Optional<Project> dbProject = dao.getProject(String.valueOf(valid.getId()));
         Assert.assertNotNull(dbProject);
@@ -71,7 +75,7 @@ public class ProjectTest implements HibernateLifecycle {
     @Test
     public void canDeleteEntityWithTopics() {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
+        Project valid = dao.createProject(createArgs("test"));
         TopicDAO tDao = new TopicDAO();
         tDao.createTopic("test",valid.getId());
         dao.deleteProjectById(String.valueOf(valid.getId()));
@@ -85,7 +89,7 @@ public class ProjectTest implements HibernateLifecycle {
     @Test
     public void deletingEntityDeletesChildren() {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
+        Project valid = dao.createProject(createArgs("test"));
         new TopicDAO().createTopic("test",valid.getId());
         dao.deleteProjectById(String.valueOf(valid.getId()));
         Assert.assertEquals(new TopicDAO().getAll().size(),0);
@@ -94,7 +98,7 @@ public class ProjectTest implements HibernateLifecycle {
     @Test
     public void findEntityReturnsData() {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
+        Project valid = dao.createProject(createArgs("test"));
         Optional<Project> projectResult = dao.getProject(String.valueOf(valid.getId()));
         Assert.assertTrue(projectResult.isPresent());
         Project dbProject = projectResult.get();
@@ -129,7 +133,7 @@ public class ProjectTest implements HibernateLifecycle {
 
         Project p = MockData.getMockState().getProjectList().get(0);
 
-        final Project dbProject = projectDAO.createProject(p.getName());
+        final Project dbProject = projectDAO.createProject(createArgs(p.getName()));
         p.setId(dbProject.getId());
         projectDAO.updateProjectState(dbProject.getId(),p.getProjectState());
 
