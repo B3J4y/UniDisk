@@ -85,6 +85,42 @@ public class ProjectTest implements HibernateLifecycle {
         Assert.assertNotNull(dbProject);
         Assert.assertFalse(dbProject.isPresent());
     }
+    @Test
+    public void getProjectDetailsWithoutChildren(){
+        ProjectDAO dao = new ProjectDAO();
+        Project valid = dao.createProject(createArgs("test"));
+        final Optional<Project> result = dao.getProjectDetails(String.valueOf(valid.getId()));
+        Assert.assertTrue(result.isPresent());
+    }
+
+    @Test
+    public void getProjectDetails(){
+        ProjectDAO dao = new ProjectDAO();
+        TopicDAO tDao = new TopicDAO();
+        KeywordDAO keywordDAO = new KeywordDAO();
+        Project valid = dao.createProject(createArgs("test"));
+
+        final Topic t1 = tDao.createTopic("test",valid.getId());
+        final Topic t2 =  tDao.createTopic("test2",valid.getId());
+        final Topic t3 =  tDao.createTopic("test3",valid.getId());
+        keywordDAO.addKeyword("k1", t1.getId());
+        keywordDAO.addKeyword("k2",t1.getId());
+        keywordDAO.addKeyword("k3",t2.getId());
+
+
+        final Project result = dao.getProjectDetails(String.valueOf(valid.getId())).get();
+        Assert.assertEquals(3,result.getTopics().size());
+
+        final Optional<Topic> t1Result = result.getTopics().stream().filter(topic -> topic.getId() == t1.getId()).findFirst();
+        Assert.assertTrue(t1Result.isPresent());
+        Assert.assertEquals(2, t1Result.get().getKeywords().size());
+
+        final Optional<Topic> t2Result = result.getTopics().stream().filter(topic -> topic.getId() == t2.getId()).findFirst();
+        Assert.assertTrue(t2Result.isPresent());
+        Assert.assertEquals( 1,t2Result.get().getKeywords().size());
+
+        Assert.assertTrue(result.getTopics().stream().anyMatch(topic -> topic.getId() == t3.getId()));
+    }
 
     @Test
     public void deletingEntityDeletesChildren() {
