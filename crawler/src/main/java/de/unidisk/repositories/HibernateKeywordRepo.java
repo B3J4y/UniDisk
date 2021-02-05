@@ -11,13 +11,20 @@ import java.util.Optional;
 @ManagedBean(name = "keywordRepository")
 public class HibernateKeywordRepo implements IKeywordRepository {
 
+    KeywordDAO dao = new KeywordDAO();
+
     @Override
     public Optional<Keyword> getKeyword(int keywordId) {
-        return new KeywordDAO().get(keywordId);
+        return dao.get(keywordId);
     }
 
     @Override
     public Keyword createKeyword(CreateKeywordArgs args) {
-        return new KeywordDAO().addKeyword(args.getName(), Integer.parseInt(args.getTopicId()));
+        return dao.addKeyword(args.getName(), Integer.parseInt(args.getTopicId()));
+    }
+
+    @Override
+    public boolean deleteKeyword(int keywordId) {
+        return dao.deleteKeyword(keywordId);
     }
 }

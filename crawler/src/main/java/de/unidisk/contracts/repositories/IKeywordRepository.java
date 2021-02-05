@@ -29,4 +29,6 @@ public interface IKeywordRepository {
     Optional<Keyword> getKeyword(int keywordId);
 
     Keyword createKeyword(CreateKeywordArgs args);
+
+    boolean deleteKeyword(int keywordId);
 }

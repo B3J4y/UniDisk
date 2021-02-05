@@ -22,17 +22,32 @@ public class TopicRestService extends CRUDService<Topic, CreateTopicDto> {
     IProjectRepository projectRepository;
 
     @Override
-    protected Response executeCreate(CreateTopicDto dto, ContextUser user) {
+    protected Response executeCreate(ContextUser user,CreateTopicDto dto) {
         final Optional<Project> project = this.projectRepository.getProject(dto.getProjectId());
         if(!project.isPresent()){
             return Response.status(400).entity("Projekt mit ID existiert nicht.").build();
         }
-        System.out.println("user id " + user.getId() +" " + project.get().getUserId());
         if(!project.get().getUserId().equals(user.getId())){
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
         final Topic topic = this.topicRepository.createTopic(Integer.parseInt(dto.getProjectId()),dto.getName());
         return Response.ok(topic).build();
+    }
+
+    @Override
+    protected Response executeDelete(ContextUser user, String id) {
+        final Optional<Topic> optionalTopic = this.topicRepository.getTopic(Integer.parseInt(id));
+        if(!optionalTopic.isPresent()){
+            return Response.status(404).build();
+        }
+        final Topic topic = optionalTopic.get();
+        final int topicId = topic.getId();
+        final Project project = this.projectRepository.getProject(String.valueOf(topic.getProjectId())).get();
+        if(!project.getUserId().equals(user.getId())){
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        this.topicRepository.deleteTopic(topicId);
+        return Response.ok().build();
     }
 }
