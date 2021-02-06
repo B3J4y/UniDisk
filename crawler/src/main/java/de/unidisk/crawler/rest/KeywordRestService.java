@@ -5,7 +5,6 @@ import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.crawler.rest.authentication.ContextUser;
 import de.unidisk.crawler.rest.dto.keyword.CreateKeywordDto;
-import de.unidisk.crawler.rest.dto.topic.CreateTopicDto;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
@@ -13,7 +12,6 @@ import de.unidisk.entities.hibernate.Topic;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
-import java.security.Key;
 import java.util.Optional;
 
 @Path("/keyword")
@@ -53,7 +51,8 @@ public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto> {
         }
         final Keyword keyword = optionalKeyword.get();
         final Topic topic = this.topicRepository.getTopic(keyword.getTopicId()).get();
-        final Project project = this.projectRepository.getProject(String.valueOf(topic.getProjectId())).get();
+        final String projectId = String.valueOf(topic.getProjectId());
+        final Project project = this.projectRepository.getProject(projectId).get();
         if(!project.getUserId().equals(user.getId())){
             return Response.status(Response.Status.FORBIDDEN).build();
         }

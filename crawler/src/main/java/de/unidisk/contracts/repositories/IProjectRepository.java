@@ -32,6 +32,7 @@ public interface IProjectRepository extends Serializable {
     List<ProjectView> getProjects();
 
     List<Project> getUserProjects(String userId);
+    Optional<Project> findUserProjectByName(String userId, String name);
 
     /**
      * Load the project with the given id.

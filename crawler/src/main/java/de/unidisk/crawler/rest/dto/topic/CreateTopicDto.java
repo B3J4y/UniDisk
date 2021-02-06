@@ -7,6 +7,11 @@ public class CreateTopicDto {
 
     public  CreateTopicDto(){}
 
+    public CreateTopicDto(String projectId, String name) {
+        this.projectId = projectId;
+        this.name = name;
+    }
+
     public String getProjectId() {
         return projectId;
     }

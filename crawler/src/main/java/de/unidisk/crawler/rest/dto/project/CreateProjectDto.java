@@ -7,6 +7,10 @@ public class CreateProjectDto {
     public CreateProjectDto() {
     }
 
+    public CreateProjectDto(String name) {
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }

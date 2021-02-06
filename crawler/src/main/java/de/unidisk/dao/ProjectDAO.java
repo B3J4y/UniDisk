@@ -99,6 +99,17 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
+    public Optional<Project> findUserProjectByName(String userId, String name) {
+        return HibernateUtil.execute(session ->  {
+            return session.createQuery("select p from Project p where p.userId = :userId AND p.name = :name", Project.class)
+                    .setParameter("userId", userId)
+                    .setParameter("name",name)
+                    .uniqueResultOptional();
+
+        });
+    }
+
+    @Override
     public Optional<Project> getProject(String projectId) {
         int id = Integer.parseInt(projectId);
         return findProjectById(id);

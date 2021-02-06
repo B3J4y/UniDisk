@@ -25,6 +25,13 @@ public class ProjectServiceRest {
     @Inject
     IProjectRepository projectRepository;
 
+    public ProjectServiceRest(IProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
+
+    public ProjectServiceRest() {
+    }
+
     @GET
     @Path("all")
     @Produces(MediaType.APPLICATION_JSON)
@@ -58,6 +65,10 @@ public class ProjectServiceRest {
     @AuthNeeded
     public Response createProject(CreateProjectDto dto, @Context SecurityContext context){
         final ContextUser user = (ContextUser) context.getUserPrincipal();
+        final Optional<Project> existingProjectWithName = this.projectRepository.findUserProjectByName(user.getId(), dto.getName());
+        if(existingProjectWithName.isPresent()){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Es existiert bereits ein Projekt mit dem gleichen Namen.").build();
+        }
         final IProjectRepository.CreateProjectArgs args = new IProjectRepository.CreateProjectArgs(user.getId(),dto.getName());
         final Project p = this.projectRepository.createProject(args);
         return Response.ok(p).build();

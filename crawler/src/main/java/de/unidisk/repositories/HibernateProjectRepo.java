@@ -35,6 +35,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
+    public Optional<Project> findUserProjectByName(String userId, String name) {
+        return projectDAO.findUserProjectByName(userId,name);
+    }
+
+    @Override
     public Optional<Project> getProject(String projectId) {
         return projectDAO.getProject(projectId);
     }

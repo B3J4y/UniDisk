@@ -21,6 +21,13 @@ public class TopicRestService extends CRUDService<Topic, CreateTopicDto> {
     @Inject
     IProjectRepository projectRepository;
 
+    public TopicRestService(){}
+
+    public TopicRestService(IProjectRepository projectRepository,ITopicRepository topicRepository) {
+        this.topicRepository = topicRepository;
+        this.projectRepository = projectRepository;
+    }
+
     @Override
     protected Response executeCreate(ContextUser user,CreateTopicDto dto) {
         final Optional<Project> project = this.projectRepository.getProject(dto.getProjectId());
