@@ -18,6 +18,13 @@ A Crawler to search for keywords and compare the score
 * run with tomcat and artifact war
 
 
+### Docker
+
+We use Docker to simplify development.
+Run `docker compose up -d` to create a development environment with a MySQL, Solr and Tomcat Server.
+In order for code changes to take effect, the services need to be rebuilt (`docker compose up -d --build`). This takes some time therefore
+it makes sense to instead kill the web service (`docker rm -fv unidisk_web_1`) and start the server via IntelliJ (or any other way).
+
 ### Database
 
 The project contains configuration files for an in memory as well as a MySQL database.
