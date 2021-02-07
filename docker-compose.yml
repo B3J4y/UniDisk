@@ -1,8 +1,6 @@
 version: "3"
 services:
   web:
-    image: tomcat
+    build: .
     ports:
       - "8081:8080"
-    volumes:
-      - ./crawler/target/unidisk.war:/usr/local/tomcat/webapps/unidisk.war
