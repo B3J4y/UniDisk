@@ -34,5 +34,4 @@ services:
       - gettingstarted
 
 volumes:
-  unidisk_db_data:
   solr_data:
