@@ -23,5 +23,16 @@ services:
     ports:
       - 8082:8080
 
+  solr:
+    image: solr:8
+    ports:
+      - 8983:8983
+    volumes:
+      - solr_data:/var/solr
+    command:
+      - solr-precreate
+      - gettingstarted
+
 volumes:
   unidisk_db_data:
+  solr_data:
