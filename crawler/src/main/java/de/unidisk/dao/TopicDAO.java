@@ -92,14 +92,11 @@ public class TopicDAO {
         }
         final Topic topic = t.get();
         topic.setName(args.getName());
-        try {
-            HibernateUtil.execute(session -> {
-                session.update(topic);
-                return null;
-            });
-        }catch(ConstraintViolationException e){
-            throw new DuplicateException();
-        }
+
+        HibernateUtil.executeUpdate(session -> {
+            session.update(topic);
+            return null;
+        });
         return topic;
     }
 

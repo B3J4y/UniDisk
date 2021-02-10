@@ -47,10 +47,9 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void createDuplicateProject() {
-        final CreateProjectDto dto = new CreateProjectDto("test");
-        final Response successResponse = projectServiceRest.createProject(dto, context);
-        Assert.assertEquals( 200,successResponse.getStatus());
+    public void createDuplicateProject() throws DuplicateException {
+        final Project project = new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(user.getId(), "projekt"));
+        final CreateProjectDto dto = new CreateProjectDto(project.getName());
         final Response duplicateResponse = projectServiceRest.createProject(dto, context);
         Assert.assertEquals( 400,duplicateResponse.getStatus());
     }

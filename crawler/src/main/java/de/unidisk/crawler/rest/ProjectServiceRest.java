@@ -54,7 +54,7 @@ public class ProjectServiceRest {
         }
         final Project p = project.get();
         if(!p.getUserId().equals(getContextUserId(context))){
-            return Response.status(Response.Status.FORBIDDEN).entity("Only owner of project is allowed to access it.").build();
+            return Response.status(Response.Status.FORBIDDEN).entity("Nur der Projektbesitzer hat Zugriff auf das Projekt.").build();
         }
         return Response.ok(p).build();
     }
@@ -66,10 +66,6 @@ public class ProjectServiceRest {
     @AuthNeeded
     public Response createProject(CreateProjectDto dto, @Context SecurityContext context){
         final ContextUser user = (ContextUser) context.getUserPrincipal();
-        final Optional<Project> existingProjectWithName = this.projectRepository.findUserProjectByName(user.getId(), dto.getName());
-        if(existingProjectWithName.isPresent()){
-            return Response.status(Response.Status.BAD_REQUEST).entity("Es existiert bereits ein Projekt mit dem gleichen Namen.").build();
-        }
         final IProjectRepository.CreateProjectArgs args = new IProjectRepository.CreateProjectArgs(user.getId(),dto.getName());
 
         try {

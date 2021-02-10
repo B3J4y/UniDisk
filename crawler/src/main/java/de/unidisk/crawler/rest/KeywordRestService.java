@@ -43,7 +43,7 @@ public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto, U
         if(!topic.isPresent()){
             return Response.status(400).entity("Thema mit ID existiert nicht.").build();
         }
-        // Calling get should be safe as the topic exists and a topic can't exist without project.
+        // Calling get should be safe as the keyword exists and a topic can't exist without project.
         final Project project = this.projectRepository.getProject(String.valueOf(topic.get().getProjectId())).get();
         if(!project.getUserId().equals(user.getId())){
             return Response.status(Response.Status.FORBIDDEN).build();

@@ -26,15 +26,13 @@ public class ProjectDAO  implements IProjectRepository {
         Project project = new Project(args.getName());
         project.setUserId(args.getUserId());
         project.setProjectState(ProjectState.IDLE);
-        try {
-            return HibernateUtil.execute(session -> {
+
+            return HibernateUtil.executeUpdate(session -> {
                 session.save(project);
                 project.setTopics(new ArrayList<>());
                 return project;
             });
-        }catch(ConstraintViolationException e){
-            throw new DuplicateException();
-        }
+
     }
 
     @Override
@@ -44,16 +42,12 @@ public class ProjectDAO  implements IProjectRepository {
             return null;
         }
         final Project project = p.get();
-        try{
-            project.setName(args.getName());
-            HibernateUtil.execute(session -> {
-                session.update(project);
-                return null;
-            });
-            return project;
-        }catch(ConstraintViolationException e){
-            throw new DuplicateException();
-        }
+        project.setName(args.getName());
+        HibernateUtil.executeUpdate(session -> {
+            session.update(project);
+            return null;
+        });
+        return project;
     }
 
     public void updateProjectState(int projectId, ProjectState state) {
