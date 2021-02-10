@@ -1,20 +1,29 @@
+import { API_ENDPOINT } from 'config';
 import { KeywordRepository, ProjectRepository, TopicRepository } from 'data/repositories';
 import { ProjectAllContainer, ProjectDetailContainer } from 'model';
 import { KeywordDetailContainer } from 'model/keyword/Detail';
 import { TopicDetailContainer } from 'model/topic/Detail';
 import React, { useContext } from 'react';
+import { ProjectApiRepository } from 'remote/repository/api/Project';
+import { AuthStub } from 'remote/services/Authentication';
 import { KeywordRecommendationService } from 'remote/services/KeywordRecommendation';
 import { KeywordRepositoryStub } from 'remote/stubs/KeywordRepository';
-import { ProjectRepositoryStub } from 'remote/stubs/ProjectRepository';
 import { TopicRepositoryStub } from 'remote/stubs/TopicRepository';
 import { EventBus } from 'services/event/bus';
 import IAuthenticationService from './data/services/Authentication';
-import { AuthStub } from './remote/services/Authentication';
 
 const eventBus = new EventBus();
 
 const getProjectRepository = (): ProjectRepository => {
-  return new ProjectRepositoryStub();
+  const authService = getAuthenticationService();
+
+  return new ProjectApiRepository({
+    endpoint: API_ENDPOINT,
+    tokenProvider: {
+      getToken: () => authService.getAuthToken().then((v) => v!.token),
+      onTokenChange: authService.onTokenChanged,
+    },
+  });
 };
 
 const getTopicRepository = (): TopicRepository => {
@@ -49,6 +58,6 @@ export function useProvider() {
   return useContext(ProviderContext);
 }
 
-export const AuthenticationService = (): IAuthenticationService => {
+export const getAuthenticationService = (): IAuthenticationService => {
   return new AuthStub();
 };

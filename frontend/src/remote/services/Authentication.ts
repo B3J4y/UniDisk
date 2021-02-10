@@ -3,6 +3,7 @@ import { User } from '../../data/user/User';
 import { AuthToken } from '../util';
 
 export class AuthStub implements IAuthenticationService {
+  onTokenChanged(callback: (token: string) => void): void {}
   private user: User = {
     email: 'test@web.de',
     id: '0',
@@ -21,6 +22,9 @@ export class AuthStub implements IAuthenticationService {
   }
 
   getAuthToken(): Promise<AuthToken> {
-    return Promise.resolve({ token: '15', userId: '15' });
+    return Promise.resolve({
+      userId: '0',
+      token: 'Bearer we424',
+    });
   }
 }

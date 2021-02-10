@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from 'axios';
 
 export type AuthToken = {
   token: string;
@@ -7,6 +7,7 @@ export type AuthToken = {
 
 export interface AuthProvider {
   getAuthToken(): Promise<AuthToken>;
+  onTokenChanged(callback: (token: string) => void): void;
 }
 
 export type ApiConfig = {
@@ -27,9 +28,9 @@ export class ApiClient {
 
     const client = axios.create({
       baseURL: this.apiConfig.baseUrl,
-      responseType: "json",
+      responseType: 'json',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: token.token,
       },
     });
