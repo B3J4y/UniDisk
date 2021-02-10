@@ -49,19 +49,22 @@ export function ProjectTopics(props: ProjectTopicsProps) {
               existingTopicNames={topics.map((topic) => topic.name)}
             />
           )}
-          <List style={{ paddingBottom: 0 }}>
-            {topics.map((topic) => {
-              return (
-                <TopicItem
-                  key={topic.id}
-                  topic={topic}
-                  disabled={disabled}
-                  selected={selected?.id === topic.id}
-                  onSelect={() => onSelect(topic)}
-                />
-              );
-            })}
-          </List>
+          {topics.length === 0 && <p>Noch keine Themen hinzugefügt.</p>}
+          {topics.length > 0 && (
+            <List style={{ paddingBottom: 0 }}>
+              {topics.map((topic) => {
+                return (
+                  <TopicItem
+                    key={topic.id}
+                    topic={topic}
+                    disabled={disabled}
+                    selected={selected?.id === topic.id}
+                    onSelect={() => onSelect(topic)}
+                  />
+                );
+              })}
+            </List>
+          )}
         </Paper>
       </Grid>
       <Grid item xs={6}>
@@ -97,28 +100,31 @@ function TopicKeywords(props: TopicKeywordsProps) {
       {!disabled && (
         <CreateKeywordForm topicId={props.topicId} topicKeywords={keywords.map((k) => k.name)} />
       )}
-      <List style={{ paddingBottom: 0 }}>
-        {keywords.map((keyword) => {
-          return (
-            <ListItem key={keyword.id}>
-              <ListItemText primary={keyword.name} />
-              {!disabled && (
-                <ListItemSecondaryAction>
-                  <Button
-                    onClick={async () => {
-                      const container = provider.getKeywordDetailContainer();
-                      container.setEntity(keyword);
-                      await container.delete();
-                    }}
-                  >
-                    X
-                  </Button>
-                </ListItemSecondaryAction>
-              )}
-            </ListItem>
-          );
-        })}
-      </List>
+      {keywords.length === 0 && <p>Noch keine Stichworte hinzugefügt</p>}
+      {keywords.length > 0 && (
+        <List style={{ paddingBottom: 0 }}>
+          {keywords.map((keyword) => {
+            return (
+              <ListItem key={keyword.id}>
+                <ListItemText primary={keyword.name} />
+                {!disabled && (
+                  <ListItemSecondaryAction>
+                    <Button
+                      onClick={async () => {
+                        const container = provider.getKeywordDetailContainer();
+                        container.setEntity(keyword);
+                        await container.delete();
+                      }}
+                    >
+                      X
+                    </Button>
+                  </ListItemSecondaryAction>
+                )}
+              </ListItem>
+            );
+          })}
+        </List>
+      )}
     </Paper>
   );
 }
@@ -140,9 +146,8 @@ function TopicItem(props: TopicItemProps) {
     <ListItem
       key={topic.id}
       button
-      disabled={disabled}
       selected={selected}
-      onClick={(event) => {
+      onClick={() => {
         onSelect();
       }}
     >
@@ -150,6 +155,7 @@ function TopicItem(props: TopicItemProps) {
         primary={
           <TextField
             value={name}
+            disabled={disabled}
             onChange={(e) => setName(e.target.value)}
             onBlur={async (e) => {
               if (name !== topic.name) {
