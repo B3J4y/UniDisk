@@ -1,5 +1,5 @@
 import { Box, Button, Grid, TextField } from '@material-ui/core';
-import { Project, Topic } from 'data/entity';
+import { Project } from 'data/entity';
 import { useProvider } from 'Provider';
 import React from 'react';
 import { Subscribe } from 'unstated-typescript';

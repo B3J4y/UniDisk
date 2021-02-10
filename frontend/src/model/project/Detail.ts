@@ -1,4 +1,4 @@
-import { Project, ProjectDetails, ProjectState } from 'data/entity';
+import { ProjectDetails, ProjectState } from 'data/entity';
 import { CreateProjectArgs, ProjectRepository, UpdateProjectArgs } from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';
 import { EntityDetailState, EntityDetailStateContainer } from 'model/base';

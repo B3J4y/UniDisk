@@ -14,13 +14,11 @@ import {
   Tabs,
   TextField,
   Toolbar,
-  Typography,
 } from '@material-ui/core';
+import BlockIcon from '@material-ui/icons/Block';
+import CheckIcon from '@material-ui/icons/Check';
 import DeleteIcon from '@material-ui/icons/Delete';
 import InfoIcon from '@material-ui/icons/Info';
-
-import CheckIcon from '@material-ui/icons/Check';
-import BlockIcon from '@material-ui/icons/Block';
 import { Project, ProjectState, ProjectStates, Topic } from 'data/entity';
 import { ProjectDetailContainer } from 'model';
 import { useProvider } from 'Provider';
@@ -28,12 +26,12 @@ import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import AlertDialog from 'ui/components/form/AlertDialog';
 import { Column } from 'ui/components/form/Column';
+import { DequeueProjectDialog } from 'ui/components/project/DequeueDialog';
+import { EnqueueProjectDialog } from 'ui/components/project/EnqueueDialog';
 import { ProjectTopics } from 'ui/components/project/TopicTable';
 import { Center } from 'ui/components/util/Center';
 import { Subscribe } from 'unstated-typescript';
 import { mapProjectState } from 'util/language';
-import { DequeueProjectDialog } from 'ui/components/project/DequeueDialog';
-import { EnqueueProjectDialog } from 'ui/components/project/EnqueueDialog';
 
 export function ProjectOverviewPage() {
   const provider = useProvider();

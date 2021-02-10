@@ -1,8 +1,7 @@
-import { Project, Topic } from 'data/entity';
+import { Topic } from 'data/entity';
 import { CreateTopicArgs, TopicRepository, UpdateTopicArgs } from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';
 import { EntityDetailState, EntityDetailStateContainer } from 'model/base';
-import { ProjectCreatedEvent, ProjectDeletedEvent, ProjectUpdatedEvent } from 'services/event';
 import { EventBus } from 'services/event/bus';
 import { TopicCreatedEvent, TopicDeletedEvent, TopicUpdatedEvent } from 'services/event/topic';
 

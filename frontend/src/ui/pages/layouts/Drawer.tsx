@@ -158,11 +158,6 @@ export function NavItem(props: { item: DrawerIcon; nested?: boolean }) {
 
 export default function DefaultDrawer({ children }: { children: any }) {
   const classes = useStyles();
-  const navigationClasses = navigationStyles();
-  const [opened, setOpen] = React.useState<string[]>([]);
-
-  const isOpen = (name: string) => opened.includes(name);
-
   return (
     <div className={classes.root}>
       <CssBaseline />

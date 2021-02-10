@@ -1,12 +1,12 @@
+import { red } from '@material-ui/core/colors';
+import { deDE } from '@material-ui/core/locale';
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import { THEME } from 'config';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import App from './App';
+import './index.css';
 import * as serviceWorker from './serviceWorker';
-import { createMuiTheme, ThemeProvider, MuiThemeProvider } from '@material-ui/core/styles';
-import { deDE } from '@material-ui/core/locale';
-import { red } from '@material-ui/core/colors';
-import { THEME } from 'config';
 
 const theme = createMuiTheme(
   {

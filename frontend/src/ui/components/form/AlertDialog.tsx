@@ -20,10 +20,6 @@ export default function AlertDialog(props: AlertDialogProps) {
   const [open, setOpen] = React.useState(false);
   const [isLoading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>(undefined);
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
   const handleClose = () => {
     setOpen(false);
   };

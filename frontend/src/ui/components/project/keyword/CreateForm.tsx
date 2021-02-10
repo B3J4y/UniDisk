@@ -77,6 +77,7 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item style={{ position: 'relative', display: 'flex', flexGrow: 1 }}>
                   <TextField
+                    disabled={disabled}
                     onBlur={(e) => {
                       if (e.relatedTarget) {
                         const className = (e.relatedTarget as { className?: string }).className;
