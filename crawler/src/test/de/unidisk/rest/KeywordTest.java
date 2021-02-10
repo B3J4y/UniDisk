@@ -1,17 +1,22 @@
 package de.unidisk.rest;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
+import de.unidisk.crawler.rest.KeywordRestService;
 import de.unidisk.crawler.rest.TopicRestService;
 import de.unidisk.crawler.rest.authentication.AuthenticatedContext;
 import de.unidisk.crawler.rest.authentication.ContextUser;
+import de.unidisk.crawler.rest.dto.keyword.CreateKeywordDto;
 import de.unidisk.crawler.rest.dto.topic.CreateTopicDto;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.HibernateLifecycle;
+import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
+import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateProjectRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
 import org.junit.Assert;
@@ -20,14 +25,16 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.security.Key;
 
-public class TopicTest implements HibernateLifecycle {
+public class KeywordTest implements HibernateLifecycle {
 
 
     IProjectRepository projectRepository;
     ITopicRepository topicRepository;
+    IKeywordRepository keywordRepository;
 
-    TopicRestService topicRestService;
+    KeywordRestService keywordRestService;
 
     SecurityContext context;
     ContextUser user;
@@ -37,8 +44,9 @@ public class TopicTest implements HibernateLifecycle {
         cleanUpDatabase();
         projectRepository = new HibernateProjectRepo();
         topicRepository = new HibernateTopicRepo();
+        keywordRepository = new HibernateKeywordRepo();
 
-        topicRestService = new TopicRestService(projectRepository,topicRepository);
+        keywordRestService = new KeywordRestService(topicRepository,projectRepository,keywordRepository);
         user = new ContextUser("5","test@web.de");
         context = new AuthenticatedContext(
                 user
@@ -66,25 +74,29 @@ public class TopicTest implements HibernateLifecycle {
     // CREATE
 
     @Test
-    public void createTopicWithoutProject() {
-        final CreateTopicDto dto = new CreateTopicDto("-1","test");
-        final Response r = topicRestService.create(dto, context);
+    public void createKeywordWithoutTopic() {
+        final CreateKeywordDto dto = new CreateKeywordDto("-1","test");
+        final Response r = keywordRestService.create(dto, context);
         Assert.assertEquals( 400,r.getStatus());
     }
 
     @Test
-    public void createTopicWithOwnProject() {
+    public void createKeywordWithOwnProject() throws DuplicateException {
         final Project p = createOwnProject("name");
-        final CreateTopicDto dto = new CreateTopicDto(String.valueOf(p.getId()),"test");
-        final Response r = topicRestService.create(dto, context);
+        final Topic topic = topicRepository.createTopic(p.getId(),"test");
+
+        final CreateKeywordDto dto = new CreateKeywordDto(String.valueOf(topic.getId()),"test");
+        final Response r = keywordRestService.create(dto, context);
         Assert.assertEquals( 200,r.getStatus());
     }
 
     @Test
-    public void createTopicWithProjectOfOtherUser() {
+    public void createTopicWithProjectOfOtherUser() throws DuplicateException {
         final Project p = createProject("name","otherUser");
-        final CreateTopicDto dto = new CreateTopicDto(String.valueOf(p.getId()),"test");
-        final Response r = topicRestService.create(dto, context);
+        final Topic topic = topicRepository.createTopic(p.getId(),"test");
+
+        final CreateKeywordDto dto = new CreateKeywordDto(String.valueOf(topic.getId()),"test");
+        final Response r = keywordRestService.create(dto, context);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(),r.getStatus());
     }
 
@@ -95,24 +107,28 @@ public class TopicTest implements HibernateLifecycle {
 
 
     @Test
-    public void deleteTopicOfOwnProject() {
+    public void deleteKeywordOfOwnProject() throws DuplicateException {
         final Project project = createOwnProject("2");
         final Topic topic = new TopicDAO().createTopic("topic", project.getId());
-        final Response r = topicRestService.delete(String.valueOf(topic.getId()), context);
+        final Keyword keyword = keywordRepository.createKeyword(new IKeywordRepository.CreateKeywordArgs("x", String.valueOf(topic.getId())));
+
+        final Response r = keywordRestService.delete(String.valueOf(keyword.getId()), context);
         Assert.assertEquals( 200,r.getStatus());
     }
 
     @Test
-    public void deleteTopicThatDoesntExist() {
-        final Response r = topicRestService.delete("-1", context);
+    public void deleteKeywordThatDoesntExist() {
+        final Response r = keywordRestService.delete("-1", context);
         Assert.assertEquals( 404,r.getStatus());
     }
 
     @Test
-    public void deleteTopicOfProjectOfOtherUser() {
+    public void deleteKeywordOfProjectOfOtherUser() throws DuplicateException {
         final Project p = createProject("name","otherUser");
         final Topic topic = new TopicDAO().createTopic("topic", p.getId());
-        final Response r = topicRestService.delete(String.valueOf(topic.getId()), context);
+        final Keyword keyword = keywordRepository.createKeyword(new IKeywordRepository.CreateKeywordArgs("x", String.valueOf(topic.getId())));
+
+        final Response r = keywordRestService.delete(String.valueOf(keyword.getId()), context);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(),r.getStatus());
     }
 }

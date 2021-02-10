@@ -1,6 +1,7 @@
 package de.unidisk.entities;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
@@ -38,7 +39,7 @@ public class TopicTests implements HibernateLifecycle {
     }
 
     @BeforeEach
-    void createParentProject(){
+    void createParentProject() throws DuplicateException {
         final ProjectDAO pDao = new ProjectDAO();
         parentProject = pDao.createProject(new IProjectRepository.CreateProjectArgs("test","test"));
     }

@@ -1,5 +1,6 @@
 package de.unidisk.contracts.repositories;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.view.project.ProjectView;
@@ -29,6 +30,24 @@ public interface IProjectRepository extends Serializable {
         }
     }
 
+    class UpdateProjectArgs {
+        final String projectId;
+        final String name;
+
+        public UpdateProjectArgs(String projectId, String name) {
+            this.projectId = projectId;
+            this.name = name;
+        }
+
+        public String getProjectId() {
+            return projectId;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
+
     List<ProjectView> getProjects();
 
     List<Project> getUserProjects(String userId);
@@ -42,8 +61,8 @@ public interface IProjectRepository extends Serializable {
     Optional<Project> getProject(String projectId);
     Optional<Project> getProjectDetails(String projectId);
 
-    Project createProject(CreateProjectArgs args);
-    Project updateProject(String id, String name);
+    Project createProject(CreateProjectArgs args) throws DuplicateException;
+    Project updateProject(UpdateProjectArgs args) throws DuplicateException;
     boolean deleteProject(String projectId);
 
 

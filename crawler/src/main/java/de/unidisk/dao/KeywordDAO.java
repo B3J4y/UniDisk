@@ -11,7 +11,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import javax.validation.ConstraintViolationException;
+import org.hibernate.exception.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

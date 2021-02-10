@@ -2,6 +2,7 @@ package de.unidisk.entities;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
@@ -20,6 +21,7 @@ import static de.unidisk.entities.util.TestFactory.randomUniversityUrl;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ProjectTest implements HibernateLifecycle {
@@ -28,17 +30,17 @@ public class ProjectTest implements HibernateLifecycle {
         return new IProjectRepository.CreateProjectArgs("test",name);
     }
     @Test
-    public void canCreateEntity() {
+    public void canCreateEntity() throws DuplicateException {
         final ProjectDAO dao = new ProjectDAO();
         final Project p = dao.createProject(createArgs("test"));
         Assert.assertNotNull(p);
-        assertEquals(createArgs("test"),p.getName());
+        assertEquals(createArgs("test").getName(),p.getName());
         assertEquals(ProjectState.IDLE,p.getProjectState());
         assertEquals(0,p.getTopics().size());
     }
 
     @Test
-    public void canSetProcessingError() {
+    public void canSetProcessingError() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         final Project p = dao.createProject(createArgs("test"));
         Assert.assertNotNull(p);
@@ -54,16 +56,19 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void creatingDuplicateEntityReturnsExisting() {
+    public void creatingDuplicateEntityThrowsDuplicateException() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject(createArgs("test"));
-        Project duplicate = dao.createProject(createArgs("test"));
-        Assert.assertNotNull(duplicate);
-        Assert.assertEquals(valid.getId(), duplicate.getId());
+        try {
+            Project duplicate = dao.createProject(createArgs("test"));
+            fail();
+        }catch(Exception e){
+            Assert.assertTrue(e instanceof DuplicateException);
+        }
     }
 
     @Test
-    public void canDeleteEntity() {
+    public void canDeleteEntity() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject(createArgs("test"));
         dao.deleteProjectById(String.valueOf(valid.getId()));
@@ -73,7 +78,7 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void canDeleteEntityWithTopics() {
+    public void canDeleteEntityWithTopics() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject(createArgs("test"));
         TopicDAO tDao = new TopicDAO();
@@ -86,7 +91,7 @@ public class ProjectTest implements HibernateLifecycle {
         Assert.assertFalse(dbProject.isPresent());
     }
     @Test
-    public void getProjectDetailsWithoutChildren(){
+    public void getProjectDetailsWithoutChildren() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject(createArgs("test"));
         final Optional<Project> result = dao.getProjectDetails(String.valueOf(valid.getId()));
@@ -94,7 +99,7 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void getProjectDetails(){
+    public void getProjectDetails() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         TopicDAO tDao = new TopicDAO();
         KeywordDAO keywordDAO = new KeywordDAO();
@@ -123,7 +128,7 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void deletingEntityDeletesChildren() {
+    public void deletingEntityDeletesChildren() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject(createArgs("test"));
         new TopicDAO().createTopic("test",valid.getId());
@@ -132,7 +137,7 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void findEntityReturnsData() {
+    public void findEntityReturnsData() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         Project valid = dao.createProject(createArgs("test"));
         Optional<Project> projectResult = dao.getProject(String.valueOf(valid.getId()));
@@ -150,7 +155,7 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void getResultsReturnsValidData() {
+    public void getResultsReturnsValidData() throws DuplicateException {
         final ApplicationState state = MockData.getMockState();
         final UniversityDAO uniDao = new UniversityDAO();
         final ProjectDAO projectDAO = new ProjectDAO();

@@ -1,5 +1,6 @@
 package de.unidisk.rest;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.crawler.rest.ProjectServiceRest;
 import de.unidisk.crawler.rest.authentication.AuthenticatedContext;
@@ -61,7 +62,7 @@ public class ProjectTest implements HibernateLifecycle {
 
 
     @Test
-    public void deleteOwnProject() {
+    public void deleteOwnProject() throws DuplicateException {
         final Project project = new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(user.getId(), "test"));
         final Response r = projectServiceRest.deleteProject(String.valueOf(project.getId()), context);
         Assert.assertEquals( 200,r.getStatus());
@@ -69,7 +70,7 @@ public class ProjectTest implements HibernateLifecycle {
 
 
     @Test
-    public void deleteProjectOfOtherUser() {
+    public void deleteProjectOfOtherUser() throws DuplicateException {
         final Project project = new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(user.getId()+"15", "test"));
         final Response r = projectServiceRest.deleteProject(String.valueOf(project.getId()), context);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(),r.getStatus());

@@ -1,5 +1,6 @@
 package de.unidisk.crawler.rest;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.crawler.rest.authentication.AuthNeeded;
 import de.unidisk.crawler.rest.authentication.ContextUser;
@@ -70,8 +71,13 @@ public class ProjectServiceRest {
             return Response.status(Response.Status.BAD_REQUEST).entity("Es existiert bereits ein Projekt mit dem gleichen Namen.").build();
         }
         final IProjectRepository.CreateProjectArgs args = new IProjectRepository.CreateProjectArgs(user.getId(),dto.getName());
-        final Project p = this.projectRepository.createProject(args);
-        return Response.ok(p).build();
+
+        try {
+            final Project  p = this.projectRepository.createProject(args);
+            return Response.ok(p).build();
+        } catch (DuplicateException e) {
+            return Response.status(400).entity("Projekt mit Namen existiert bereits.").build();
+        }
     }
 
 
@@ -82,9 +88,14 @@ public class ProjectServiceRest {
     @AuthNeeded
     public Response updateProject(UpdateProjectDto dto, @PathParam("id") String id, @Context SecurityContext context ){
         return runProject(id,context, project -> {
-            final Project updated = this.projectRepository.updateProject(id,dto.getName());
-            return Response.ok(updated).build();
-        }
+            final IProjectRepository.UpdateProjectArgs args = new IProjectRepository.UpdateProjectArgs(id,dto.getName());
+                    try {
+                        final Project updated = this.projectRepository.updateProject(args);
+                        return Response.ok(updated).build();
+                    } catch (DuplicateException e) {
+                        return Response.status(400).entity("Projekt mit Namen existiert bereits.").build();
+                    }
+            }
         );
     }
 
@@ -147,7 +158,7 @@ public class ProjectServiceRest {
         }
         final Project p = project.get();
         if(!p.getUserId().equals(getContextUserId(context))){
-            return Response.status(Response.Status.FORBIDDEN).entity("Only owner of project is allowed to access it.").build();
+            return Response.status(Response.Status.FORBIDDEN).entity("Nur der Projektbesitzer darf auf das Projekt zugreifen.").build();
         }
         return task.apply(project.get());
     }

@@ -1,5 +1,6 @@
 package de.unidisk.entities.util;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.ProjectDAO;
@@ -27,11 +28,21 @@ public final class TestFactory {
     }
 
     public static Project createRawProject(){
-        return new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(UUID.randomUUID().toString(),"test"));
+        try {
+            return new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(UUID.randomUUID().toString(),"test"));
+        } catch (DuplicateException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static Keyword createKeyword(){
-        Project p = new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(UUID.randomUUID().toString(),"test"));
+        Project p = null;
+        try {
+            p = new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(UUID.randomUUID().toString(),"test"));
+        } catch (DuplicateException e) {
+            e.printStackTrace();
+        }
         Topic t = new TopicDAO().createTopic(UUID.randomUUID().toString(),p.getId());
         Keyword k = new KeywordDAO().addKeyword(UUID.randomUUID().toString(),t.getId());
         return k;

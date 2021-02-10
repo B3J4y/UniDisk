@@ -7,6 +7,10 @@ public class CreateKeywordDto {
 
     public  CreateKeywordDto(){}
 
+    public CreateKeywordDto(String topicId, String name) {
+        this.topicId = topicId;
+        this.name = name;
+    }
 
     public String getTopicId() {
         return topicId;

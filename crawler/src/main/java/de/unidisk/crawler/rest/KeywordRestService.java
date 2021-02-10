@@ -27,7 +27,15 @@ public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto, U
 
     @Inject
     IKeywordRepository keywordRepository;
+    public KeywordRestService(){
 
+    }
+
+    public KeywordRestService(ITopicRepository topicRepository, IProjectRepository projectRepository, IKeywordRepository keywordRepository) {
+        this.topicRepository = topicRepository;
+        this.projectRepository = projectRepository;
+        this.keywordRepository = keywordRepository;
+    }
 
     @Override
     protected Response executeCreate(ContextUser user,CreateKeywordDto dto) {

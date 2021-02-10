@@ -1,5 +1,6 @@
 package de.unidisk.repositories;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
@@ -50,13 +51,13 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
-    public Project createProject(CreateProjectArgs args) {
+    public Project createProject(CreateProjectArgs args) throws DuplicateException {
         return this.projectDAO.createProject(args);
     }
 
     @Override
-    public Project updateProject(String id, String name) {
-        return this.projectDAO.updateProject(id,name);
+    public Project updateProject(UpdateProjectArgs args) throws DuplicateException {
+        return this.projectDAO.updateProject(args);
     }
 
     @Override

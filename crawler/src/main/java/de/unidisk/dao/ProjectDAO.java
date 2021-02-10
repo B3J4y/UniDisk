@@ -1,6 +1,7 @@
 package de.unidisk.dao;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
@@ -8,6 +9,7 @@ import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.query.Query;
 
 import java.util.ArrayList;
@@ -20,30 +22,38 @@ public class ProjectDAO  implements IProjectRepository {
     public ProjectDAO() {
     }
 
-    public Project createProject(CreateProjectArgs args) {
+    public Project createProject(CreateProjectArgs args) throws DuplicateException {
         Project project = new Project(args.getName());
         project.setUserId(args.getUserId());
         project.setProjectState(ProjectState.IDLE);
-        return  HibernateUtil.execute(session -> {
-            session.save(project);
-            project.setTopics(new ArrayList<>());
-            return project;
-        });
+        try {
+            return HibernateUtil.execute(session -> {
+                session.save(project);
+                project.setTopics(new ArrayList<>());
+                return project;
+            });
+        }catch(ConstraintViolationException e){
+            throw new DuplicateException();
+        }
     }
 
     @Override
-    public Project updateProject(String id, String name) {
-        final Optional<Project> p = findProjectById(Integer.parseInt(id));
+    public Project updateProject(UpdateProjectArgs args) throws DuplicateException {
+        final Optional<Project> p = findProjectById(Integer.parseInt(args.getProjectId()));
         if (!p.isPresent()) {
             return null;
         }
         final Project project = p.get();
-        project.setName(name);
-        HibernateUtil.execute(session -> {
-            session.update(project);
-            return null;
-        });
-        return project;
+        try{
+            project.setName(args.getName());
+            HibernateUtil.execute(session -> {
+                session.update(project);
+                return null;
+            });
+            return project;
+        }catch(ConstraintViolationException e){
+            throw new DuplicateException();
+        }
     }
 
     public void updateProjectState(int projectId, ProjectState state) {
