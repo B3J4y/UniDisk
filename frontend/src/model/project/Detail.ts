@@ -1,4 +1,4 @@
-import { Project, ProjectDetails } from 'data/entity';
+import { Project, ProjectDetails, ProjectState } from 'data/entity';
 import { CreateProjectArgs, ProjectRepository, UpdateProjectArgs } from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';
 import { EntityDetailState, EntityDetailStateContainer } from 'model/base';
@@ -14,7 +14,10 @@ import {
 } from 'services/event';
 import { EventBus } from 'services/event/bus';
 
-export type ProjectDetailState = EntityDetailState<ProjectDetails>;
+export type ProjectDetailState = EntityDetailState<ProjectDetails> & {
+  enqueue: Operation;
+  dequeue: Operation;
+};
 
 export class ProjectDetailContainer extends EntityDetailStateContainer<
   ProjectDetails,
@@ -135,6 +138,54 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
     });
   }
 
+  public async enqueue(): Promise<void> {
+    const projectId = this.state.entity.data!.id;
+    const task = () => this.repository.enqueue(projectId);
+
+    for await (const event of Operation.execute(task)) {
+      this.setState({
+        ...this.state,
+        enqueue: event,
+      });
+    }
+
+    if (this.state.enqueue.isFinished) {
+      const newProject: ProjectDetails = {
+        ...this.getProject()!,
+        state: ProjectState.ready,
+      };
+      this.setState({
+        ...this.state,
+        entity: Resource.success(newProject),
+      });
+      this.eventBus.publish(new ProjectUpdatedEvent(newProject));
+    }
+  }
+
+  public async dequeue(): Promise<void> {
+    const projectId = this.state.entity.data!.id;
+    const task = () => this.repository.dequeue(projectId);
+
+    for await (const event of Operation.execute(task)) {
+      this.setState({
+        ...this.state,
+        dequeue: event,
+      });
+    }
+
+    if (this.state.dequeue.isFinished) {
+      const newProject: ProjectDetails = {
+        ...this.getProject()!,
+        state: ProjectState.idle,
+      };
+      this.setState({
+        ...this.state,
+        entity: Resource.success(newProject),
+      });
+      this.eventBus.publish(new ProjectUpdatedEvent(newProject));
+    }
+  }
+
   protected executeDelete(id: string): Promise<void> {
     return this.repository.delete(id);
   }
@@ -144,7 +195,13 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   }
 
   protected initialState(): ProjectDetailState {
-    return { entity: Resource.idle(), save: Operation.idle(), delete: Operation.idle() };
+    return {
+      entity: Resource.idle(),
+      save: Operation.idle(),
+      delete: Operation.idle(),
+      enqueue: Operation.idle(),
+      dequeue: Operation.idle(),
+    };
   }
 
   protected executeCreate(vars: CreateProjectArgs): Promise<ProjectDetails> {
@@ -153,4 +210,6 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   protected executeUpdate(vars: UpdateProjectArgs): Promise<ProjectDetails> {
     return this.repository.update(vars).then((project) => ({ ...project, topics: [] }));
   }
+
+  private getProject = () => this.state.entity.data;
 }

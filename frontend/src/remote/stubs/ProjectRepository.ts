@@ -2,6 +2,24 @@ import { Project, ProjectDetails, ProjectState } from 'data/entity';
 import { CreateProjectArgs, ProjectRepository, UpdateProjectArgs } from 'data/repositories';
 
 export class ProjectRepositoryStub implements ProjectRepository {
+  public async enqueue(projectId: string): Promise<void> {
+    ProjectRepositoryStub.projects = ProjectRepositoryStub.projects.map((project) => {
+      if (project.id === projectId) {
+        return { ...project, state: ProjectState.ready };
+      }
+      return project;
+    });
+  }
+
+  public async dequeue(projectId: string): Promise<void> {
+    ProjectRepositoryStub.projects = ProjectRepositoryStub.projects.map((project) => {
+      if (project.id === projectId) {
+        return { ...project, state: ProjectState.idle };
+      }
+      return project;
+    });
+  }
+
   static projects: ProjectDetails[] = [
     {
       id: '15',

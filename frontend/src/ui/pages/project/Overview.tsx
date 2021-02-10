@@ -1,4 +1,5 @@
 import {
+  AppBar,
   Box,
   Button,
   CircularProgress,
@@ -9,12 +10,18 @@ import {
   ListItemIcon,
   ListItemText,
   Paper,
+  Tab,
+  Tabs,
   TextField,
   Toolbar,
+  Typography,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import InfoIcon from '@material-ui/icons/Info';
-import { Project, ProjectState, Topic } from 'data/entity';
+
+import CheckIcon from '@material-ui/icons/Check';
+import BlockIcon from '@material-ui/icons/Block';
+import { Project, ProjectState, ProjectStates, Topic } from 'data/entity';
 import { ProjectDetailContainer } from 'model';
 import { useProvider } from 'Provider';
 import React, { useEffect } from 'react';
@@ -24,6 +31,9 @@ import { Column } from 'ui/components/form/Column';
 import { ProjectTopics } from 'ui/components/project/TopicTable';
 import { Center } from 'ui/components/util/Center';
 import { Subscribe } from 'unstated-typescript';
+import { mapProjectState } from 'util/language';
+import { DequeueProjectDialog } from 'ui/components/project/DequeueDialog';
+import { EnqueueProjectDialog } from 'ui/components/project/EnqueueDialog';
 
 export function ProjectOverviewPage() {
   const provider = useProvider();
@@ -151,10 +161,26 @@ type ProjectSelectionTableProps = {
   onSelect: (project: Project) => void;
 };
 
+const selectionStates = [
+  ProjectState.idle,
+  ProjectState.ready,
+  ProjectState.processing,
+  ProjectState.completed,
+  ProjectState.error,
+];
+
 function ProjectSelectionTable(props: ProjectSelectionTableProps) {
   const history = useHistory();
   const provider = useProvider();
   const { onSelect, projects, selected } = props;
+  const [selectedState, setSelectedState] = React.useState(ProjectState.idle);
+
+  const handleTabChange = (_event: React.ChangeEvent<{}>, index: number) => {
+    const newState = ProjectStates[index];
+    setSelectedState(newState);
+  };
+
+  const stateProjects = projects.filter((project) => project.state === selectedState);
 
   return (
     <Paper>
@@ -169,67 +195,126 @@ function ProjectSelectionTable(props: ProjectSelectionTableProps) {
           </Grid>
         </Grid>
       </Toolbar>
-      <Box p={2}>
-        <List component="nav" aria-label="secondary mailbox folder">
-          {projects.map((project) => {
-            const isSelected = selected?.id === project.id;
-
-            return (
-              <ListItem
-                key={project.id}
-                button
-                selected={isSelected}
-                onClick={() => {
-                  onSelect(project);
-                }}
-              >
-                <ListItemText primary={project.name} />
-                <ListItemIcon>
-                  <IconButton
-                    aria-label="info"
-                    onClick={() => {
-                      history.push(`/project/${project.id}`);
-                    }}
-                  >
-                    <InfoIcon />
-                  </IconButton>
-                </ListItemIcon>
-                <ListItemIcon>
-                  <AlertDialog
-                    title="Projekt löschen"
-                    contentText={`Soll das Projekt ${project.name} wirklich gelöscht werden? Alle Themen, Stichworte und Auswertungen werden ebenfalls gelöscht.`}
-                    action={async () => {
-                      const container = provider.getProjectDetailContainer();
-                      container.setEntity({ ...project, topics: [] });
-                      await container.delete();
-                      const { state } = container;
-
-                      return {
-                        success: state.delete.isFinished,
-                        error: state.delete.hasError
-                          ? 'Projekt konnte nicht gelöscht werden.'
-                          : undefined,
-                      };
-                    }}
-                    builder={(setOpen) => {
-                      return (
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => {
-                            setOpen(true);
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      );
-                    }}
-                  />
-                </ListItemIcon>
-              </ListItem>
-            );
+      <AppBar position="static">
+        <Tabs
+          value={selectedState}
+          onChange={handleTabChange}
+          aria-label="simple tabs example"
+          scrollButtons="auto"
+          variant="scrollable"
+        >
+          {selectionStates.map((state) => {
+            const label = mapProjectState(state);
+            return <Tab label={label} />;
           })}
-        </List>
+        </Tabs>
+      </AppBar>
+
+      <Box p={0}>
+        {stateProjects.length === 0 && (
+          <Box p={1}>
+            <p>Keine Projekte</p>
+          </Box>
+        )}
+        {stateProjects.length > 0 && (
+          <List component="nav" aria-label="secondary mailbox folder">
+            {stateProjects.map((project) => {
+              const isSelected = selected?.id === project.id;
+
+              return (
+                <ListItem
+                  key={project.id}
+                  button
+                  selected={isSelected}
+                  onClick={() => {
+                    onSelect(project);
+                  }}
+                >
+                  <ListItemText primary={project.name} />
+
+                  {project.state === ProjectState.idle && (
+                    <EnqueueProjectDialog project={project}>
+                      {(show) => {
+                        return (
+                          <ListItemIcon>
+                            <IconButton
+                              aria-label="enqueue"
+                              onClick={() => {
+                                show();
+                              }}
+                            >
+                              <CheckIcon />
+                            </IconButton>
+                          </ListItemIcon>
+                        );
+                      }}
+                    </EnqueueProjectDialog>
+                  )}
+                  {project.state === ProjectState.ready && (
+                    <DequeueProjectDialog project={project}>
+                      {(show) => {
+                        return (
+                          <ListItemIcon>
+                            <IconButton
+                              aria-label="dequeue"
+                              onClick={() => {
+                                show();
+                              }}
+                            >
+                              <BlockIcon />
+                            </IconButton>
+                          </ListItemIcon>
+                        );
+                      }}
+                    </DequeueProjectDialog>
+                  )}
+                  <ListItemIcon>
+                    <IconButton
+                      aria-label="info"
+                      onClick={() => {
+                        history.push(`/project/${project.id}`);
+                      }}
+                    >
+                      <InfoIcon />
+                    </IconButton>
+                  </ListItemIcon>
+                  <ListItemIcon>
+                    <AlertDialog
+                      title="Projekt löschen"
+                      contentText={`Soll das Projekt ${project.name} wirklich gelöscht werden? Alle Themen, Stichworte und Auswertungen werden ebenfalls gelöscht.`}
+                      action={async () => {
+                        const container = provider.getProjectDetailContainer();
+                        container.setEntity({ ...project, topics: [] });
+                        await container.delete();
+                        const { state } = container;
+
+                        return {
+                          success: state.delete.isFinished,
+                          error: state.delete.hasError
+                            ? 'Projekt konnte nicht gelöscht werden.'
+                            : undefined,
+                        };
+                      }}
+                      builder={(setOpen) => {
+                        return (
+                          <IconButton
+                            edge="end"
+                            aria-label="delete"
+                            onClick={() => {
+                              setOpen(true);
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        );
+                      }}
+                    />
+                  </ListItemIcon>
+                </ListItem>
+              );
+            })}
+          </List>
+        )}
       </Box>
     </Paper>
   );

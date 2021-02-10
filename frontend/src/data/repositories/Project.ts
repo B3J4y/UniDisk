@@ -17,4 +17,7 @@ export interface ProjectRepository {
   create(args: CreateProjectArgs): Promise<Project>;
   update(args: UpdateProjectArgs): Promise<Project>;
   delete(id: Project['id']): Promise<void>;
+
+  enqueue(projectId: Project['id']): Promise<void>;
+  dequeue(projectId: Project['id']): Promise<void>;
 }

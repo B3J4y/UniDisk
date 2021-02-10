@@ -54,6 +54,20 @@ export class Resource<T> {
   public toOperation(): Operation {
     return new Operation(this.state, this.error);
   }
+
+  public static async *execute<T>(
+    task: () => Promise<T> | T,
+    errorHandler?: (e: unknown) => unknown,
+  ) {
+    yield Resource.loading<T>();
+    try {
+      const result = await task();
+      yield Resource.success<T>(result);
+    } catch (e) {
+      const error = errorHandler ? errorHandler(e) : e;
+      yield Resource.failure<T>(error);
+    }
+  }
 }
 
 export class Operation {
@@ -94,5 +108,19 @@ export class Operation {
 
   get isFinished(): boolean {
     return this.state === ResourceState.Success;
+  }
+
+  public static async *execute(
+    task: () => Promise<void> | void,
+    errorHandler?: (e: unknown) => unknown,
+  ) {
+    yield Operation.loading();
+    try {
+      await task();
+      yield Operation.success();
+    } catch (e) {
+      const error = errorHandler ? errorHandler(e) : e;
+      yield Operation.failure(error);
+    }
   }
 }

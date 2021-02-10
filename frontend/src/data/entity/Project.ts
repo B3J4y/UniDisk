@@ -8,6 +8,10 @@ export enum ProjectState {
   completed,
 }
 
+export const ProjectStates: ProjectState[] = Object.values(ProjectState).filter(
+  (v) => typeof v !== 'string',
+) as ProjectState[];
+
 export type Project = {
   id: string;
   name: string;
