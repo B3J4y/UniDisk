@@ -70,14 +70,12 @@ public class KeywordDAO {
         }
         final Keyword keyword = k.get();
         keyword.setName(args.getName());
-        try {
-            HibernateUtil.execute(session -> {
-                session.update(keyword);
-                return null;
-            });
-        }catch(ConstraintViolationException e){
-            throw new DuplicateException();
-        }
+
+        HibernateUtil.executeUpdate(session -> {
+            session.update(keyword);
+            return null;
+        });
+
         return keyword;
     }
 

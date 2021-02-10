@@ -27,12 +27,11 @@ public class ProjectDAO  implements IProjectRepository {
         project.setUserId(args.getUserId());
         project.setProjectState(ProjectState.IDLE);
 
-            return HibernateUtil.executeUpdate(session -> {
-                session.save(project);
-                project.setTopics(new ArrayList<>());
-                return project;
-            });
-
+        return HibernateUtil.executeUpdate(session -> {
+            session.save(project);
+            project.setTopics(new ArrayList<>());
+            return project;
+        });
     }
 
     @Override
