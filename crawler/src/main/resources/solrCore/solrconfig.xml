@@ -495,7 +495,7 @@
          Example of a generic cache.  These caches may be accessed by
          name through SolrIndexSearcher.getCache(),cacheLookup(), and
          cacheInsert().  The purpose is to enable easy caching of
-         contextUser/application level data.  The regenerator argument should
+         user/application level data.  The regenerator argument should
          be specified as an implementation of solr.CacheRegenerator 
          if autowarming is desired.  
       -->
@@ -754,8 +754,8 @@
          multi-val params from the query (or the existing "defaults").
       -->
     <!-- In this example, the param "fq=instock:true" would be appended to
-         any query time fq params the contextUser may specify, as a mechanism for
-         partitioning the index, independent of any contextUser selected filtering
+         any query time fq params the user may specify, as a mechanism for
+         partitioning the index, independent of any user selected filtering
          that may also be desired (perhaps as a result of faceted searching).
 
          NOTE: there is *absolutely* nothing a client can do to prevent these
@@ -955,7 +955,7 @@
 
        NOTE: This is purely as an example.  The whole purpose of the
        SpellCheckComponent is to hook it into the request handler that
-       handles your normal contextUser queries so that a separate request is
+       handles your normal user queries so that a separate request is
        not needed to get suggestions.
 
        IN OTHER WORDS, THERE IS REALLY GOOD CHANCE THE SETUP BELOW IS
@@ -1400,7 +1400,7 @@
        <int name="value">5</int>
      </transformer>
      
-     If you want the contextUser to still be able to change it with _value:something_ use this:
+     If you want the user to still be able to change it with _value:something_ use this:
      <transformer name="mytrans3" class="org.apache.solr.response.transform.ValueAugmenterFactory" >
        <double name="defaultValue">5</double>
      </transformer>
