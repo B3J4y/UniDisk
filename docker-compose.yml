@@ -1,37 +1,37 @@
 version: "3"
-
 services:
-  #https://github.com/docker-solr/docker-solr
+  web:
+    build: .
+    ports:
+      - 8081:8080
+    depends_on:
+      - db
+  db:
+    container_name: unidisk_db
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: unidisk
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+    ports:
+      - 3306:3306
+
+  adminer:
+    image: adminer
+    ports:
+      - 8082:8080
+
   solr:
     image: solr:8
     ports:
-      - "8983:8983"
+      - 8983:8983
     volumes:
-      - data:/var/solr
+      - solr_data:/var/solr
     command:
       - solr-precreate
       - gettingstarted
 
-  db:
-    image: mysql
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
-
-  api:
-    image: tomcat
-    ports:
-      - "8081:8081"
-    volumes:
-      - ./target/unidisk.war:/usr/local/tomcat/webapps/ROOT.war
-      - ./target/unidisk:/usr/local/tomcat/webapps/ROOT
-
 volumes:
-  data:
+  solr_data:
