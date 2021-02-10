@@ -66,7 +66,7 @@ public class TopicTest implements HibernateLifecycle {
         final Project p = createOwnProject("name");
         final CreateTopicDto dto = new CreateTopicDto(String.valueOf(p.getId()),"test");
         final Response r = topicRestService.create(dto, context);
-        Assert.assertEquals( 400,r.getStatus());
+        Assert.assertEquals( 200,r.getStatus());
     }
 
     @Test

@@ -1,10 +1,12 @@
 package de.unidisk.crawler.rest;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.crawler.rest.authentication.ContextUser;
 import de.unidisk.crawler.rest.dto.keyword.CreateKeywordDto;
+import de.unidisk.crawler.rest.dto.keyword.UpdateKeywordDto;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
@@ -15,7 +17,7 @@ import javax.ws.rs.core.Response;
 import java.util.Optional;
 
 @Path("/keyword")
-public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto> {
+public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto, UpdateKeywordDto> {
 
     @Inject
     ITopicRepository topicRepository;
@@ -31,16 +33,48 @@ public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto> {
     protected Response executeCreate(ContextUser user,CreateKeywordDto dto) {
         final Optional<Topic> topic = this.topicRepository.getTopic(Integer.parseInt(dto.getTopicId()));
         if(!topic.isPresent()){
-            return Response.status(400).entity("Projekt mit ID existiert nicht.").build();
+            return Response.status(400).entity("Thema mit ID existiert nicht.").build();
         }
-        final Optional<Project> project = this.projectRepository.getProject(String.valueOf(topic.get().getProjectId()));
-        if(!project.get().getUserId().equals(user.getId())){
+        // Calling get should be safe as the topic exists and a topic can't exist without project.
+        final Project project = this.projectRepository.getProject(String.valueOf(topic.get().getProjectId())).get();
+        if(!project.getUserId().equals(user.getId())){
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+        if(!project.canEdit()){
+            return Response.status(400).entity("Projekt kann im aktuellen Status nicht bearbeitet werden.").build();
+        }
+
+
+        final IKeywordRepository.CreateKeywordArgs args = new IKeywordRepository.CreateKeywordArgs(dto.getName(),dto.getTopicId());
+        final Keyword keyword;
+        try {
+            keyword = this.keywordRepository.createKeyword(args);
+        } catch (DuplicateException e) {
+            return Response.status(400).entity("Stichwort mit Namen existiert bereits.").build();
+        }
+        return Response.ok(keyword).build();
+    }
+
+    @Override
+    protected Response executeUpdate(ContextUser user, UpdateKeywordDto updateKeywordDto, Keyword keyword) {
+        final Topic topic = this.topicRepository.getTopic(keyword.getTopicId()).get();
+        final Project project = this.projectRepository.getProject(String.valueOf(topic.getProjectId())).get();
+        if(!project.getUserId().equals(user.getId())){
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
-        final IKeywordRepository.CreateKeywordArgs args = new IKeywordRepository.CreateKeywordArgs(dto.getName(),dto.getTopicId());
-        final Keyword keyword = this.keywordRepository.createKeyword(args);
-        return Response.ok(keyword).build();
+        try {
+            final IKeywordRepository.UpdateKeywordArgs args = new IKeywordRepository.UpdateKeywordArgs(updateKeywordDto.getName(), updateKeywordDto.getKeywordId());
+            final Keyword updated = this.keywordRepository.updateKeyword(args);
+            return Response.ok(updated).build();
+        } catch (DuplicateException e) {
+            return Response.status(400).entity("Stichwort mit Namen existiert bereits.").build();
+        }
+    }
+
+    @Override
+    protected Optional<Keyword> getEntity(String entityId) {
+        return this.keywordRepository.getKeyword(Integer.parseInt(entityId));
     }
 
     @Override
@@ -56,6 +90,11 @@ public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto> {
         if(!project.getUserId().equals(user.getId())){
             return Response.status(Response.Status.FORBIDDEN).build();
         }
+
+        if(!project.canEdit()){
+            return Response.status(400).entity("Projekt kann im aktuellen Status nicht bearbeitet werden.").build();
+        }
+
         final boolean deleted = this.keywordRepository.deleteKeyword(keyword.getId());
         return Response.ok(deleted).build();
     }

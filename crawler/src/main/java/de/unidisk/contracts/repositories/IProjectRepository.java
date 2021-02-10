@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface IProjectRepository extends Serializable {
 
-    public static class CreateProjectArgs {
+    class CreateProjectArgs {
         final String userId;
         final String name;
 

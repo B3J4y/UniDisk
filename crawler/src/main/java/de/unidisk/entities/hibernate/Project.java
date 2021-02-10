@@ -107,4 +107,8 @@ public class Project {
     public void setUserId(String userId) {
         this.userId = userId;
     }
+
+    public boolean canEdit(){
+        return this.projectState == ProjectState.IDLE;
+    }
 }

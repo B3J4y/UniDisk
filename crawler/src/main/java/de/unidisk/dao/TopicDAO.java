@@ -1,11 +1,14 @@
 package de.unidisk.dao;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +83,34 @@ public class TopicDAO {
         transaction.commit();
         currentSession.close();
         return topic;
+    }
+
+    public Topic updateTopic(ITopicRepository.UpdateTopicArgs args) throws DuplicateException {
+        final Optional<Topic> t = getTopic(args.getTopicId());
+        if (!t.isPresent()) {
+            return null;
+        }
+        final Topic topic = t.get();
+        topic.setName(args.getName());
+        try {
+            HibernateUtil.execute(session -> {
+                session.update(topic);
+                return null;
+            });
+        }catch(ConstraintViolationException e){
+            throw new DuplicateException();
+        }
+        return topic;
+    }
+
+    public Optional<Topic> getProjectTopicByName(String projectId, String topic){
+        return execute(session -> {
+            Optional<Topic> optTopic = session.createQuery("select t from Topic t where t.name = :name AND t.projectId = :projectId", Topic.class)
+                    .setParameter("projectId", Integer.parseInt(projectId))
+                    .setParameter("name",topic)
+                    .uniqueResultOptional();
+            return optTopic;
+        });
     }
 
     public Topic createTopic(String name, int projectId, List<String> keywords){

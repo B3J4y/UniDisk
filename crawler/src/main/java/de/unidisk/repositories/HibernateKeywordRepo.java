@@ -1,5 +1,6 @@
 package de.unidisk.repositories;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.entities.hibernate.Keyword;
@@ -21,6 +22,11 @@ public class HibernateKeywordRepo implements IKeywordRepository {
     @Override
     public Keyword createKeyword(CreateKeywordArgs args) {
         return dao.addKeyword(args.getName(), Integer.parseInt(args.getTopicId()));
+    }
+
+    @Override
+    public Keyword updateKeyword(UpdateKeywordArgs args) throws DuplicateException {
+        return dao.updateKeyword(args);
     }
 
     @Override

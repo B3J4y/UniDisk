@@ -1,6 +1,7 @@
 package de.unidisk.repositories;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.hibernate.Keyword;
@@ -10,7 +11,6 @@ import de.unidisk.entities.hibernate.TopicScore;
 
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,15 +18,23 @@ import java.util.Optional;
 @ManagedBean(name = "topicRepository")
 public class HibernateTopicRepo implements ITopicRepository {
 
+
+    final TopicDAO dao = new TopicDAO();
+
     @Override
     public Topic createTopic(int projectId, String name) {
-        return new TopicDAO().createTopic(name,projectId);
+        return dao.createTopic(name,projectId);
+    }
+
+    @Override
+    public Topic updateTopic(UpdateTopicArgs args) throws DuplicateException {
+        return dao.updateTopic(args);
     }
 
 
     @Override
     public void deleteTopic(int topicId) {
-        new TopicDAO().deleteTopic(topicId);
+        dao.deleteTopic(topicId);
     }
 
     @Override
@@ -42,16 +50,17 @@ public class HibernateTopicRepo implements ITopicRepository {
 
     @Override
     public Optional<Topic> getTopic(int id) {
-        return new TopicDAO().getTopic(id);
+        return dao.getTopic(id);
     }
+
 
     @Override
     public List<TopicScore> getScores(int topicId) throws EntityNotFoundException {
-        return new TopicDAO().getScoresFromKeywords(topicId);
+        return dao.getScoresFromKeywords(topicId);
     }
 
     @Override
     public double getScore(int id) {
-        return new TopicDAO().getScore(id);
+        return dao.getScore(id);
     }
 }

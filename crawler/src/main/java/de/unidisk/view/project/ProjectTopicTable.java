@@ -1,5 +1,6 @@
 package de.unidisk.view.project;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.solr.SolrApp;
 import de.unidisk.view.MessagingCenter;
@@ -140,7 +141,12 @@ public class ProjectTopicTable {
             topicError = "Das Thema darf nicht leer sein.";
         }
         else{
-            final Topic topic = topicRepository.createTopic( selectedProject.getId(),newTopic);
+            Topic topic = null;
+            try {
+                topic = topicRepository.createTopic( selectedProject.getId(),newTopic);
+            } catch (DuplicateException e) {
+                e.printStackTrace();
+            }
             if(topic == null){
 
                 topicError = "Thema konnte nicht erstellt werden.";

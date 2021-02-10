@@ -1,9 +1,11 @@
 package de.unidisk.crawler.rest;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.crawler.rest.authentication.ContextUser;
 import de.unidisk.crawler.rest.dto.topic.CreateTopicDto;
+import de.unidisk.crawler.rest.dto.topic.UpdateTopicDto;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
 
@@ -13,7 +15,7 @@ import javax.ws.rs.core.Response;
 import java.util.Optional;
 
 @Path("/topic")
-public class TopicRestService extends CRUDService<Topic, CreateTopicDto> {
+public class TopicRestService extends CRUDService<Topic, CreateTopicDto, UpdateTopicDto> {
 
     @Inject
     ITopicRepository topicRepository;
@@ -34,13 +36,47 @@ public class TopicRestService extends CRUDService<Topic, CreateTopicDto> {
         if(!project.isPresent()){
             return Response.status(400).entity("Projekt mit ID existiert nicht.").build();
         }
-        if(!project.get().getUserId().equals(user.getId())){
+        final Project p = project.get();
+        if(!p.getUserId().equals(user.getId())){
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
-        final Topic topic = this.topicRepository.createTopic(Integer.parseInt(dto.getProjectId()),dto.getName());
+        if(!p.canEdit()){
+            return Response.status(400).entity("Projekt kann im aktuellen Status nicht bearbeitet werden.").build();
+        }
+
+
+        final Topic topic;
+        try {
+            topic = this.topicRepository.createTopic(Integer.parseInt(dto.getProjectId()),dto.getName());
+        } catch (DuplicateException e) {
+            return Response.status(400).entity("Thema mit gleichem Namen existiert bereits.").build();
+        }
         return Response.ok(topic).build();
     }
+
+    @Override
+    protected Response executeUpdate(ContextUser user, UpdateTopicDto updateTopicDto, Topic topic) {
+        final Project project = this.projectRepository.getProject(String.valueOf(topic.getProjectId())).get();
+        if(project.getUserId().equals(user.getId())){
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+
+        try {
+            final ITopicRepository.UpdateTopicArgs args = new ITopicRepository.UpdateTopicArgs(topic.getId(), topic.getName());
+            final Topic  updated = this.topicRepository.updateTopic(args);
+            return Response.ok(updated).build();
+        } catch (DuplicateException e) {
+            return Response.status(400).entity("Thema mit gleichem Namen existiert bereits.").build();
+        }
+
+    }
+
+    @Override
+    protected Optional<Topic> getEntity(String entityId) {
+        return this.topicRepository.getTopic(Integer.parseInt(entityId));
+    }
+
 
     @Override
     protected Response executeDelete(ContextUser user, String id) {
@@ -54,6 +90,11 @@ public class TopicRestService extends CRUDService<Topic, CreateTopicDto> {
         if(!project.getUserId().equals(user.getId())){
             return Response.status(Response.Status.FORBIDDEN).build();
         }
+
+        if(!project.canEdit()){
+            return Response.status(400).entity("Projekt kann im aktuellen Status nicht bearbeitet werden.").build();
+        }
+
         this.topicRepository.deleteTopic(topicId);
         return Response.ok().build();
     }
