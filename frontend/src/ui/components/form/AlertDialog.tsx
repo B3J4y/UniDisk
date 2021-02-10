@@ -30,7 +30,7 @@ export default function AlertDialog(props: AlertDialogProps) {
 
   return (
     <div>
-      {builder(setOpen)},
+      {builder(setOpen)}
       <Dialog
         open={open}
         onClose={handleClose}
