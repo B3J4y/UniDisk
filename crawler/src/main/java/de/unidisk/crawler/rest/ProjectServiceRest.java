@@ -99,7 +99,7 @@ public class ProjectServiceRest {
     @POST
     @Path("{id}/enqueue")
     @AuthNeeded
-    public Response enqueueProject(String id,@Context SecurityContext context ){
+    public Response enqueueProject(@PathParam("id")  String id,@Context SecurityContext context ){
         return runProject(id, context, project -> {
             final ProjectState currentState = project.getProjectState();
                     if(currentState == ProjectState.IDLE){
@@ -116,7 +116,7 @@ public class ProjectServiceRest {
     @POST
     @Path("{id}/dequeue")
     @AuthNeeded
-    public Response dequeueProject(String id,@Context SecurityContext context ){
+    public Response dequeueProject(@PathParam("id")  String id,@Context SecurityContext context ){
         return runProject(id, context, project -> {
                     final ProjectState currentState = project.getProjectState();
                     if(currentState == ProjectState.WAITING || currentState == ProjectState.ERROR){

@@ -42,7 +42,7 @@ public abstract class CRUDService<TEntity, TCreateDto,TUpdateDto> {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @AuthNeeded
-    public Response delete(String id, @Context SecurityContext context){
+    public Response delete(@PathParam("id") String id, @Context SecurityContext context){
         final ContextUser user = (ContextUser) context.getUserPrincipal();
         return this.executeDelete(user,id);
     }
