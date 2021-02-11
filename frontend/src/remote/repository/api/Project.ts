@@ -1,5 +1,10 @@
 import { Project, ProjectDetails, ProjectState } from 'data/entity';
-import { CreateProjectArgs, ProjectRepository, UpdateProjectArgs } from 'data/repositories';
+import {
+  CreateProjectArgs,
+  ProjectEvaluationResult,
+  ProjectRepository,
+  UpdateProjectArgs,
+} from 'data/repositories';
 import { BaseApiRepository, RepositoryArgs } from './Base';
 import {
   CreateProjectDto,
@@ -38,6 +43,9 @@ function mapModelDtoToEntity(dto: ProjectModelDto): Project {
 export class ProjectApiRepository extends BaseApiRepository implements ProjectRepository {
   public constructor(args: RepositoryArgs) {
     super({ ...args, defaultPath: 'project' });
+  }
+  getResult(id: string): Promise<ProjectEvaluationResult | undefined> {
+    throw new Error('Method not implemented.');
   }
 
   findAll(): Promise<Project[]> {

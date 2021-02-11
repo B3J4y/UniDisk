@@ -15,21 +15,29 @@ import AssessmentIcon from '@material-ui/icons/Assessment';
 import BuildIcon from '@material-ui/icons/Build';
 import MapIcon from '@material-ui/icons/Map';
 import { Project, ProjectDetails, ProjectState, Topic } from 'data/entity';
+import MaterialTable from 'material-table';
 import { ProjectDetailContainer } from 'model';
 import { useProvider } from 'Provider';
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { ProjectTopics } from 'ui/components/project/TopicTable';
 import { Provider, Subscribe } from 'unstated-typescript';
 
 type Views = 'general' | 'map' | 'results';
 
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
 export function ProjectDetailsPage() {
   const provider = useProvider();
-  const params = useParams<{ projectId?: Project['id']; view?: Views }>();
+  const params = useParams<{ projectId?: Project['id'] }>();
   const { projectId } = params;
 
-  const [activeView, setActiveView] = React.useState(params.view ?? 'general');
+  const queryParameter = useQuery();
+  const view = queryParameter.get('view') ?? 'general';
+
+  const [activeView, setActiveView] = React.useState(view as Views);
 
   if (!projectId) {
     return <p>Project ID muss angegeben werden.</p>;
@@ -228,7 +236,66 @@ function ProjectResults(props: ProjectResultsProps) {
       </p>
     );
 
-  return <p>Auswertung</p>;
+  return (
+    <Subscribe to={[ProjectDetailContainer]}>
+      {(container) => {
+        const result = container.state.result;
+
+        const { data: results, isLoading, isIdle, hasError } = result;
+        if (isIdle) {
+          window.requestAnimationFrame(() => container.loadResults());
+        }
+
+        if (isLoading || isIdle) {
+          return <CircularProgress />;
+        }
+
+        if (hasError) {
+          return <p>Ergebnisse konnten nicht geladen werden.</p>;
+        }
+
+        if (result.hasData && !results)
+          return <p>Projektergenisse stehen noch nicht zur Verfügung</p>;
+
+        const topicScores = results!.topicScores;
+
+        return (
+          <MaterialTable
+            localization={{
+              body: {
+                emptyDataSourceMessage: `Keine Ergebnisse vorhanden`,
+              },
+              toolbar: {
+                searchPlaceholder: 'Suche',
+                searchTooltip: 'Suche',
+              },
+              pagination: {
+                labelRowsPerPage: 'Zeilen pro Seite:',
+                labelRowsSelect: 'Zeilen',
+                labelDisplayedRows: '{from}-{to} von {count}',
+                nextAriaLabel: 'Nächste Seite',
+              },
+              header: {
+                actions: 'Aktionen',
+              },
+            }}
+            columns={[
+              { title: 'Universität', field: 'university.name' },
+              { title: 'Thema', field: 'topic.name' },
+              { title: 'Score', field: 'score', type: 'numeric' },
+              {
+                title: 'Anzahl Einträge',
+                field: 'entryCount',
+                type: 'numeric',
+              },
+            ]}
+            data={topicScores}
+            title="Auswertung"
+          />
+        );
+      }}
+    </Subscribe>
+  );
 }
 
 function ProjectResultMap() {

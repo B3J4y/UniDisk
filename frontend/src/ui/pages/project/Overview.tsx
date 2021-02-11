@@ -19,7 +19,7 @@ import BlockIcon from '@material-ui/icons/Block';
 import CheckIcon from '@material-ui/icons/Check';
 import DeleteIcon from '@material-ui/icons/Delete';
 import InfoIcon from '@material-ui/icons/Info';
-import { Project, ProjectState, ProjectStates, Topic } from 'data/entity';
+import { Project, ProjectState, Topic } from 'data/entity';
 import { ProjectDetailContainer } from 'model';
 import { useProvider } from 'Provider';
 import React, { useEffect } from 'react';
@@ -178,9 +178,8 @@ function ProjectSelectionTable(props: ProjectSelectionTableProps) {
   const { onSelect, projects, selected } = props;
   const [selectedState, setSelectedState] = React.useState(selected?.state ?? ProjectState.idle);
 
-  const handleTabChange = (_event: React.ChangeEvent<{}>, index: number) => {
-    const newState = ProjectStates[index];
-    setSelectedState(newState);
+  const handleTabChange = (_event: React.ChangeEvent<{}>, state: ProjectState) => {
+    setSelectedState(state);
   };
 
   const stateProjects = projects.filter((project) => project.state === selectedState);
@@ -202,13 +201,12 @@ function ProjectSelectionTable(props: ProjectSelectionTableProps) {
         <Tabs
           value={selectedState}
           onChange={handleTabChange}
-          aria-label="simple tabs example"
           scrollButtons="auto"
           variant="scrollable"
         >
           {selectionStates.map((state) => {
             const label = mapProjectState(state);
-            return <Tab label={label} />;
+            return <Tab label={label} value={state} />;
           })}
         </Tabs>
       </AppBar>

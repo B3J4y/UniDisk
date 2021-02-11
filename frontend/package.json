@@ -12,7 +12,7 @@
     "@testing-library/user-event": "^7.2.1",
     "@tinymce/tinymce-react": "^3.8.0",
     "axios": "^0.19.2",
-    "material-table": "^1.57.2",
+    "material-table": "^1.69.2",
     "moment": "^2.24.0",
     "ol": "^6.4.3",
     "query-string": "^6.12.1",

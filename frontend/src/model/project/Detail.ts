@@ -1,5 +1,10 @@
 import { ProjectDetails, ProjectState } from 'data/entity';
-import { CreateProjectArgs, ProjectRepository, UpdateProjectArgs } from 'data/repositories';
+import {
+  CreateProjectArgs,
+  ProjectEvaluationResult,
+  ProjectRepository,
+  UpdateProjectArgs,
+} from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';
 import { EntityDetailState, EntityDetailStateContainer } from 'model/base';
 import {
@@ -17,6 +22,7 @@ import { EventBus } from 'services/event/bus';
 export type ProjectDetailState = EntityDetailState<ProjectDetails> & {
   enqueue: Operation;
   dequeue: Operation;
+  result: Resource<ProjectEvaluationResult | undefined>;
 };
 
 export class ProjectDetailContainer extends EntityDetailStateContainer<
@@ -186,6 +192,26 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
     }
   }
 
+  public async loadResults(): Promise<void> {
+    const project = this.getProject();
+    if (!project) throw new Error("Project hasn't been loaded yet.");
+
+    if (project.state !== ProjectState.completed) {
+      this.setState({
+        ...this.state,
+        result: Resource.success(undefined),
+      });
+      return;
+    }
+
+    for await (const event of Resource.execute(() => this.repository.getResult(project.id))) {
+      this.setState({
+        ...this.state,
+        result: event,
+      });
+    }
+  }
+
   protected executeDelete(id: string): Promise<void> {
     return this.repository.delete(id);
   }
@@ -201,6 +227,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       delete: Operation.idle(),
       enqueue: Operation.idle(),
       dequeue: Operation.idle(),
+      result: Resource.idle(),
     };
   }
 

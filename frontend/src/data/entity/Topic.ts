@@ -1,9 +1,20 @@
 import { Keyword } from './Keyword';
+import { University } from './University';
 
-export type Topic = {
+type BaseTopic = {
   id: string;
   name: string;
-  keywords?: Keyword[];
 };
 
+export type Topic = {
+  keywords?: Keyword[];
+} & BaseTopic;
+
 export type TopicDetails = Required<Topic>;
+
+export type TopicResult = {
+  topic: BaseTopic;
+  score: number;
+  entryCount: number;
+  university: University;
+};

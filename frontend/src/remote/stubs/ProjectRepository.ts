@@ -1,7 +1,32 @@
 import { Project, ProjectDetails, ProjectState } from 'data/entity';
-import { CreateProjectArgs, ProjectRepository, UpdateProjectArgs } from 'data/repositories';
+import {
+  CreateProjectArgs,
+  ProjectEvaluationResult,
+  ProjectRepository,
+  UpdateProjectArgs,
+} from 'data/repositories';
 
 export class ProjectRepositoryStub implements ProjectRepository {
+  public async getResult(id: string): Promise<ProjectEvaluationResult | undefined> {
+    const project = ProjectRepositoryStub.projects.find((p) => p.id === id);
+    if (!id) return undefined;
+
+    return {
+      topicScores:
+        project?.topics.map((topic) => {
+          return {
+            topic,
+            university: {
+              id: '15',
+              name: 'Uni Potsdam',
+            },
+            score: 0.5,
+            entryCount: 20,
+          };
+        }) ?? [],
+    };
+  }
+
   public async enqueue(projectId: string): Promise<void> {
     ProjectRepositoryStub.projects = ProjectRepositoryStub.projects.map((project) => {
       if (project.id === projectId) {
@@ -25,6 +50,30 @@ export class ProjectRepositoryStub implements ProjectRepository {
       id: '15',
       name: 'test',
       state: ProjectState.idle,
+      topics: [
+        {
+          id: '0',
+          name: 'Software',
+          keywords: [],
+        },
+      ],
+    },
+    {
+      id: '14',
+      name: 'completed',
+      state: ProjectState.completed,
+      topics: [
+        {
+          id: '0',
+          name: 'Software',
+          keywords: [],
+        },
+      ],
+    },
+    {
+      id: '17',
+      name: 'error',
+      state: ProjectState.error,
       topics: [
         {
           id: '0',

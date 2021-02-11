@@ -1,4 +1,4 @@
-import { Project, ProjectDetails } from 'data/entity';
+import { Project, ProjectDetails, TopicResult } from 'data/entity';
 
 export type CreateProjectArgs = {
   name: string;
@@ -9,10 +9,21 @@ export type UpdateProjectArgs = {
   projectId: Project['id'];
 };
 
+export type ProjectEvaluationResult = {
+  topicScores: TopicResult[];
+};
+
 export interface ProjectRepository {
   findAll(): Promise<Project[]>;
 
   get(id: Project['id']): Promise<ProjectDetails | undefined>;
+
+  /**
+   * Returns evalutation result of project.
+   * Returns undefined if project didn't finish processing.
+   * @param id project id
+   */
+  getResult(id: Project['id']): Promise<ProjectEvaluationResult | undefined>;
 
   create(args: CreateProjectArgs): Promise<Project>;
   update(args: UpdateProjectArgs): Promise<Project>;
