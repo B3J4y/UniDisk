@@ -4,9 +4,8 @@ import { Feature, Map, Overlay, View } from 'ol';
 
 // Start Openlayers imports
 import { Point } from 'ol/geom';
-import { Select as SelectInteraction } from 'ol/interaction';
 import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
-import { fromLonLat, transform } from 'ol/proj';
+import { fromLonLat, transform, toLonLat } from 'ol/proj';
 import { OSM as OSMSource, Vector as VectorSource } from 'ol/source';
 import { Icon, Style } from 'ol/style';
 import React from 'react';
@@ -22,7 +21,6 @@ export type Marker = {
 
 export type MapProps = {
   onClick?: (value?: GpsPosition) => void;
-  onMarkerSelected: (marker: Marker) => void;
   onHover?: (marker: Marker, position: { x: number; y: number }) => void;
   onHoverExit?: () => void;
   initialPosition: GpsPosition & { zoom?: number };
@@ -171,6 +169,10 @@ export class OLMap extends React.Component<MapProps, State> {
           map.getTargetElement().style.cursor = hit ? 'pointer' : '';
         });
       map.updateSize();
+      // map.on('moveend', function (e, x) {
+      //   const [lon,lat] = toLonLat(map.getView().getCenter());
+      //   const zoom = map.getView().getZoom();
+      // });
       map.on('click', function (evt) {
         var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
           //you can add a condition on layer to restrict the listener
@@ -183,7 +185,7 @@ export class OLMap extends React.Component<MapProps, State> {
 
         const marker = { lat: lat, lng: lng };
         if (feature) {
-          that.props.onMarkerSelected({ ...marker, id: feature.getId() });
+          // that.props.onMarkerSelected({ ...marker, id: feature.getId() });
         } else {
           if (that.props.onClick) that.props.onClick(marker);
         }

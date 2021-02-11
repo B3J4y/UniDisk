@@ -14,7 +14,7 @@
     "axios": "^0.19.2",
     "material-table": "^1.69.2",
     "moment": "^2.24.0",
-    "ol": "^6.4.3",
+    "ol": "^6.5.0",
     "query-string": "^6.12.1",
     "react": "^16.13.1",
     "react-beautiful-dnd": "^13.0.0",

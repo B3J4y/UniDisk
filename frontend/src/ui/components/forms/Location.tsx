@@ -58,7 +58,6 @@ export class LocationSelection extends React.Component<LocationSelectionProps, S
               });
               this.props.onChange(position);
             }}
-            onMarkerSelected={(p) => {}}
             markers={markers}
           />
         </Grid>

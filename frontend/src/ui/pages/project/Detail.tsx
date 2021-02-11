@@ -20,6 +20,7 @@ import { ProjectDetailContainer } from 'model';
 import { useProvider } from 'Provider';
 import React from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { OLMap } from 'ui/components/forms/Map';
 import { ProjectTopics } from 'ui/components/project/TopicTable';
 import { Provider, Subscribe } from 'unstated-typescript';
 
@@ -299,5 +300,10 @@ function ProjectResults(props: ProjectResultsProps) {
 }
 
 function ProjectResultMap() {
-  return <p>Karte</p>;
+  return (
+    <OLMap
+      height={700}
+      initialPosition={{ lat: 51.295471273122644, lng: 9.568830237027088, zoom: 6.553662572584849 }}
+    />
+  );
 }
