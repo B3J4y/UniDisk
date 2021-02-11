@@ -26,6 +26,8 @@ export function CreateTopicForm(props: CreateTopicFormProps) {
             return;
           }
 
+          setInputError('');
+
           await container.create({
             name: name.trim(),
             projectId,

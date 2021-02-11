@@ -24,7 +24,6 @@ export class ProjectRepositoryStub implements ProjectRepository {
     {
       id: '15',
       name: 'test',
-      createdAt: new Date(),
       state: ProjectState.idle,
       topics: [
         {
@@ -50,7 +49,6 @@ export class ProjectRepositoryStub implements ProjectRepository {
     const project: Project = {
       id: new Date().getTime().toString(),
       name: args.name,
-      createdAt: new Date(),
       state: ProjectState.idle,
     };
 

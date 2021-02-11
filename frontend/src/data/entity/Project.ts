@@ -16,7 +16,6 @@ export type Project = {
   id: string;
   name: string;
   topics?: Topic[];
-  createdAt: Date;
   state: ProjectState;
 };
 

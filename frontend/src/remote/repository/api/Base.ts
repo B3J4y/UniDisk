@@ -8,6 +8,7 @@ export type TokenProvider = {
 export type RepositoryArgs = {
   endpoint: string;
   tokenProvider: TokenProvider;
+  defaultPath?: string;
 };
 
 export abstract class BaseApiRepository {
@@ -21,7 +22,7 @@ export abstract class BaseApiRepository {
       try {
         const token = await tokenProvider.getToken();
         this.client = axios.create({
-          baseURL: endpoint,
+          baseURL: endpoint + (args.defaultPath ?? ''),
           headers: {
             Authorization: token,
           },
@@ -34,7 +35,7 @@ export abstract class BaseApiRepository {
 
     tokenProvider.onTokenChange((token) => {
       axios.create({
-        baseURL: endpoint,
+        baseURL: endpoint + (args.defaultPath ?? ''),
         headers: {
           Authorization: token,
         },

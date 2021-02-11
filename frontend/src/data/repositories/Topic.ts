@@ -14,6 +14,4 @@ export interface TopicRepository {
   create(args: CreateTopicArgs): Promise<Topic>;
   update(args: UpdateTopicArgs): Promise<Topic>;
   delete(id: Topic['id']): Promise<void>;
-
-  getProjectTopics(id: Project['id']): Promise<TopicDetails[]>;
 }

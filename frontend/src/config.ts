@@ -4,4 +4,9 @@ export const stage: Stage = process.env.REACT_APP_STAGE === 'prod' ? 'prod' : 'd
 
 export const THEME = { primary: '#A0C55F', colorOnPrimary: 'white' };
 
-export const API_ENDPOINT = 'http://localhost:8080/unidisk_war/rest/';
+// Determines whether stubs or API endpoints are used
+export const USE_STUBS = true;
+
+const LOCAL_DEV_ENDPOINT = 'http://localhost:8080/unidisk_war/rest/';
+
+export const API_ENDPOINT = LOCAL_DEV_ENDPOINT;

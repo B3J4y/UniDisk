@@ -23,7 +23,6 @@ function App(): JSX.Element {
               {Routes.map((r) => r)}
               <Route exact path="/login" component={StatedLoginForm} />
             </Switch>
-            ,
           </div>
         </Router>
       </Provider>

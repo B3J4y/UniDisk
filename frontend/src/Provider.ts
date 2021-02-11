@@ -1,37 +1,48 @@
-import { API_ENDPOINT } from 'config';
+import { API_ENDPOINT, USE_STUBS } from 'config';
 import { KeywordRepository, ProjectRepository, TopicRepository } from 'data/repositories';
 import { ProjectAllContainer, ProjectDetailContainer } from 'model';
 import { KeywordDetailContainer } from 'model/keyword/Detail';
 import { TopicDetailContainer } from 'model/topic/Detail';
 import React, { useContext } from 'react';
+import { TopicApiRepository } from 'remote/repository';
+import { KeywordApiRepository } from 'remote/repository/api/Keyword';
 import { ProjectApiRepository } from 'remote/repository/api/Project';
 import { AuthStub } from 'remote/services/Authentication';
 import { KeywordRecommendationService } from 'remote/services/KeywordRecommendation';
-import { KeywordRepositoryStub } from 'remote/stubs/KeywordRepository';
-import { TopicRepositoryStub } from 'remote/stubs/TopicRepository';
+import { ProjectRepositoryStub, KeywordRepositoryStub, TopicRepositoryStub } from 'remote/stubs';
 import { EventBus } from 'services/event/bus';
 import IAuthenticationService from './data/services/Authentication';
 
 const eventBus = new EventBus();
 
-const getProjectRepository = (): ProjectRepository => {
+const getTokenProvider = () => {
   const authService = getAuthenticationService();
+  return {
+    getToken: () => authService.getAuthToken().then((v) => v!.token),
+    onTokenChange: authService.onTokenChanged,
+  };
+};
 
-  return new ProjectApiRepository({
+const getRepositoryArgs = () => {
+  return {
     endpoint: API_ENDPOINT,
-    tokenProvider: {
-      getToken: () => authService.getAuthToken().then((v) => v!.token),
-      onTokenChange: authService.onTokenChanged,
-    },
-  });
+    tokenProvider: getTokenProvider(),
+  };
+};
+
+const getProjectRepository = (): ProjectRepository => {
+  if (USE_STUBS) return new ProjectRepositoryStub();
+  return new ProjectApiRepository(getRepositoryArgs());
 };
 
 const getTopicRepository = (): TopicRepository => {
-  return new TopicRepositoryStub();
+  if (USE_STUBS) return new TopicRepositoryStub();
+  return new TopicApiRepository(getRepositoryArgs());
 };
 
 const getKeywordRepository = (): KeywordRepository => {
-  return new KeywordRepositoryStub();
+  if (USE_STUBS) return new KeywordRepositoryStub();
+  return new KeywordApiRepository(getRepositoryArgs());
 };
 
 export const provider = {

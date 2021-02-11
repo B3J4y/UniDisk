@@ -80,7 +80,12 @@ function ProjectsSelection(props: ProjectsSelectionProps) {
   const { projects } = props;
 
   const provider = useProvider();
-  const [selected, setSelected] = React.useState(projects[0]);
+
+  // Choose idle on as default and if it doesn't exist take first project
+  const firstSelected =
+    projects.find((project) => project.state === ProjectState.idle) ?? projects[0];
+
+  const [selected, setSelected] = React.useState(firstSelected);
   const [selectedTopic, setSelectedTopic] = React.useState<Topic | undefined>(undefined);
 
   const getProjectContainer = (projectId: string): ProjectDetailContainer => {
@@ -171,7 +176,7 @@ function ProjectSelectionTable(props: ProjectSelectionTableProps) {
   const history = useHistory();
   const provider = useProvider();
   const { onSelect, projects, selected } = props;
-  const [selectedState, setSelectedState] = React.useState(ProjectState.idle);
+  const [selectedState, setSelectedState] = React.useState(selected?.state ?? ProjectState.idle);
 
   const handleTabChange = (_event: React.ChangeEvent<{}>, index: number) => {
     const newState = ProjectStates[index];
