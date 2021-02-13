@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest.dto.keyword;
+package de.unidisk.rest.dto.keyword;
 
 public class UpdateKeywordDto {
 

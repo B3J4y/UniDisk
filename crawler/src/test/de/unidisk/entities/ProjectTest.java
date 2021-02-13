@@ -4,6 +4,7 @@ import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.view.results.Result;
@@ -26,8 +27,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class ProjectTest implements HibernateLifecycle {
 
-    private IProjectRepository.CreateProjectArgs createArgs(String name){
-        return new IProjectRepository.CreateProjectArgs("test",name);
+    private CreateProjectParams createArgs(String name){
+        return new CreateProjectParams("test",name);
     }
     @Test
     public void canCreateEntity() throws DuplicateException {

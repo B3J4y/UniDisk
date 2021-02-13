@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest.authentication;
+package de.unidisk.rest.authentication;
 
 import javax.ws.rs.core.SecurityContext;
 import java.security.Principal;

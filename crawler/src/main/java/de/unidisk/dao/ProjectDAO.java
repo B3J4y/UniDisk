@@ -2,6 +2,8 @@ package de.unidisk.dao;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
+import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
@@ -22,9 +24,9 @@ public class ProjectDAO  implements IProjectRepository {
     public ProjectDAO() {
     }
 
-    public Project createProject(CreateProjectArgs args) throws DuplicateException {
-        Project project = new Project(args.getName());
-        project.setUserId(args.getUserId());
+    public Project createProject(CreateProjectParams params) throws DuplicateException {
+        Project project = new Project(params.getName());
+        project.setUserId(params.getUserId());
         project.setProjectState(ProjectState.IDLE);
 
         return HibernateUtil.executeUpdate(session -> {
@@ -35,13 +37,13 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
-    public Project updateProject(UpdateProjectArgs args) throws DuplicateException {
-        final Optional<Project> p = findProjectById(Integer.parseInt(args.getProjectId()));
+    public Project updateProject(UpdateProjectParams params) throws DuplicateException {
+        final Optional<Project> p = findProjectById(Integer.parseInt(params.getProjectId()));
         if (!p.isPresent()) {
             return null;
         }
         final Project project = p.get();
-        project.setName(args.getName());
+        project.setName(params.getName());
         HibernateUtil.executeUpdate(session -> {
             session.update(project);
             return null;

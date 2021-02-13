@@ -1,11 +1,12 @@
-package de.unidisk.crawler.rest;
+package de.unidisk.rest;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
-import de.unidisk.crawler.rest.authentication.ContextUser;
-import de.unidisk.crawler.rest.dto.topic.CreateTopicDto;
-import de.unidisk.crawler.rest.dto.topic.UpdateTopicDto;
+import de.unidisk.contracts.repositories.params.topic.UpdateTopicParams;
+import de.unidisk.rest.authentication.ContextUser;
+import de.unidisk.rest.dto.topic.CreateTopicDto;
+import de.unidisk.rest.dto.topic.UpdateTopicDto;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
 
@@ -63,8 +64,8 @@ public class TopicRestService extends CRUDService<Topic, CreateTopicDto, UpdateT
         }
 
         try {
-            final ITopicRepository.UpdateTopicArgs args = new ITopicRepository.UpdateTopicArgs(topic.getId(), topic.getName());
-            final Topic  updated = this.topicRepository.updateTopic(args);
+            final UpdateTopicParams params = new UpdateTopicParams(topic.getId(), topic.getName());
+            final Topic  updated = this.topicRepository.updateTopic(params);
             return Response.ok(updated).build();
         } catch (DuplicateException e) {
             return Response.status(400).entity("Thema mit gleichem Namen existiert bereits.").build();

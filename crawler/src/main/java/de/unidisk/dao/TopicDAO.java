@@ -3,6 +3,7 @@ package de.unidisk.dao;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.ITopicRepository;
+import de.unidisk.contracts.repositories.params.topic.UpdateTopicParams;
 import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -85,13 +86,13 @@ public class TopicDAO {
         return topic;
     }
 
-    public Topic updateTopic(ITopicRepository.UpdateTopicArgs args) throws DuplicateException {
-        final Optional<Topic> t = getTopic(args.getTopicId());
+    public Topic updateTopic(UpdateTopicParams params) throws DuplicateException {
+        final Optional<Topic> t = getTopic(params.getTopicId());
         if (!t.isPresent()) {
             return null;
         }
         final Topic topic = t.get();
-        topic.setName(args.getName());
+        topic.setName(params.getName());
 
         HibernateUtil.executeUpdate(session -> {
             session.update(topic);

@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest;
+package de.unidisk.rest;
 
 import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;

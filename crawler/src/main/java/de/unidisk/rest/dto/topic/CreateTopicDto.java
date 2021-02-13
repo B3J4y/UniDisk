@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest.dto.topic;
+package de.unidisk.rest.dto.topic;
 
 public class CreateTopicDto {
 

@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest.authentication;
+package de.unidisk.rest.authentication;
 
 import de.unidisk.contracts.services.IAuthenticationService;
 
@@ -10,7 +10,6 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
 
 @Provider
 @AuthNeeded

@@ -1,13 +1,11 @@
-package de.unidisk.crawler.rest;
+package de.unidisk.rest;
 
-
-import de.unidisk.*;
 
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.services.IAuthenticationService;
-import de.unidisk.crawler.rest.authentication.AuthenticationService;
+import de.unidisk.rest.authentication.AuthenticationService;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateProjectRepo;
 import de.unidisk.repositories.HibernateTopicRepo;

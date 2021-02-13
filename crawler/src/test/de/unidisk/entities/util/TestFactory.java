@@ -2,6 +2,7 @@ package de.unidisk.entities.util;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.dao.TopicDAO;
@@ -29,7 +30,7 @@ public final class TestFactory {
 
     public static Project createRawProject(){
         try {
-            return new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(UUID.randomUUID().toString(),"test"));
+            return new ProjectDAO().createProject(new CreateProjectParams(UUID.randomUUID().toString(),"test"));
         } catch (DuplicateException e) {
             e.printStackTrace();
         }
@@ -39,7 +40,7 @@ public final class TestFactory {
     public static Keyword createKeyword(){
         Project p = null;
         try {
-            p = new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs(UUID.randomUUID().toString(),"test"));
+            p = new ProjectDAO().createProject(new CreateProjectParams(UUID.randomUUID().toString(),"test"));
         } catch (DuplicateException e) {
             e.printStackTrace();
         }

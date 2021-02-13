@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest.authentication;
+package de.unidisk.rest.authentication;
 
 import javax.security.auth.Subject;
 import java.security.Principal;

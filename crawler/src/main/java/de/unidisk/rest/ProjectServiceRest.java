@@ -1,11 +1,13 @@
-package de.unidisk.crawler.rest;
+package de.unidisk.rest;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
-import de.unidisk.crawler.rest.authentication.AuthNeeded;
-import de.unidisk.crawler.rest.authentication.ContextUser;
-import de.unidisk.crawler.rest.dto.project.CreateProjectDto;
-import de.unidisk.crawler.rest.dto.project.UpdateProjectDto;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
+import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
+import de.unidisk.rest.authentication.AuthNeeded;
+import de.unidisk.rest.authentication.ContextUser;
+import de.unidisk.rest.dto.project.CreateProjectDto;
+import de.unidisk.rest.dto.project.UpdateProjectDto;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 
@@ -16,7 +18,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.security.Principal;
 import java.util.*;
 import java.util.function.Function;
 
@@ -66,10 +67,10 @@ public class ProjectServiceRest {
     @AuthNeeded
     public Response createProject(CreateProjectDto dto, @Context SecurityContext context){
         final ContextUser user = (ContextUser) context.getUserPrincipal();
-        final IProjectRepository.CreateProjectArgs args = new IProjectRepository.CreateProjectArgs(user.getId(),dto.getName());
+        final CreateProjectParams params = new CreateProjectParams(user.getId(),dto.getName());
 
         try {
-            final Project  p = this.projectRepository.createProject(args);
+            final Project  p = this.projectRepository.createProject(params);
             return Response.ok(p).build();
         } catch (DuplicateException e) {
             return Response.status(400).entity("Projekt mit Namen existiert bereits.").build();
@@ -84,9 +85,9 @@ public class ProjectServiceRest {
     @AuthNeeded
     public Response updateProject(UpdateProjectDto dto, @PathParam("id") String id, @Context SecurityContext context ){
         return runProject(id,context, project -> {
-            final IProjectRepository.UpdateProjectArgs args = new IProjectRepository.UpdateProjectArgs(id,dto.getName());
+            final UpdateProjectParams params = new UpdateProjectParams(id,dto.getName());
                     try {
-                        final Project updated = this.projectRepository.updateProject(args);
+                        final Project updated = this.projectRepository.updateProject(params);
                         return Response.ok(updated).build();
                     } catch (DuplicateException e) {
                         return Response.status(400).entity("Projekt mit Namen existiert bereits.").build();

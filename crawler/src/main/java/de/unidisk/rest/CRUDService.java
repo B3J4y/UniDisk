@@ -1,7 +1,7 @@
-package de.unidisk.crawler.rest;
+package de.unidisk.rest;
 
-import de.unidisk.crawler.rest.authentication.AuthNeeded;
-import de.unidisk.crawler.rest.authentication.ContextUser;
+import de.unidisk.rest.authentication.AuthNeeded;
+import de.unidisk.rest.authentication.ContextUser;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;

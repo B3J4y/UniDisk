@@ -89,7 +89,7 @@ public class SolrApp {
         }
 
     }
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] params) throws Exception {
         final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(),
                 new HibernateTopicRepo(),
                 SolrConfiguration.getInstance());

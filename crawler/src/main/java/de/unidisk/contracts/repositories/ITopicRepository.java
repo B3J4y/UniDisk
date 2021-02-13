@@ -2,6 +2,7 @@ package de.unidisk.contracts.repositories;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.params.topic.UpdateTopicParams;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Topic;
 import de.unidisk.entities.hibernate.TopicScore;
@@ -12,28 +13,9 @@ import java.util.Optional;
 public interface ITopicRepository {
 
 
-
-    class UpdateTopicArgs {
-        final int topicId;
-        final String name;
-
-        public UpdateTopicArgs(int topicId, String name) {
-            this.topicId = topicId;
-            this.name = name;
-        }
-
-        public int getTopicId() {
-            return topicId;
-        }
-
-        public String getName() {
-            return name;
-        }
-    }
-
     Topic createTopic(int projectId, String name) throws DuplicateException;
 
-    Topic updateTopic(UpdateTopicArgs args) throws DuplicateException;
+    Topic updateTopic(UpdateTopicParams params) throws DuplicateException;
 
     void deleteTopic(int topicId);
 

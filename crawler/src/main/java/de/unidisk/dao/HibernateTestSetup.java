@@ -3,6 +3,7 @@ package de.unidisk.dao;
 import de.unidisk.common.ApplicationState;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -42,7 +43,7 @@ public class HibernateTestSetup {
             Project dbProject1;
 
             try {
-                dbProject1 = projectDAO.createProject(new IProjectRepository.CreateProjectArgs(p.getName(),"test"));
+                dbProject1 = projectDAO.createProject(new CreateProjectParams(p.getName(),"test"));
             } catch (DuplicateException e) {
                 e.printStackTrace();
                 dbProject1 = null;

@@ -1,6 +1,6 @@
 package de.unidisk.contracts.services;
 
-import de.unidisk.crawler.rest.authentication.ContextUser;
+import de.unidisk.rest.authentication.ContextUser;
 
 public interface IAuthenticationService {
 

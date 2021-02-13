@@ -3,10 +3,10 @@ package de.unidisk.rest;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
-import de.unidisk.crawler.rest.TopicRestService;
-import de.unidisk.crawler.rest.authentication.AuthenticatedContext;
-import de.unidisk.crawler.rest.authentication.ContextUser;
-import de.unidisk.crawler.rest.dto.topic.CreateTopicDto;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
+import de.unidisk.rest.authentication.AuthenticatedContext;
+import de.unidisk.rest.authentication.ContextUser;
+import de.unidisk.rest.dto.topic.CreateTopicDto;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.HibernateLifecycle;
@@ -47,7 +47,7 @@ public class TopicTest implements HibernateLifecycle {
 
     Project createOwnProject(String name){
         try {
-            return new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs( user.getId(),name));
+            return new ProjectDAO().createProject(new CreateProjectParams( user.getId(),name));
         } catch (DuplicateException e) {
             e.printStackTrace();
         }
@@ -56,7 +56,7 @@ public class TopicTest implements HibernateLifecycle {
 
     Project createProject(String name, String userId){
         try {
-            return new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs( userId,name));
+            return new ProjectDAO().createProject(new CreateProjectParams( userId,name));
         } catch (DuplicateException e) {
             e.printStackTrace();
         }

@@ -2,6 +2,7 @@ package de.unidisk.dao;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IKeywordRepository;
+import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
@@ -62,14 +63,14 @@ public class KeywordDAO {
         return keyword;
     }
 
-    public Keyword updateKeyword(IKeywordRepository.UpdateKeywordArgs args) throws DuplicateException
+    public Keyword updateKeyword(UpdateKeywordParams params) throws DuplicateException
     {
-        final Optional<Keyword> k = get(Integer.parseInt(args.getKeywordId()));
+        final Optional<Keyword> k = get(Integer.parseInt(params.getKeywordId()));
         if (!k.isPresent()) {
             return null;
         }
         final Keyword keyword = k.get();
-        keyword.setName(args.getName());
+        keyword.setName(params.getName());
 
         HibernateUtil.executeUpdate(session -> {
             session.update(keyword);

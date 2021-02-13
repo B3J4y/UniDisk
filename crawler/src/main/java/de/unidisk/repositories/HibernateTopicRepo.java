@@ -2,6 +2,7 @@ package de.unidisk.repositories;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.params.topic.UpdateTopicParams;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.hibernate.Keyword;
@@ -27,8 +28,8 @@ public class HibernateTopicRepo implements ITopicRepository {
     }
 
     @Override
-    public Topic updateTopic(UpdateTopicArgs args) throws DuplicateException {
-        return dao.updateTopic(args);
+    public Topic updateTopic(UpdateTopicParams params) throws DuplicateException {
+        return dao.updateTopic(params);
     }
 
 

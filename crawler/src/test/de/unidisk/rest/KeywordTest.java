@@ -4,12 +4,11 @@ import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
-import de.unidisk.crawler.rest.KeywordRestService;
-import de.unidisk.crawler.rest.TopicRestService;
-import de.unidisk.crawler.rest.authentication.AuthenticatedContext;
-import de.unidisk.crawler.rest.authentication.ContextUser;
-import de.unidisk.crawler.rest.dto.keyword.CreateKeywordDto;
-import de.unidisk.crawler.rest.dto.topic.CreateTopicDto;
+import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
+import de.unidisk.rest.authentication.AuthenticatedContext;
+import de.unidisk.rest.authentication.ContextUser;
+import de.unidisk.rest.dto.keyword.CreateKeywordDto;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.HibernateLifecycle;
@@ -25,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.security.Key;
 
 public class KeywordTest implements HibernateLifecycle {
 
@@ -55,7 +53,7 @@ public class KeywordTest implements HibernateLifecycle {
 
     Project createOwnProject(String name){
         try {
-            return new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs( user.getId(),name));
+            return new ProjectDAO().createProject(new CreateProjectParams( user.getId(),name));
         } catch (DuplicateException e) {
             e.printStackTrace();
         }
@@ -64,7 +62,7 @@ public class KeywordTest implements HibernateLifecycle {
 
     Project createProject(String name, String userId){
         try {
-            return new ProjectDAO().createProject(new IProjectRepository.CreateProjectArgs( userId,name));
+            return new ProjectDAO().createProject(new CreateProjectParams( userId,name));
         } catch (DuplicateException e) {
             e.printStackTrace();
         }
@@ -110,7 +108,7 @@ public class KeywordTest implements HibernateLifecycle {
     public void deleteKeywordOfOwnProject() throws DuplicateException {
         final Project project = createOwnProject("2");
         final Topic topic = new TopicDAO().createTopic("topic", project.getId());
-        final Keyword keyword = keywordRepository.createKeyword(new IKeywordRepository.CreateKeywordArgs("x", String.valueOf(topic.getId())));
+        final Keyword keyword = keywordRepository.createKeyword(new CreateKeywordParams("x", String.valueOf(topic.getId())));
 
         final Response r = keywordRestService.delete(String.valueOf(keyword.getId()), context);
         Assert.assertEquals( 200,r.getStatus());
@@ -126,7 +124,7 @@ public class KeywordTest implements HibernateLifecycle {
     public void deleteKeywordOfProjectOfOtherUser() throws DuplicateException {
         final Project p = createProject("name","otherUser");
         final Topic topic = new TopicDAO().createTopic("topic", p.getId());
-        final Keyword keyword = keywordRepository.createKeyword(new IKeywordRepository.CreateKeywordArgs("x", String.valueOf(topic.getId())));
+        final Keyword keyword = keywordRepository.createKeyword(new CreateKeywordParams("x", String.valueOf(topic.getId())));
 
         final Response r = keywordRestService.delete(String.valueOf(keyword.getId()), context);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(),r.getStatus());

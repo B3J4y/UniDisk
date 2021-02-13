@@ -1,6 +1,7 @@
 package de.unidisk.view.project.dialog;
 
 import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.view.MessagingCenter;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.services.ProjectService;
@@ -58,7 +59,7 @@ public class AddProjectDialog implements Serializable {
                     errorText = "Projektname existiert bereits";
                 }else{
                     ProjectDAO projectDAO = new ProjectDAO();
-                    projectDAO.createProject(new IProjectRepository.CreateProjectArgs(projectName,"test"));
+                    projectDAO.createProject(new CreateProjectParams(projectName,"test"));
                     de.unidisk.entities.hibernate.Project project = projectDAO.findProject(projectName).orElseThrow(IllegalStateException::new);
 
                     PrimeFaces current = PrimeFaces.current();

@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest.dto.project;
+package de.unidisk.rest.dto.project;
 
 public class CreateProjectDto {
 

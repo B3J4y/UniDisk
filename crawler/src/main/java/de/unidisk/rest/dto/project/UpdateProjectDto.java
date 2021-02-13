@@ -1,6 +1,4 @@
-package de.unidisk.crawler.rest.dto.project;
-
-import de.unidisk.entities.hibernate.ProjectState;
+package de.unidisk.rest.dto.project;
 
 public class UpdateProjectDto {
 

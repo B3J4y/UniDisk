@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest.authentication;
+package de.unidisk.rest.authentication;
 
 import de.unidisk.contracts.services.IAuthenticationService;
 

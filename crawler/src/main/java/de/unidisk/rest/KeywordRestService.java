@@ -1,12 +1,14 @@
-package de.unidisk.crawler.rest;
+package de.unidisk.rest;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
-import de.unidisk.crawler.rest.authentication.ContextUser;
-import de.unidisk.crawler.rest.dto.keyword.CreateKeywordDto;
-import de.unidisk.crawler.rest.dto.keyword.UpdateKeywordDto;
+import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
+import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
+import de.unidisk.rest.authentication.ContextUser;
+import de.unidisk.rest.dto.keyword.CreateKeywordDto;
+import de.unidisk.rest.dto.keyword.UpdateKeywordDto;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
@@ -53,10 +55,10 @@ public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto, U
         }
 
 
-        final IKeywordRepository.CreateKeywordArgs args = new IKeywordRepository.CreateKeywordArgs(dto.getName(),dto.getTopicId());
+        final CreateKeywordParams params = new CreateKeywordParams(dto.getName(),dto.getTopicId());
         final Keyword keyword;
         try {
-            keyword = this.keywordRepository.createKeyword(args);
+            keyword = this.keywordRepository.createKeyword(params);
         } catch (DuplicateException e) {
             return Response.status(400).entity("Stichwort mit Namen existiert bereits.").build();
         }
@@ -72,8 +74,8 @@ public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto, U
         }
 
         try {
-            final IKeywordRepository.UpdateKeywordArgs args = new IKeywordRepository.UpdateKeywordArgs(updateKeywordDto.getName(), updateKeywordDto.getKeywordId());
-            final Keyword updated = this.keywordRepository.updateKeyword(args);
+            final UpdateKeywordParams params = new UpdateKeywordParams(updateKeywordDto.getName(), updateKeywordDto.getKeywordId());
+            final Keyword updated = this.keywordRepository.updateKeyword(params);
             return Response.ok(updated).build();
         } catch (DuplicateException e) {
             return Response.status(400).entity("Stichwort mit Namen existiert bereits.").build();
