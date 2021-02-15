@@ -2,6 +2,9 @@ package de.unidisk.entities;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.view.results.Result;
@@ -19,24 +22,28 @@ import static de.unidisk.entities.util.TestFactory.randomUniversityUrl;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class ProjectTest implements HibernateLifecycle {
 
+    private CreateProjectParams createArgs(String name){
+        return new CreateProjectParams("test",name);
+    }
     @Test
-    public void canCreateEntity() {
+    public void canCreateEntity() throws DuplicateException {
         final ProjectDAO dao = new ProjectDAO();
-        final Project p = dao.createProject("test");
+        final Project p = dao.createProject(createArgs("test"));
         Assert.assertNotNull(p);
-        assertEquals("test",p.getName());
+        assertEquals(createArgs("test").getName(),p.getName());
         assertEquals(ProjectState.IDLE,p.getProjectState());
         assertEquals(0,p.getTopics().size());
     }
 
     @Test
-    public void canSetProcessingError() {
+    public void canSetProcessingError() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
-        final Project p = dao.createProject("test");
+        final Project p = dao.createProject(createArgs("test"));
         Assert.assertNotNull(p);
         final String error = "test error";
         dao.setProjectError(p.getId(), error);
@@ -50,18 +57,21 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void creatingDuplicateEntityReturnsExisting() {
+    public void creatingDuplicateEntityThrowsDuplicateException() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
-        Project duplicate = dao.createProject("test");
-        Assert.assertNotNull(duplicate);
-        Assert.assertEquals(valid.getId(), duplicate.getId());
+        Project valid = dao.createProject(createArgs("test"));
+        try {
+            Project duplicate = dao.createProject(createArgs("test"));
+            fail();
+        }catch(Exception e){
+            Assert.assertTrue(e instanceof DuplicateException);
+        }
     }
 
     @Test
-    public void canDeleteEntity() {
+    public void canDeleteEntity() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
+        Project valid = dao.createProject(createArgs("test"));
         dao.deleteProjectById(String.valueOf(valid.getId()));
         Optional<Project> dbProject = dao.getProject(String.valueOf(valid.getId()));
         Assert.assertNotNull(dbProject);
@@ -69,9 +79,9 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void canDeleteEntityWithTopics() {
+    public void canDeleteEntityWithTopics() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
+        Project valid = dao.createProject(createArgs("test"));
         TopicDAO tDao = new TopicDAO();
         tDao.createTopic("test",valid.getId());
         dao.deleteProjectById(String.valueOf(valid.getId()));
@@ -81,20 +91,56 @@ public class ProjectTest implements HibernateLifecycle {
         Assert.assertNotNull(dbProject);
         Assert.assertFalse(dbProject.isPresent());
     }
+    @Test
+    public void getProjectDetailsWithoutChildren() throws DuplicateException {
+        ProjectDAO dao = new ProjectDAO();
+        Project valid = dao.createProject(createArgs("test"));
+        final Optional<Project> result = dao.getProjectDetails(String.valueOf(valid.getId()));
+        Assert.assertTrue(result.isPresent());
+    }
 
     @Test
-    public void deletingEntityDeletesChildren() {
+    public void getProjectDetails() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
+        TopicDAO tDao = new TopicDAO();
+        KeywordDAO keywordDAO = new KeywordDAO();
+        Project valid = dao.createProject(createArgs("test"));
+
+        final Topic t1 = tDao.createTopic("test",valid.getId());
+        final Topic t2 =  tDao.createTopic("test2",valid.getId());
+        final Topic t3 =  tDao.createTopic("test3",valid.getId());
+        keywordDAO.addKeyword("k1", t1.getId());
+        keywordDAO.addKeyword("k2",t1.getId());
+        keywordDAO.addKeyword("k3",t2.getId());
+
+
+        final Project result = dao.getProjectDetails(String.valueOf(valid.getId())).get();
+        Assert.assertEquals(3,result.getTopics().size());
+
+        final Optional<Topic> t1Result = result.getTopics().stream().filter(topic -> topic.getId() == t1.getId()).findFirst();
+        Assert.assertTrue(t1Result.isPresent());
+        Assert.assertEquals(2, t1Result.get().getKeywords().size());
+
+        final Optional<Topic> t2Result = result.getTopics().stream().filter(topic -> topic.getId() == t2.getId()).findFirst();
+        Assert.assertTrue(t2Result.isPresent());
+        Assert.assertEquals( 1,t2Result.get().getKeywords().size());
+
+        Assert.assertTrue(result.getTopics().stream().anyMatch(topic -> topic.getId() == t3.getId()));
+    }
+
+    @Test
+    public void deletingEntityDeletesChildren() throws DuplicateException {
+        ProjectDAO dao = new ProjectDAO();
+        Project valid = dao.createProject(createArgs("test"));
         new TopicDAO().createTopic("test",valid.getId());
         dao.deleteProjectById(String.valueOf(valid.getId()));
         Assert.assertEquals(new TopicDAO().getAll().size(),0);
     }
 
     @Test
-    public void findEntityReturnsData() {
+    public void findEntityReturnsData() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
-        Project valid = dao.createProject("test");
+        Project valid = dao.createProject(createArgs("test"));
         Optional<Project> projectResult = dao.getProject(String.valueOf(valid.getId()));
         Assert.assertTrue(projectResult.isPresent());
         Project dbProject = projectResult.get();
@@ -110,7 +156,7 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void getResultsReturnsValidData() {
+    public void getResultsReturnsValidData() throws DuplicateException {
         final ApplicationState state = MockData.getMockState();
         final UniversityDAO uniDao = new UniversityDAO();
         final ProjectDAO projectDAO = new ProjectDAO();
@@ -129,7 +175,7 @@ public class ProjectTest implements HibernateLifecycle {
 
         Project p = MockData.getMockState().getProjectList().get(0);
 
-        final Project dbProject = projectDAO.createProject(p.getName());
+        final Project dbProject = projectDAO.createProject(createArgs(p.getName()));
         p.setId(dbProject.getId());
         projectDAO.updateProjectState(dbProject.getId(),p.getProjectState());
 

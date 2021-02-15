@@ -1,5 +1,8 @@
 package de.unidisk.entities;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.dao.TopicDAO;
@@ -17,8 +20,8 @@ class KeywordTest implements HibernateLifecycle, CRUDTest, ChildTests {
     Topic parentTopic;
 
     @BeforeEach
-    void setupTopic(){
-        Project p = new ProjectDAO().createProject("p");
+    void setupTopic() throws DuplicateException {
+        Project p = new ProjectDAO().createProject(new CreateProjectParams("p","test"));
         parentTopic = new TopicDAO().createTopic("n",p.getId());
     }
 

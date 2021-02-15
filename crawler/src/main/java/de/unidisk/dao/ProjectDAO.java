@@ -1,6 +1,9 @@
 package de.unidisk.dao;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
+import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.model.KeywordItem;
@@ -8,6 +11,7 @@ import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.query.Query;
 
 import java.util.ArrayList;
@@ -20,18 +24,31 @@ public class ProjectDAO  implements IProjectRepository {
     public ProjectDAO() {
     }
 
-    public Project createProject(String name) {
-        Optional<Project> existingProject = findProject(name);
-        if (existingProject.isPresent()) {
-            return existingProject.get();
-        }
-        Project project = new Project(name);
+    public Project createProject(CreateProjectParams params) throws DuplicateException {
+        Project project = new Project(params.getName());
+        project.setUserId(params.getUserId());
         project.setProjectState(ProjectState.IDLE);
-        return  HibernateUtil.execute(session -> {
+
+        return HibernateUtil.executeUpdate(session -> {
             session.save(project);
             project.setTopics(new ArrayList<>());
             return project;
         });
+    }
+
+    @Override
+    public Project updateProject(UpdateProjectParams params) throws DuplicateException {
+        final Optional<Project> p = findProjectById(Integer.parseInt(params.getProjectId()));
+        if (!p.isPresent()) {
+            return null;
+        }
+        final Project project = p.get();
+        project.setName(params.getName());
+        HibernateUtil.executeUpdate(session -> {
+            session.update(project);
+            return null;
+        });
+        return project;
     }
 
     public void updateProjectState(int projectId, ProjectState state) {
@@ -77,9 +94,43 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
+    public List<Project> getUserProjects(String userId) {
+       return HibernateUtil.execute(session ->  {
+            return session.createQuery("select p from Project p where p.userId = :userId", Project.class)
+                    .setParameter("userId", userId)
+                    .list();
+
+        });
+    }
+
+    @Override
+    public Optional<Project> findUserProjectByName(String userId, String name) {
+        return HibernateUtil.execute(session ->  {
+            return session.createQuery("select p from Project p where p.userId = :userId AND p.name = :name", Project.class)
+                    .setParameter("userId", userId)
+                    .setParameter("name",name)
+                    .uniqueResultOptional();
+
+        });
+    }
+
+    @Override
     public Optional<Project> getProject(String projectId) {
         int id = Integer.parseInt(projectId);
         return findProjectById(id);
+    }
+
+    @Override
+    public Optional<Project> getProjectDetails(String projectId) {
+        return HibernateUtil.execute(session ->  {
+            return session.createQuery("select p from Project p " +
+                    "LEFT JOIN Topic t ON p.id = t.projectId " +
+                    "LEFT JOIN Keyword  k ON t.id = k.topicId " +
+                    "where p.id = :id", Project.class)
+                    .setParameter("id", Integer.parseInt(projectId))
+                    .uniqueResultOptional();
+
+        });
     }
 
     public boolean deleteProject(String name){

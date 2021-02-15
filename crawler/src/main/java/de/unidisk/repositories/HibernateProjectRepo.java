@@ -1,5 +1,8 @@
 package de.unidisk.repositories;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
+import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
@@ -30,8 +33,33 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
+    public List<Project> getUserProjects(String userId) {
+        return projectDAO.getUserProjects(userId);
+    }
+
+    @Override
+    public Optional<Project> findUserProjectByName(String userId, String name) {
+        return projectDAO.findUserProjectByName(userId,name);
+    }
+
+    @Override
     public Optional<Project> getProject(String projectId) {
         return projectDAO.getProject(projectId);
+    }
+
+    @Override
+    public Optional<Project> getProjectDetails(String projectId) {
+        return projectDAO.getProjectDetails(projectId);
+    }
+
+    @Override
+    public Project createProject(CreateProjectParams params) throws DuplicateException {
+        return this.projectDAO.createProject(params);
+    }
+
+    @Override
+    public Project updateProject(UpdateProjectParams params) throws DuplicateException {
+        return this.projectDAO.updateProject(params);
     }
 
     @Override

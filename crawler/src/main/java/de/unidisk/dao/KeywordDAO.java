@@ -1,5 +1,8 @@
 package de.unidisk.dao;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.IKeywordRepository;
+import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
@@ -9,6 +12,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import org.hibernate.exception.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +60,23 @@ public class KeywordDAO {
 
         transaction.commit();
         currentSession.close();
+        return keyword;
+    }
+
+    public Keyword updateKeyword(UpdateKeywordParams params) throws DuplicateException
+    {
+        final Optional<Keyword> k = get(Integer.parseInt(params.getKeywordId()));
+        if (!k.isPresent()) {
+            return null;
+        }
+        final Keyword keyword = k.get();
+        keyword.setName(params.getName());
+
+        HibernateUtil.executeUpdate(session -> {
+            session.update(keyword);
+            return null;
+        });
+
         return keyword;
     }
 

@@ -1,6 +1,9 @@
 package de.unidisk.dao;
 
 import de.unidisk.common.ApplicationState;
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -36,7 +39,17 @@ public class HibernateTestSetup {
         final List<String> universityNames = state.getUniversities().stream().map(University::getName).collect(Collectors.toList());
 
         state.getProjectList().forEach((p) -> {
-            final Project dbProject = projectDAO.createProject(p.getName());
+            final Project dbProject;
+            Project dbProject1;
+
+            try {
+                dbProject1 = projectDAO.createProject(new CreateProjectParams(p.getName(),"test"));
+            } catch (DuplicateException e) {
+                e.printStackTrace();
+                dbProject1 = null;
+            }
+
+            dbProject = dbProject1;
             if(dbProject == null){
                 //project already exists, might happen if setup is run multiple times against persistent database
                 return;
