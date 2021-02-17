@@ -363,7 +363,7 @@ function ProjectResultMap(props: ProjectResultMapProps) {
   const { onCreate, result } = props;
   const { topicScores } = result;
 
-  const topics = Array.from(new Set(topicScores.map((topic) => topic.topic.name)));
+  const topics = Array.from(new Set(topicScores.map((score) => score.topic.name)));
   const [visibleTopics, setVisibleTopics] = React.useState(new Set(topics));
 
   return (

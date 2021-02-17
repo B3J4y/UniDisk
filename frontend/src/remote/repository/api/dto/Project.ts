@@ -23,6 +23,7 @@ export type ProjectModelDto = {
 };
 
 export type ResultDto = {
+  topicId: number;
   topic: string;
   score: number;
   entryCount: number;

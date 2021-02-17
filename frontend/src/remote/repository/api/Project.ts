@@ -50,13 +50,14 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
       const response = await client.get(`/${id}/results`);
       const resultDto = response.data as ProjectResultDto;
       const scores: TopicResult[] = resultDto.map((dto) => {
+        const { topic: topicName, topicId, university } = dto;
         return {
-          topic: { id: '', name: dto.topic },
+          topic: { id: topicId.toString(), name: topicName },
           score: dto.score,
           entryCount: dto.entryCount,
           university: {
-            ...dto.university,
-            id: dto.university.id.toString(),
+            ...university,
+            id: university.id.toString(),
           },
         };
       });
