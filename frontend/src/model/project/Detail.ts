@@ -114,7 +114,6 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
         ...project,
         topics: topics.map((t) => (t.id === newTopic.id ? newTopic : t)),
       };
-      console.log({ newTopic, updatedProject });
 
       this.setState({ ...this.state, entity: Resource.success(updatedProject) });
     });

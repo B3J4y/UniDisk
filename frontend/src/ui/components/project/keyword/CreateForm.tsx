@@ -2,7 +2,7 @@ import { Box, Button, Grid, List, ListItem, ListItemText, TextField } from '@mat
 import { Topic } from 'data/entity';
 import { useProvider } from 'Provider';
 import React, { useEffect } from 'react';
-import { KeywordRecommedation } from 'remote/services/KeywordRecommendation';
+import { KeywordRecommedationResult } from 'remote/services/KeywordRecommendation';
 import { Subscribe } from 'unstated-typescript';
 
 export type CreateKeywordFormProps = {
@@ -14,31 +14,39 @@ export type CreateKeywordFormProps = {
 export function CreateKeywordForm(props: CreateKeywordFormProps) {
   const { topicId, topicKeywords } = props;
   const provider = useProvider();
+  const recommendationService = provider.getKeywordRecommendationService();
   const disabled = props.disabled ?? false;
   const [name, setName] = React.useState('');
   const [container, setContainer] = React.useState(provider.getKeywordDetailContainer());
 
   const [loading, setLoading] = React.useState(false);
-  const [recommendations, setRecommendations] = React.useState<KeywordRecommedation[] | undefined>(
-    undefined,
-  );
+  const [currentRecommendation, setCurrentRecommendation] = React.useState<
+    KeywordRecommedationResult | undefined
+  >(undefined);
+
   const [showRecommendations, setShowRecommendations] = React.useState(false);
 
   const [inputError, setInputError] = React.useState<string | undefined>(undefined);
 
-  const x = async () => {
+  const search = async () => {
+    if (name.trim().length < 3) {
+      setCurrentRecommendation(undefined);
+      return undefined;
+    }
     try {
-      const results = await provider.getKeywordRecommendationService().search(name);
-      const filtered = results.filter((result) => !topicKeywords.includes(result.keyword));
-      setRecommendations(filtered);
+      const results = await recommendationService.search(name);
+      setCurrentRecommendation(results);
     } finally {
       setLoading(false);
     }
   };
-
+  const recommendations = currentRecommendation?.recommendations.filter(
+    (result) => !topicKeywords.includes(result.keyword),
+  );
   useEffect(() => {
     setLoading(true);
-    x();
+
+    search();
   }, [name]);
 
   const keywordRecommendationClass = 'keyword-rec-item';
@@ -48,14 +56,25 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
       {(container) => {
         const createKeyword = async (keyword: string, reset: boolean = false) => {
           await container.create({
-            name: keyword,
+            name: keyword.trim(),
             topicId,
           });
+
+          const isRecommendation =
+            currentRecommendation !== undefined &&
+            currentRecommendation.recommendations.some((r) => r.keyword === keyword.trim());
+
+          if (isRecommendation) {
+            recommendationService.recommendationUsed({
+              requestId: currentRecommendation!.id,
+              keyword,
+            });
+          }
 
           if (container.state.save.isFinished) {
             if (reset) {
               setName('');
-              setRecommendations(undefined);
+              setCurrentRecommendation(undefined);
               setShowRecommendations(false);
             }
             setContainer(provider.getKeywordDetailContainer());
@@ -78,12 +97,14 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
                 <Grid item style={{ position: 'relative', display: 'flex', flexGrow: 1 }}>
                   <TextField
                     disabled={disabled}
+                    id="recommendation-input"
                     onBlur={(e) => {
                       if (e.relatedTarget) {
                         const className = (e.relatedTarget as { className?: string }).className;
                         // Ignore keyword selection otherwise the selected keyword is not used
                         if (className?.includes(keywordRecommendationClass) ?? false) return;
                       }
+
                       setShowRecommendations(false);
                     }}
                     onFocus={() => {
@@ -99,9 +120,20 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
                     variant="outlined"
                     placeholder="Stichwort..."
                   />
-                  <div style={{ position: 'absolute', bottom: '-60px', zIndex: 2, width: '100%' }}>
-                    {recommendations && showRecommendations && recommendations.length > 0 && (
-                      <List style={{ background: 'white' }}>
+                  {recommendations && showRecommendations && recommendations.length > 0 && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '64px',
+                        zIndex: 2,
+                        width: '94%',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        border: '1px solid grey',
+                        borderRadius: '4px',
+                      }}
+                    >
+                      <List style={{ background: 'white', padding: 0 }}>
                         {recommendations.map((r) => {
                           return (
                             <ListItem
@@ -110,9 +142,8 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
                               onClick={() => {
                                 createKeyword(r.keyword, false);
 
-                                setRecommendations(
-                                  recommendations.filter((k) => r.keyword !== k.keyword),
-                                );
+                                setCurrentRecommendation(currentRecommendation);
+                                document.getElementById('recommendation-input')?.focus();
                               }}
                             >
                               <ListItemText primary={r.keyword} />
@@ -120,8 +151,8 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
                           );
                         })}
                       </List>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </Grid>
                 <Grid item>
                   <Button type="submit">+</Button>

@@ -51,7 +51,7 @@ export function ProjectTopics(props: ProjectTopicsProps) {
           )}
           {topics.length === 0 && <p>Noch keine Themen hinzugefügt.</p>}
           {topics.length > 0 && (
-            <List style={{ paddingBottom: 0 }}>
+            <List style={{ paddingBottom: 0, maxHeight: '500px', overflowY: 'auto' }}>
               {topics.map((topic) => {
                 return (
                   <TopicItem
@@ -102,7 +102,7 @@ function TopicKeywords(props: TopicKeywordsProps) {
       )}
       {keywords.length === 0 && <p>Noch keine Stichworte hinzugefügt</p>}
       {keywords.length > 0 && (
-        <List style={{ paddingBottom: 0 }}>
+        <List style={{ paddingBottom: 0, maxHeight: '500px', overflowY: 'auto' }}>
           {keywords.map((keyword) => {
             return (
               <ListItem key={keyword.id}>
