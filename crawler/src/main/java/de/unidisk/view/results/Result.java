@@ -3,16 +3,26 @@ package de.unidisk.view.results;
 import de.unidisk.entities.hibernate.University;
 
 public class Result {
+    int topicId;
     String topic;
     University university;
     double score;
     long entryCount;
 
-    public Result(String topic, double score, long entryCount, University university) {
+    public Result(int topicId, String topic, double score, long entryCount, University university) {
+        this.topicId = topicId;
         this.topic = topic;
         this.score = score;
         this.entryCount = entryCount;
         this.university = university;
+    }
+
+    public int getTopicId() {
+        return topicId;
+    }
+
+    public void setTopicId(int topicId) {
+        this.topicId = topicId;
     }
 
     public String getTopic() {
