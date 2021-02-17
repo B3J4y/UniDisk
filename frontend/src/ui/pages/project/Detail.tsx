@@ -385,6 +385,8 @@ function ProjectResultMap(props: ProjectResultMapProps) {
           onCreate={(map) => {
             if (!onCreate) return;
 
+            // This solution doesn't capture the Heatmap layer.
+            // Proposed solution at https://github.com/openlayers/openlayers/issues/11014 doesn't work either.
             const exportCallback = () => {
               var exportOptions = {
                 filter: function (element) {
