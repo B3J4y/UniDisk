@@ -1,22 +1,23 @@
 import Grid from '@material-ui/core/Grid';
-
-import { Feature, Map, Overlay, View } from 'ol';
-
+import { Feature, Map, View } from 'ol';
 // Start Openlayers imports
 import { Point } from 'ol/geom';
-import { Vector as VectorLayer, Tile as TileLayer } from 'ol/layer';
-import { fromLonLat, transform, toLonLat } from 'ol/proj';
+import { Heatmap as HeatmapLayer, Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
+import { fromLonLat } from 'ol/proj';
 import { OSM as OSMSource, Vector as VectorSource } from 'ol/source';
-import { Icon, Style } from 'ol/style';
+import { Style, Text } from 'ol/style';
 import React from 'react';
-import { GpsPosition } from './Location';
 import './Map.css';
 
 // End Openlayers imports
 
+export type GpsPosition = {
+  lat: number;
+  lng: number;
+};
 export type Marker = {
-  id?: string;
-  icon?: string;
+  id: string;
+  score: number;
 } & GpsPosition;
 
 export type MapProps = {
@@ -33,9 +34,40 @@ type State = {
   height?: number;
   markers: Marker[];
 };
+
+function max(values: number[]): number {
+  var currentMax = -1;
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i];
+    if (value > currentMax) currentMax = value;
+  }
+  return currentMax;
+}
+
+function createHeatmapFeature(position: GpsPosition, score: number): Feature {
+  const { lat, lng } = position;
+
+  const feature = new Feature({
+    geometry: new Point(fromLonLat([lng, lat])),
+  });
+  feature.setProperties({ score: score.toString() });
+  return feature;
+}
+
+const styleFunction = function (feature, resolution) {
+  return new Style({
+    text: new Text({
+      text: feature.get('score'),
+    }),
+  });
+};
+
 export class OLMap extends React.Component<MapProps, State> {
   private map: Map;
-  private vectorLayer: VectorLayer;
+  private defaultLayer: VectorLayer;
+  private heatmapLayer: HeatmapLayer;
+
+  private readonly toggleMapViewThreshhold = 6;
 
   private mapId: string;
   constructor(props) {
@@ -56,51 +88,39 @@ export class OLMap extends React.Component<MapProps, State> {
   }
 
   componentDidUpdate(oldProps: MapProps) {
-    this.updateMarker(this.props.markers ?? []);
+    const previousMarker = oldProps.markers ?? [];
+    const newMarker = this.props.markers ?? [];
+
+    // Simplest solution for now, doesn't detect change if marker data changed
+    const markerChanged = previousMarker.length !== newMarker.length;
+
+    if (!markerChanged) return;
+
+    const features = this.buildMarkerFeatures(newMarker);
+
+    [this.heatmapLayer, this.defaultLayer].forEach((layer) => {
+      const layerSource = layer.getSource();
+      const oldFeatures = layerSource.getFeatures();
+      oldFeatures.forEach((feature) => layerSource.removeFeature(feature));
+      features.forEach((f) => layerSource.addFeature(f));
+    });
   }
 
-  updateMarker(marker: Marker[]) {
-    if (this.vectorLayer) {
-      var features = this.vectorLayer.getSource().getFeatures();
-      features.forEach((feature) => {
-        this.vectorLayer.getSource().removeFeature(feature);
-      });
-    }
-    const markers = marker.map((m) => {
-      var newMarker = this.createMarker({ lat: m.lat, lng: m.lng }, m.id, m.icon);
-      return newMarker;
-    });
-    var vectorSource = new VectorSource({
-      features: markers,
-    });
-    this.vectorLayer = new VectorLayer({
-      source: vectorSource,
-    });
-    this.map.addLayer(this.vectorLayer);
-    this.map.updateSize();
-  }
+  buildMarkerFeatures(marker: Marker[]) {
+    const features = marker.map((m) => {
+      const score = m.score;
+      if (!score) {
+        console.log(m);
+      }
 
-  createMarker(position, id, icon) {
-    var newMarker = new Feature({
-      geometry: new Point(fromLonLat([position.lng, position.lat])),
+      const feature = createHeatmapFeature(m, score);
+      return feature;
     });
 
-    if (icon) {
-      var iconStyle = new Style({
-        image: new Icon({
-          src: icon,
-
-          scale: 0.8,
-        }),
-      });
-      newMarker.setStyle(iconStyle);
-    }
-    newMarker.setId(id);
-    return newMarker;
+    return features;
   }
 
   componentDidMount() {
-    const that = this;
     const { initialPosition, onCreate } = this.props;
     const { lng, lat } = initialPosition;
 
@@ -120,77 +140,55 @@ export class OLMap extends React.Component<MapProps, State> {
       });
       this.map = map;
 
-      const markers = this.state.markers.map((m) => {
-        var newMarker = this.createMarker({ lat: m.lat, lng: m.lng }, m.id, m.icon);
-        return newMarker;
+      const marker = this.props.markers ?? [];
+
+      const scores = marker.map((m) => m.score);
+      const maxScore = max(scores);
+
+      const features = this.buildMarkerFeatures(marker);
+
+      const vectorSource = new VectorSource({
+        features: features,
       });
 
-      var vectorSource = new VectorSource({
-        features: markers,
-      });
-      var markerVectorLayer = new VectorLayer({
+      this.defaultLayer = new VectorLayer({
         source: vectorSource,
+        style: styleFunction,
       });
 
-      this.vectorLayer = markerVectorLayer;
-
-      var element = document.getElementById('popup');
-
-      var popup = new Overlay({
-        element: element,
-        positioning: 'bottom-center',
-        stopEvent: false,
-        offset: [0, -10],
+      this.heatmapLayer = new HeatmapLayer({
+        source: vectorSource,
+        blur: 12,
+        radius: 15,
+        weight: function (feature) {
+          //value in range [0,1]
+          return parseInt(feature.get('score')) / maxScore;
+        },
       });
-      map.addOverlay(popup);
-      map.addLayer(markerVectorLayer);
 
-      if (that.props.onHover)
-        map.on('pointermove', function (e) {
-          if (e.dragging) {
-            if (element) element.style.display = 'none';
-            return;
-          }
-          var pixel = map.getEventPixel(e.originalEvent);
-          var hit = map.hasFeatureAtPixel(pixel);
-          var feature = map.forEachFeatureAtPixel(e.pixel, function (feature) {
-            return feature;
-          });
-          if (feature) {
-            const featureId = feature.getId();
-            const hoveredMarker = that.state.markers.find((m) => m.id == featureId);
-            const coordinate = feature.getGeometry().getCoordinates();
-            const screenPosition = map.getPixelFromCoordinate(coordinate);
+      map.addLayer(this.defaultLayer);
+      map.addLayer(this.heatmapLayer);
 
-            const [x, y] = screenPosition;
-            if (hoveredMarker) that.props.onHover!(hoveredMarker, { x, y });
-          } else {
-            if (that.props.onHoverExit) that.props.onHoverExit();
-          }
-          map.getTargetElement().style.cursor = hit ? 'pointer' : '';
-        });
-      map.updateSize();
-      // map.on('moveend', function (e, x) {
-      //   const [lon,lat] = toLonLat(map.getView().getCenter());
-      //   const zoom = map.getView().getZoom();
+      this.heatmapLayer.setVisible(false);
+
+      // [defaultLayer].forEach((layer) => {
+      //   const layerSource = layer.getSource();
+      //   features.forEach((f) => layerSource.addFeature(f));
       // });
-      map.on('click', function (evt) {
-        var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-          //you can add a condition on layer to restrict the listener
-          return feature;
-        });
 
-        const coord = transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
-        const lat = coord[1];
-        const lng = coord[0];
+      map.on('moveend', (e) => {
+        var newZoom = map.getView().getZoom();
 
-        const marker = { lat: lat, lng: lng };
-        if (feature) {
-          // that.props.onMarkerSelected({ ...marker, id: feature.getId() });
+        if (newZoom <= this.toggleMapViewThreshhold) {
+          this.heatmapLayer.setVisible(false);
+          this.defaultLayer.setVisible(true);
         } else {
-          if (that.props.onClick) that.props.onClick(marker);
+          this.heatmapLayer.setVisible(true);
+          this.defaultLayer.setVisible(false);
         }
+        console.log('zoom end, new zoom: ' + newZoom);
       });
+
       if (onCreate) {
         onCreate(map);
       }

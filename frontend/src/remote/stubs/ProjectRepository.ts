@@ -19,6 +19,8 @@ export class ProjectRepositoryStub implements ProjectRepository {
             university: {
               id: '15',
               name: 'Uni Potsdam',
+              lat: 10,
+              lng: 5,
             },
             score: 0.5,
             entryCount: 20,

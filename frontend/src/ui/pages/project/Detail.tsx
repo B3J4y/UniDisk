@@ -372,6 +372,16 @@ function ProjectResultMap(props: ProjectResultMapProps) {
         <a id="image-download" download="map.png" style={{ display: 'none' }}></a>
         <OLMap
           height={700}
+          markers={topicScores
+            .filter((score) => visibleTopics.has(score.topic.name))
+            .map((score) => {
+              return {
+                id: score.topic.id + score.university.id,
+                lat: score.university.lat,
+                lng: score.university.lng,
+                score: score.score,
+              };
+            })}
           onCreate={(map) => {
             if (!onCreate) return;
 
