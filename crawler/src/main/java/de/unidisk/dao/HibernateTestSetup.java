@@ -24,7 +24,8 @@ public class HibernateTestSetup {
     }
 
     public static void Setup(ApplicationState state){
-
+        // current user id used for all users
+        final String userId = "0";
         final ProjectDAO projectDAO = new ProjectDAO();
         final TopicDAO topicDAO = new TopicDAO();
         final TopicScoreDAO topicScoreDAO = new TopicScoreDAO();
@@ -43,7 +44,7 @@ public class HibernateTestSetup {
             Project dbProject1;
 
             try {
-                dbProject1 = projectDAO.createProject(new CreateProjectParams(p.getName(),"test"));
+                dbProject1 = projectDAO.createProject(new CreateProjectParams(userId,"test"));
             } catch (DuplicateException e) {
                 e.printStackTrace();
                 dbProject1 = null;
