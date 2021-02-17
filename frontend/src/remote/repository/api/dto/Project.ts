@@ -21,3 +21,16 @@ export type ProjectModelDto = {
   projectState: ProjectStateDto;
   processingError: string;
 };
+
+export type ResultDto = {
+  topic: string;
+  score: number;
+  entryCount: number;
+  university: {
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+  };
+};
+export type ProjectResultDto = ResultDto[];

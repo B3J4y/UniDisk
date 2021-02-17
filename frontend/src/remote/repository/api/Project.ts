@@ -1,4 +1,4 @@
-import { Project, ProjectDetails, ProjectState } from 'data/entity';
+import { Project, ProjectDetails, ProjectState, TopicResult } from 'data/entity';
 import {
   CreateProjectArgs,
   ProjectEvaluationResult,
@@ -9,6 +9,7 @@ import { BaseApiRepository, RepositoryArgs } from './Base';
 import {
   CreateProjectDto,
   ProjectModelDto,
+  ProjectResultDto,
   ProjectStateDto,
   UpdateProjectDto,
 } from './dto/Project';
@@ -45,7 +46,25 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
     super({ ...args, defaultPath: 'project' });
   }
   getResult(id: string): Promise<ProjectEvaluationResult | undefined> {
-    throw new Error('Method not implemented.');
+    return this.withClient<ProjectEvaluationResult>(async (client) => {
+      const response = await client.get(`/${id}/results`);
+      const resultDto = response.data as ProjectResultDto;
+      const scores: TopicResult[] = resultDto.map((dto) => {
+        return {
+          topic: { id: '', name: dto.topic },
+          score: dto.score,
+          entryCount: dto.entryCount,
+          university: {
+            ...dto.university,
+            id: dto.university.id.toString(),
+          },
+        };
+      });
+
+      return {
+        topicScores: scores,
+      };
+    });
   }
 
   findAll(): Promise<Project[]> {
