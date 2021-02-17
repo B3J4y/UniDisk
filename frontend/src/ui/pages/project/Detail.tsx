@@ -1,4 +1,6 @@
 import {
+  Button,
+  Checkbox,
   CircularProgress,
   createStyles,
   Drawer,
@@ -6,8 +8,10 @@ import {
   List,
   ListItem,
   ListItemIcon,
+  ListItemSecondaryAction,
   ListItemText,
   makeStyles,
+  Paper,
   Theme,
   Toolbar,
 } from '@material-ui/core';
@@ -23,7 +27,8 @@ import { useLocation, useParams } from 'react-router-dom';
 import { OLMap } from 'ui/components/forms/Map';
 import { ProjectTopics } from 'ui/components/project/TopicTable';
 import { Provider, Subscribe } from 'unstated-typescript';
-
+import * as htmlToImage from 'html-to-image';
+import { ProjectEvaluationResult } from 'data/repositories';
 type Views = 'general' | 'map' | 'results';
 
 function useQuery() {
@@ -39,6 +44,8 @@ export function ProjectDetailsPage() {
   const view = queryParameter.get('view') ?? 'general';
 
   const [activeView, setActiveView] = React.useState(view as Views);
+
+  let mapController: MapController | undefined = undefined;
 
   if (!projectId) {
     return <p>Project ID muss angegeben werden.</p>;
@@ -60,6 +67,7 @@ export function ProjectDetailsPage() {
 
         if (!project) return <p>Projekt konnte nicht gefunden werden.</p>;
 
+        const isMapView = activeView === 'map';
         return (
           <Provider inject={[detailContainer]}>
             <NavigationDrawer
@@ -76,10 +84,45 @@ export function ProjectDetailsPage() {
                 window.history.pushState({ path: newurl }, '', newurl);
               }}
             >
-              <h2 style={{ textAlign: 'left', marginTop: 0 }}>{project.name}</h2>
+              <Grid container justify="space-between" xs={8}>
+                <Grid>
+                  <h2 style={{ textAlign: 'left', marginTop: 0 }}>{project.name}</h2>
+                </Grid>
+                <Grid>
+                  {isMapView && (
+                    <Button
+                      onClick={() => {
+                        if (!mapController) return;
+                        mapController.export();
+                      }}
+                    >
+                      Export
+                    </Button>
+                  )}
+                </Grid>
+              </Grid>
               {activeView === 'general' && <GeneralProjectDetails />}
-              {activeView === 'results' && <ProjectResults project={project} />}
-              {activeView === 'map' && <ProjectResultMap />}
+              {activeView === 'results' && (
+                <ProjectResultsGuard project={project}>
+                  {(result) => {
+                    return <ProjectResults project={project} result={result} />;
+                  }}
+                </ProjectResultsGuard>
+              )}
+              {isMapView && (
+                <ProjectResultsGuard project={project}>
+                  {(result) => {
+                    return (
+                      <ProjectResultMap
+                        result={result}
+                        onCreate={(controller) => {
+                          mapController = controller;
+                        }}
+                      />
+                    );
+                  }}
+                </ProjectResultsGuard>
+              )}
             </NavigationDrawer>
           </Provider>
         );
@@ -216,11 +259,12 @@ function GeneralProjectDetails() {
   );
 }
 
-type ProjectResultsProps = {
+type ProjectResultsGuardProps = {
   project: ProjectDetails;
+  children: (results: ProjectEvaluationResult) => React.ReactNode | React.ReactNode[];
 };
-function ProjectResults(props: ProjectResultsProps) {
-  const { project } = props;
+function ProjectResultsGuard(props: ProjectResultsGuardProps) {
+  const { project, children } = props;
 
   if (project.state === ProjectState.idle)
     return (
@@ -258,52 +302,144 @@ function ProjectResults(props: ProjectResultsProps) {
         if (result.hasData && !results)
           return <p>Projektergenisse stehen noch nicht zur Verfügung</p>;
 
-        const topicScores = results!.topicScores;
-
-        return (
-          <MaterialTable
-            localization={{
-              body: {
-                emptyDataSourceMessage: `Keine Ergebnisse vorhanden`,
-              },
-              toolbar: {
-                searchPlaceholder: 'Suche',
-                searchTooltip: 'Suche',
-              },
-              pagination: {
-                labelRowsPerPage: 'Zeilen pro Seite:',
-                labelRowsSelect: 'Zeilen',
-                labelDisplayedRows: '{from}-{to} von {count}',
-                nextAriaLabel: 'Nächste Seite',
-              },
-              header: {
-                actions: 'Aktionen',
-              },
-            }}
-            columns={[
-              { title: 'Universität', field: 'university.name' },
-              { title: 'Thema', field: 'topic.name' },
-              { title: 'Score', field: 'score', type: 'numeric' },
-              {
-                title: 'Anzahl Einträge',
-                field: 'entryCount',
-                type: 'numeric',
-              },
-            ]}
-            data={topicScores}
-            title="Auswertung"
-          />
-        );
+        return children(results!);
       }}
     </Subscribe>
   );
 }
 
-function ProjectResultMap() {
+type ProjectResultsProps = {
+  project: ProjectDetails;
+  result: ProjectEvaluationResult;
+};
+function ProjectResults(props: ProjectResultsProps) {
+  const { project, result } = props;
+
+  const { topicScores } = result;
   return (
-    <OLMap
-      height={700}
-      initialPosition={{ lat: 51.295471273122644, lng: 9.568830237027088, zoom: 6.553662572584849 }}
+    <MaterialTable
+      localization={{
+        body: {
+          emptyDataSourceMessage: `Keine Ergebnisse vorhanden`,
+        },
+        toolbar: {
+          searchPlaceholder: 'Suche',
+          searchTooltip: 'Suche',
+        },
+        pagination: {
+          labelRowsPerPage: 'Zeilen pro Seite:',
+          labelRowsSelect: 'Zeilen',
+          labelDisplayedRows: '{from}-{to} von {count}',
+          nextAriaLabel: 'Nächste Seite',
+        },
+        header: {
+          actions: 'Aktionen',
+        },
+      }}
+      columns={[
+        { title: 'Universität', field: 'university.name' },
+        { title: 'Thema', field: 'topic.name' },
+        { title: 'Score', field: 'score', type: 'numeric' },
+        {
+          title: 'Anzahl Einträge',
+          field: 'entryCount',
+          type: 'numeric',
+        },
+      ]}
+      data={topicScores}
+      title="Auswertung"
     />
+  );
+}
+
+type MapController = {
+  export: () => void;
+};
+type ProjectResultMapProps = {
+  onCreate?: (controller: MapController) => void;
+  result: ProjectEvaluationResult;
+};
+function ProjectResultMap(props: ProjectResultMapProps) {
+  const { onCreate, result } = props;
+  const { topicScores } = result;
+
+  const topics = Array.from(new Set(topicScores.map((topic) => topic.topic.name)));
+  const [visibleTopics, setVisibleTopics] = React.useState(new Set(topics));
+
+  return (
+    <Grid item xs={12} container spacing={2}>
+      <Grid item xs={8}>
+        <a id="image-download" download="map.png" style={{ display: 'none' }}></a>
+        <OLMap
+          height={700}
+          onCreate={(map) => {
+            if (!onCreate) return;
+
+            const exportCallback = () => {
+              var exportOptions = {
+                filter: function (element) {
+                  return element.className ? element.className.indexOf('ol-control') === -1 : true;
+                },
+              };
+
+              map.once('rendercomplete', function () {
+                htmlToImage.toPng(map.getTargetElement(), exportOptions).then(function (dataURL) {
+                  const link = document.getElementById('image-download');
+                  if (!link) {
+                    return;
+                  }
+                  // @ts-ignore
+                  link.href = dataURL;
+                  link.click();
+                });
+              });
+              map.renderSync();
+            };
+            const controller: MapController = {
+              export: exportCallback,
+            };
+
+            onCreate(controller);
+          }}
+          initialPosition={{
+            lat: 51.295471273122644,
+            lng: 9.568830237027088,
+            zoom: 6.553662572584849,
+          }}
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <Paper>
+          <Toolbar>
+            <h1>Legende</h1>
+          </Toolbar>
+          <List>
+            {topics.map((topic) => {
+              const checked = visibleTopics.has(topic);
+              return (
+                <ListItem key={topic}>
+                  <ListItemText primary={topic} />
+                  <ListItemSecondaryAction>
+                    <Checkbox
+                      edge="end"
+                      onChange={() => {
+                        if (checked) {
+                          visibleTopics.delete(topic);
+                        } else {
+                          visibleTopics.add(topic);
+                        }
+                        setVisibleTopics(new Set(visibleTopics));
+                      }}
+                      checked={checked}
+                      inputProps={{ 'aria-labelledby': topic }}
+                    />
+                  </ListItemSecondaryAction>
+                </ListItem>
+              );
+            })}
+          </List>
+        </Paper>
+      </Grid>
+    </Grid>
   );
 }

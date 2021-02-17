@@ -85,9 +85,6 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
       if (response.status !== 200) throw response.statusText;
 
       const { data } = response;
-
-      console.log(response);
-
       return {
         ...mapModelDtoToEntity(data),
         topics: data.topics.map(mapTopicDto),

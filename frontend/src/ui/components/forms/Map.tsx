@@ -22,6 +22,7 @@ export type Marker = {
 export type MapProps = {
   onClick?: (value?: GpsPosition) => void;
   onHover?: (marker: Marker, position: { x: number; y: number }) => void;
+  onCreate?: (map: Map) => void;
   onHoverExit?: () => void;
   initialPosition: GpsPosition & { zoom?: number };
   markers?: Marker[];
@@ -100,7 +101,7 @@ export class OLMap extends React.Component<MapProps, State> {
 
   componentDidMount() {
     const that = this;
-    const { initialPosition } = this.props;
+    const { initialPosition, onCreate } = this.props;
     const { lng, lat } = initialPosition;
 
     try {
@@ -190,6 +191,9 @@ export class OLMap extends React.Component<MapProps, State> {
           if (that.props.onClick) that.props.onClick(marker);
         }
       });
+      if (onCreate) {
+        onCreate(map);
+      }
     } catch (error) {
       console.error(error);
     }
