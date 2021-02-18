@@ -10,6 +10,7 @@ import de.unidisk.rest.dto.project.CreateProjectDto;
 import de.unidisk.rest.dto.project.UpdateProjectDto;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
+import de.unidisk.view.results.Result;
 
 
 import javax.inject.Inject;
@@ -58,6 +59,20 @@ public class ProjectServiceRest {
             return Response.status(Response.Status.FORBIDDEN).entity("Nur der Projektbesitzer hat Zugriff auf das Projekt.").build();
         }
         return Response.ok(p).build();
+    }
+
+    @GET
+    @Path("{id}/results")
+    @Produces({ MediaType.APPLICATION_JSON})
+    @AuthNeeded
+    public Response projectResults(@PathParam("id") String id,@Context SecurityContext context){
+        return this.runProject(id,context, project -> {
+            if(project.getProjectState() != ProjectState.FINISHED)
+                return Response.status(400).entity("Projekt befindet sich momentan in der Bearbeitung.").build();
+
+            final List<Result> results = this.projectRepository.getResults(id);
+            return Response.ok(project).entity(results).build();
+        });
     }
 
 

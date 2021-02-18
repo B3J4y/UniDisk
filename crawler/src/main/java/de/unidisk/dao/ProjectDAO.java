@@ -196,7 +196,7 @@ public class ProjectDAO  implements IProjectRepository {
     {
         int pId = Integer.parseInt(projectId);
         return HibernateUtil.execute((session -> {
-            return  session.createQuery("select new de.unidisk.view.results.Result(t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
+            return  session.createQuery("select new de.unidisk.view.results.Result(t.topic.id, t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
                     " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
                     .setParameter("pId",pId).list();
         }));
