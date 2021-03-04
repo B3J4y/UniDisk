@@ -16,7 +16,7 @@ export type RecommendationUsedParams = {
 };
 export class KeywordRecommendationService {
   private client = axios.create({
-    baseURL: 'http://localhost:8000',
+    baseURL: 'http://localhost:8001',
   });
 
   public async recommendationUsed(params: RecommendationUsedParams): Promise<void> {
