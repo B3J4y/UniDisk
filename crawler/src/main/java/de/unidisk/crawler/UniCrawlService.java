@@ -11,6 +11,8 @@ import de.unidisk.entities.hibernate.University;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +36,7 @@ public class UniCrawlService implements SimpleCrawl.IProgressListener {
             logger.info("No seeds to crawl.");
             return;
         }
-        //start(seeds);
+        start(seeds);
     }
 
     private void start(List<UniversitySeed> seeds){
@@ -56,12 +58,8 @@ public class UniCrawlService implements SimpleCrawl.IProgressListener {
 
     public void start(long timeSinceLastCrawl){
         logger.info("Start UniCrawlService");
-        final List<University> unis = universityRepository.getUniversities(timeSinceLastCrawl);
-        if(unis == null || unis.size() == 0){
-            logger.info("No seeds to crawl.");
-            return;
-        }
-        final List<UniversitySeed> seeds = unis.stream().map(u -> new UniversitySeed(u.getSeedUrl(),u.getId())).collect(Collectors.toList());
+        final List<String> urls = Arrays.asList("https://www.uni-potsdam.de");
+        final List<UniversitySeed> seeds = urls.stream().map(u -> new UniversitySeed(u,3)).collect(Collectors.toList());
         start(seeds);
     }
 

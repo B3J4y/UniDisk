@@ -112,9 +112,7 @@ public class SimpleCrawl implements ICrawler {
                         safe, page.getWebURL().getDepth(), timestamp, universityId);
         try {
             new SimpleSolarSystem(solrUrl).sendPageToTheMoon(simpleCrawlDocument);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SolrServerException e) {
+        } catch (IOException | SolrServerException e) {
             e.printStackTrace();
         }
         return null;

@@ -55,4 +55,4 @@ def used_keyword(dto: KeywordUsedDto):
 
 if __name__ == "__main__":
     model = FastText.load("fasttext.model") 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)
