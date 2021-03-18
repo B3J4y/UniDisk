@@ -156,6 +156,17 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
+    public void createSubproject() throws DuplicateException {
+        ProjectDAO dao = new ProjectDAO();
+        final Project parentProject = dao.createProject(createArgs("test"));
+        final ProjectSubtype projectSubtype = ProjectSubtype.ByTopics;
+        final Project childProject = dao.createProject(new CreateProjectParams(parentProject.getId(), projectSubtype));
+        assertEquals(childProject.getParentProjectId(), parentProject.getId());
+        assertEquals(childProject.getProjectSubtype(),projectSubtype);
+        assertEquals(childProject.getUserId(),parentProject.getUserId());
+    }
+
+    @Test
     public void getResultsReturnsValidData() throws DuplicateException {
         final ApplicationState state = MockData.getMockState();
         final UniversityDAO uniDao = new UniversityDAO();
