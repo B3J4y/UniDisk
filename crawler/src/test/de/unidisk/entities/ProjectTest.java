@@ -160,7 +160,7 @@ public class ProjectTest implements HibernateLifecycle {
         ProjectDAO dao = new ProjectDAO();
         final Project parentProject = dao.createProject(createArgs("test"));
         final ProjectSubtype projectSubtype = ProjectSubtype.ByTopics;
-        final Project childProject = dao.createProject(new CreateProjectParams(parentProject.getId(), projectSubtype));
+        final Project childProject = dao.createProject(CreateProjectParams.subproject(parentProject.getId(), projectSubtype));
         assertEquals(childProject.getParentProjectId(), parentProject.getId());
         assertEquals(childProject.getProjectSubtype(),projectSubtype);
         assertEquals(childProject.getUserId(),parentProject.getUserId());

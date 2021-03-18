@@ -1,5 +1,6 @@
 package de.unidisk.contracts.repositories.params.project;
 
+import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectSubtype;
 
 public class CreateProjectParams {
@@ -15,11 +16,15 @@ public class CreateProjectParams {
         this.projectSubtype = null;
     }
 
-    public CreateProjectParams(int parentProjectId, ProjectSubtype subtype) {
+    private CreateProjectParams(int parentProjectId, ProjectSubtype subtype) {
         this.parentProjectId = parentProjectId;
         this.projectSubtype = subtype;
         this.name = null;
         this.userId = null;
+    }
+
+    public static CreateProjectParams subproject(int parentProjectId, ProjectSubtype subtype) {
+        return new CreateProjectParams(parentProjectId,subtype);
     }
 
     public String getUserId() {

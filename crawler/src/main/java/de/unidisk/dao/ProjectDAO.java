@@ -32,6 +32,8 @@ public class ProjectDAO  implements IProjectRepository {
                 return null;
             }
             final Project parentProject = optionalParentProject.get();
+            if(parentProject.isSubproject())
+                throw new IllegalArgumentException("Unable to create subproject for subproject.");
             project = new Project(null);
             project.setUserId(parentProject.getUserId());
             project.setParentProjectId(parentProject.getId());

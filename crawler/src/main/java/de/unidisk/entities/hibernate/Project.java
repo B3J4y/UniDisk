@@ -132,6 +132,10 @@ public class Project {
         return parentProjectId;
     }
 
+    public boolean isSubproject(){
+        return projectSubtype != null;
+    }
+
     public void setParentProjectId(int parentProjectId) {
         this.parentProjectId = parentProjectId;
     }
