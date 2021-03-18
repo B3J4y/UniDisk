@@ -7,6 +7,9 @@ import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.contracts.services.IProjectService;
+import de.unidisk.contracts.services.keyword.IKeywordRecommendationService;
+import de.unidisk.contracts.services.keyword.KeywordRecommendation;
+import de.unidisk.contracts.services.keyword.KeywordRecommendationResponse;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.contracts.repositories.IProjectRepository;
@@ -18,6 +21,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import java.security.Key;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,14 +35,16 @@ public class ProjectService implements IProjectService {
     IProjectRepository projectRepository;
     ITopicRepository topicRepository;
     IKeywordRepository keywordRepository;
+    IKeywordRecommendationService keywordService;
 
     public ProjectService() {
     }
 
-    public ProjectService(IProjectRepository projectRepository, ITopicRepository topicRepository, IKeywordRepository keywordRepository) {
+    public ProjectService(IProjectRepository projectRepository, ITopicRepository topicRepository, IKeywordRepository keywordRepository, IKeywordRecommendationService keywordService) {
         this.projectRepository = projectRepository;
         this.topicRepository = topicRepository;
         this.keywordRepository = keywordRepository;
+        this.keywordService = keywordService;
     }
 
     public List<ProjectView> getProjects() {
@@ -87,14 +94,24 @@ public class ProjectService implements IProjectService {
         if(!optionalParentProject.isPresent())
             throw new EntityNotFoundException(Project.class,Integer.parseInt(parentProjectId));
 
-        final CreateProjectParams params = CreateProjectParams.subproject(Integer.parseInt(parentProjectId), ProjectSubtype.CustomOnly);
+        final CreateProjectParams params = CreateProjectParams.subproject(Integer.parseInt(parentProjectId), ProjectSubtype.ByTopics);
 
         final Project subproject = projectRepository.createProject(params);
         final Project parentProject = optionalParentProject.get();
         for (Topic topic : parentProject.getTopics()) {
-            //TODO: call suggestion api and generate topic
+            final Topic topicCopy = topicRepository.createTopic(subproject.getId(), topic.getName());
+            final KeywordRecommendationResponse response = keywordService.getRecommendations(topic.getName(), Collections.emptyList());
+            final List<String> keywords = response.getRecommendations().stream().limit(5).map(KeywordRecommendation::getKeyword).collect(Collectors.toList());
+            for(String keyword : keywords){
+                final CreateKeywordParams keywordParams = new CreateKeywordParams(keyword, String.valueOf(topicCopy.getId()), false);
+                final Keyword createdKeyword = keywordRepository.createKeyword(keywordParams);
+                topicCopy.getKeywords().add(createdKeyword);
+            }
+            subproject.getTopics().add(topicCopy);
         }
 
         return subproject;
     }
+
+
 }

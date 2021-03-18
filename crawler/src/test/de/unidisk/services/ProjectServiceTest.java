@@ -7,27 +7,43 @@ import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
+import de.unidisk.contracts.services.keyword.IKeywordRecommendationService;
+import de.unidisk.contracts.services.keyword.KeywordRecommendation;
+import de.unidisk.contracts.services.keyword.KeywordRecommendationResponse;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.HibernateLifecycle;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
-import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.entities.hibernate.Topic;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateProjectRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
-import org.junit.Assert;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 
 public class ProjectServiceTest implements HibernateLifecycle {
+
+    @Mock
+    IKeywordRecommendationService keywordRecommendationService;
+
+    @BeforeAll
+    public void openMocks() {
+        MockitoAnnotations.initMocks(this);
+    }
 
 
     private Project createProject(String name, Map<String,List<String>> topicKeywords , Set<String> suggestedKeys) throws DuplicateException {
@@ -45,7 +61,9 @@ public class ProjectServiceTest implements HibernateLifecycle {
                         String.valueOf(topic.getId()),
                         isSuggestion
                         ));
+                topic.getKeywords().add(createdKeyword);
             }
+            project.getTopics().add(topic);
         }
         return project;
     }
@@ -59,12 +77,13 @@ public class ProjectServiceTest implements HibernateLifecycle {
         final ProjectService projectService = new ProjectService(
                 projectRepository,
                 topicRepository,
-                keywordRepository
+                keywordRepository,
+                keywordRecommendationService
         );
 
         final Map<String,List<String>> topicKeywordsMap = Map.ofEntries(
                 entry("Custom", Arrays.asList("Katze","Hund","Löwe","Tiger")),
-                entry("Mixed", Arrays.asList("Schokolade","Test","Schokolade", "Ente")),
+                entry("Mixed", Arrays.asList("Schokolade","Test", "Ente")),
                 // all words are suggestions
                 entry("Stichwortlos", Arrays.asList("Baum","Haus"))
         );
@@ -81,6 +100,47 @@ public class ProjectServiceTest implements HibernateLifecycle {
             assertTrue(copiedTopic.isPresent());
             final int expectedKeywordCount = entry.getValue().stream().map(keyword -> suggestedKeywordsSet.contains(keyword) ? 0 : 1 ).reduce(0, Integer::sum);
             assertEquals(expectedKeywordCount,copiedTopic.get().getKeywords().size() );
+        });
+    }
+
+    @Test
+    public void copyProjectFromTopics() throws DuplicateException, EntityNotFoundException {
+        final IProjectRepository projectRepository = new HibernateProjectRepo();
+        final ITopicRepository topicRepository = new HibernateTopicRepo();
+        final IKeywordRepository keywordRepository = new HibernateKeywordRepo();
+
+        final ProjectService projectService = new ProjectService(
+                projectRepository,
+                topicRepository,
+                keywordRepository,
+                keywordRecommendationService
+        );
+
+
+        final Map<String,List<String>> topicKeywordsMap = Map.ofEntries(
+                entry("Custom", Arrays.asList("Katze","Hund","Löwe","Tiger")),
+                entry("Mixed", Arrays.asList("Schokolade","Test", "Ente")),
+                // all words are suggestions
+                entry("Stichwortlos", Arrays.asList("Baum","Haus"))
+        );
+
+        final List<String> customResults = Arrays.asList("1","2","Hund", "Katze","Bär", "Baum");
+
+        when(keywordRecommendationService.getRecommendations(any(),any())).thenAnswer(invocationOnMock -> {
+            return new KeywordRecommendationResponse(
+                    customResults.stream().map(r -> new KeywordRecommendation(.5,r)).collect(Collectors.toList()),
+                    "24"
+            );
+        });
+
+
+        final Project project = createProject("test",topicKeywordsMap
+                , Set.of());
+
+        final Project newProject = projectService.copyProjectFromTopics(String.valueOf(project.getId()));
+        assertEquals(project.getTopics().size(), newProject.getTopics().size());
+        newProject.getTopics().forEach(topic-> {
+            assertEquals(topic.getKeywords().size(), 5);
         });
     }
 }
