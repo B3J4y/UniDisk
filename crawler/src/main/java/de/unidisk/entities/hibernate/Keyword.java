@@ -13,6 +13,7 @@ public class Keyword implements Input {
 
     private int topicId;
     private String name;
+    private boolean isSuggestion = false;
 
 
     public Keyword() {
@@ -28,6 +29,13 @@ public class Keyword implements Input {
         this();
         this.name = name;
         this.topicId = topicId;
+    }
+
+    public Keyword(String name, int topicId, boolean isSuggestion) {
+        this();
+        this.name = name;
+        this.topicId = topicId;
+        this.isSuggestion = isSuggestion;
     }
 
     @Override
@@ -71,5 +79,9 @@ public class Keyword implements Input {
         int result = id;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
+    }
+
+    public boolean isSuggestion() {
+        return isSuggestion;
     }
 }

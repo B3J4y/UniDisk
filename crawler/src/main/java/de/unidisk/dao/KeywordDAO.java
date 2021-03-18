@@ -2,6 +2,7 @@ package de.unidisk.dao;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IKeywordRepository;
+import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
@@ -13,6 +14,8 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import org.hibernate.exception.ConstraintViolationException;
+
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +59,30 @@ public class KeywordDAO {
         }
 
         final Keyword keyword = new Keyword(name,topicId);
+        currentSession.save(keyword);
+
+        transaction.commit();
+        currentSession.close();
+        return keyword;
+    }
+
+    public Keyword createKeyword(CreateKeywordParams params){
+        final int topicId = Integer.parseInt(params.getTopicId());
+        final String name = params.getName();
+
+        if(keywordExists(topicId,name))
+            return null;
+        final boolean topicExists = new TopicDAO().topicExists(topicId);
+        if(!topicExists)
+            throw new IllegalArgumentException("Topic with given id doesn't exist.");
+
+        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
+        Transaction transaction = currentSession.getTransaction();
+        if (!transaction.isActive()) {
+            transaction.begin();
+        }
+
+        final Keyword keyword = new Keyword(name,topicId, params.isSuggestion());
         currentSession.save(keyword);
 
         transaction.commit();
