@@ -1,5 +1,7 @@
 package de.unidisk.repositories;
 
+import de.unidisk.common.ProjectResult;
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
@@ -7,6 +9,7 @@ import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.entities.hibernate.ResultRelevance;
 import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
@@ -73,6 +76,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
+    public List<ProjectResult> getAllResults(String projectId) {
+        return projectDAO.getAllResults(projectId);
+    }
+
+    @Override
     public boolean canEdit(String projectId) {
         return projectDAO.canEdit(projectId);
     }
@@ -95,6 +103,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public void clearProjectError(int projectId) {
         projectDAO.clearProjectError(projectId);
+    }
+
+    @Override
+    public void rateTopicScore(String topicScoreId, ResultRelevance relevance) throws EntityNotFoundException {
+
     }
 
 }

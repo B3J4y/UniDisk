@@ -147,4 +147,8 @@ public class Project {
     public void setProjectSubtype(ProjectSubtype projectSubtype) {
         this.projectSubtype = projectSubtype;
     }
+
+    public List<Project> getSubprojects() {
+        return subprojects;
+    }
 }

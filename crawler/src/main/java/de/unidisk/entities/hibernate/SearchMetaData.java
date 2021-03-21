@@ -13,6 +13,7 @@ public class SearchMetaData {
     
     @OneToOne
     private University university;
+
     private Long timestamp;
 
     public SearchMetaData(){

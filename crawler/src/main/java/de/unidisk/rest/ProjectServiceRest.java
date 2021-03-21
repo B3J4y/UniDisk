@@ -1,5 +1,6 @@
 package de.unidisk.rest;
 
+import de.unidisk.common.ProjectResult;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
@@ -70,7 +71,7 @@ public class ProjectServiceRest {
             if(project.getProjectState() != ProjectState.FINISHED)
                 return Response.status(400).entity("Projekt befindet sich momentan in der Bearbeitung.").build();
 
-            final List<Result> results = this.projectRepository.getResults(id);
+            final List<ProjectResult> results = this.projectRepository.getAllResults(id);
             return Response.ok(project).entity(results).build();
         });
     }

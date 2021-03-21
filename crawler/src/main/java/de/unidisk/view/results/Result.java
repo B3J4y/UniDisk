@@ -1,20 +1,35 @@
 package de.unidisk.view.results;
 
+import de.unidisk.entities.hibernate.ResultRelevance;
 import de.unidisk.entities.hibernate.University;
 
 public class Result {
+    int id;
     int topicId;
     String topic;
     University university;
     double score;
     long entryCount;
+    ResultRelevance relevance;
 
-    public Result(int topicId, String topic, double score, long entryCount, University university) {
+    public Result(int id, int topicId, String topic, double score, long entryCount, University university) {
+        this.id = id;
         this.topicId = topicId;
         this.topic = topic;
         this.score = score;
         this.entryCount = entryCount;
         this.university = university;
+        this.relevance = ResultRelevance.NONE;
+    }
+
+    public Result(int id ,int topicId, String topic, double score, long entryCount, University university, ResultRelevance relevance) {
+        this.id = id;
+        this.topicId = topicId;
+        this.topic = topic;
+        this.university = university;
+        this.score = score;
+        this.entryCount = entryCount;
+        this.relevance = relevance;
     }
 
     public int getTopicId() {
@@ -51,5 +66,9 @@ public class Result {
 
     public University getUniversity() {
         return university;
+    }
+
+    public ResultRelevance getRelevance() {
+        return relevance;
     }
 }

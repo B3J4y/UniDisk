@@ -19,25 +19,25 @@ public class TopicScoreDAO implements ScoringDAO {
                 .orElse(new TopicScore((Topic) input));
     }
 
-    public TopicScore createScore(int topicId, double score) throws EntityNotFoundException {
-        TopicDAO tDao = new TopicDAO();
-        final Optional<Topic> topic = tDao.getTopic(topicId);
-        if(!topic.isPresent())
-            throw new EntityNotFoundException(Topic.class,topicId);
+    private TopicScore findOrFail(int topicScoreId) throws EntityNotFoundException {
+        final Optional<TopicScore> score = HibernateUtil.execute(session -> {
+            return session.createQuery("select p from TopicScore p where p.id = :id", TopicScore.class)
+                    .setParameter("id", topicScoreId)
+                    .uniqueResultOptional();
 
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        final TopicScore topicScore = new TopicScore();
-        topicScore.setScore(score);
-        topicScore.setTopic(topic.get());
-        final int id = (int) currentSession.save(topicScore);
+        });
+        if (!score.isPresent())
+            throw new EntityNotFoundException(TopicScore.class, topicScoreId);
+        return score.get();
+    }
 
-        transaction.commit();
-        currentSession.close();
-        topicScore.setId(id);
-        return topicScore;
+    public TopicScore rateScore(int topicScoreId, ResultRelevance relevance) throws EntityNotFoundException {
+        final TopicScore score = this.findOrFail(topicScoreId);
+        final TopicScore updatedScore = HibernateUtil.execute(session -> {
+            score.setResultRelevance(relevance);
+            session.save(score);
+            return score;
+        });
+        return updatedScore;
     }
 }
