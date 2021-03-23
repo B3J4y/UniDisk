@@ -44,7 +44,7 @@ public class HibernateTestSetup {
             Project dbProject1;
 
             try {
-                dbProject1 = projectDAO.createProject(new CreateProjectParams(userId,"test"));
+                dbProject1 = projectDAO.createProject(new CreateProjectParams(userId,p.getName()));
             } catch (DuplicateException e) {
                 e.printStackTrace();
                 dbProject1 = null;

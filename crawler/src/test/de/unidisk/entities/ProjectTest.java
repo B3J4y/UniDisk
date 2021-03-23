@@ -232,4 +232,17 @@ public class ProjectTest implements HibernateLifecycle {
             Assert.assertEquals(topicResult.getEntryCount(),expectedTopicHits);
         });
     }
+
+    @Test
+    public void createSubproject() throws DuplicateException {
+        ProjectDAO dao = new ProjectDAO();
+        final Project parentProject = dao.createProject(createArgs("test"));
+        final ProjectSubtype projectSubtype = ProjectSubtype.ByTopics;
+        final Project childProject = dao.createProject(CreateProjectParams.subproject(parentProject.getId(), projectSubtype));
+        assertEquals(childProject.getParentProjectId().intValue(), parentProject.getId());
+        assertEquals(childProject.getProjectSubtype(),projectSubtype);
+        assertEquals(childProject.getUserId(),parentProject.getUserId());
+        assertEquals(childProject.getProjectState(), ProjectState.IDLE);
+    }
+
 }

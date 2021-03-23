@@ -25,9 +25,26 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     public Project createProject(CreateProjectParams params) throws DuplicateException {
-        Project project = new Project(params.getName());
-        project.setUserId(params.getUserId());
+        Project project;
+        if(params.areSubprojectParams()){
+            final Optional<Project> optionalParentProject = this.findProjectById(params.getParentProjectId());
+            if (!optionalParentProject.isPresent()) {
+                return null;
+            }
+            final Project parentProject = optionalParentProject.get();
+            if(parentProject.isSubproject())
+                throw new IllegalArgumentException("Unable to create subproject for subproject.");
+            project = new Project(null);
+            project.setParentProjectId(parentProject.getId());
+            project.setUserId(parentProject.getUserId());
+            project.setProjectSubtype(params.getProjectSubtype());
+        }else {
+            project = new Project(params.getName());
+            project.setUserId(params.getUserId());
+        }
+
         project.setProjectState(ProjectState.IDLE);
+
 
         return HibernateUtil.executeUpdate(session -> {
             session.save(project);
@@ -96,7 +113,8 @@ public class ProjectDAO  implements IProjectRepository {
     @Override
     public List<Project> getUserProjects(String userId) {
        return HibernateUtil.execute(session ->  {
-            return session.createQuery("select p from Project p where p.userId = :userId", Project.class)
+           // Projects with parentProjectId != null were created by the system and should not be visible to the user
+            return session.createQuery("select p from Project p where p.userId = :userId AND p.parentProjectId IS null", Project.class)
                     .setParameter("userId", userId)
                     .list();
 
