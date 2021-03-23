@@ -3,6 +3,7 @@ import { Keyword, Topic } from 'data/entity';
 export type CreateKeywordArgs = {
   topicId: Topic['id'];
   name: string;
+  isSuggestion?: boolean;
 };
 
 export type UpdateKeywordArgs = {

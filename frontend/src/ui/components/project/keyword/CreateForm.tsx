@@ -36,6 +36,7 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
     try {
       const results = await recommendationService.search(name);
       setCurrentRecommendation(results);
+    } catch (e) {
     } finally {
       setLoading(false);
     }
@@ -54,10 +55,20 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
   return (
     <Subscribe to={[container]}>
       {(container) => {
-        const createKeyword = async (keyword: string, reset: boolean = false) => {
+        const createKeyword = async (
+          {
+            keyword,
+            isSuggestion,
+          }: {
+            keyword: string;
+            isSuggestion: boolean;
+          },
+          reset: boolean = false,
+        ) => {
           await container.create({
             name: keyword.trim(),
             topicId,
+            isSuggestion: isSuggestion,
           });
 
           const isRecommendation =
@@ -89,7 +100,17 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
                 setInputError('Stichwort kann Thema nur einmal zugewiesen werden.');
                 return;
               }
-              createKeyword(name, true);
+              const isSuggestion =
+                currentRecommendation?.recommendations.some(
+                  (recommendation) => recommendation.keyword.trim() === name.trim(),
+                ) ?? true;
+              createKeyword(
+                {
+                  keyword: name,
+                  isSuggestion,
+                },
+                true,
+              );
             }}
           >
             <Box p={2}>
@@ -140,7 +161,13 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
                               className={keywordRecommendationClass}
                               button
                               onClick={() => {
-                                createKeyword(r.keyword, false);
+                                createKeyword(
+                                  {
+                                    keyword: r.keyword,
+                                    isSuggestion: true,
+                                  },
+                                  false,
+                                );
 
                                 setCurrentRecommendation(currentRecommendation);
                                 document.getElementById('recommendation-input')?.focus();

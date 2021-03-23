@@ -11,6 +11,7 @@ export class KeywordApiRepository extends BaseApiRepository implements KeywordRe
     const dto: CreateKeywordDto = {
       name: args.name,
       topicId: args.topicId,
+      suggestion: args.isSuggestion ?? false,
     };
 
     return this.withClient<Keyword>(async (client) => {

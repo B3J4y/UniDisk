@@ -8,6 +8,7 @@ export type KeywordDto = {
 export type CreateKeywordDto = {
   name: string;
   topicId: string;
+  suggestion: boolean;
 };
 
 export type UpdateKeywordDto = {
