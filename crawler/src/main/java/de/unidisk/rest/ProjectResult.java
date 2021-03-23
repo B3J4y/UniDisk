@@ -32,13 +32,12 @@ public class ProjectResult {
     @Consumes(MediaType.APPLICATION_JSON)
     @AuthNeeded
     public Response rate(RateResultDto dto, @PathParam("id") String id, @Context SecurityContext context){
-        final ContextUser user = (ContextUser) context.getUserPrincipal();
         try {
             projectRepository.rateTopicScore(id,dto.getRelevance());
+            return Response.ok().build();
         } catch (EntityNotFoundException e) {
             return Response.status(404).build();
         }
-        return Response.ok().build();
     }
 
 }
