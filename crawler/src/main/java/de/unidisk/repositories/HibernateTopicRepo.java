@@ -40,7 +40,6 @@ public class HibernateTopicRepo implements ITopicRepository {
 
     @Override
     public Keyword addKeyword(int topicId, String name) {
-
         return new KeywordDAO().addKeyword(name,topicId);
     }
 

@@ -23,7 +23,7 @@ public class HibernateKeywordRepo implements IKeywordRepository {
 
     @Override
     public Keyword createKeyword(CreateKeywordParams params) {
-        return dao.addKeyword(params.getName(), Integer.parseInt(params.getTopicId()));
+        return dao.createKeyword(params);
     }
 
     @Override

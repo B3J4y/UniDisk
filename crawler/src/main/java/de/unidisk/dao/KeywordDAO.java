@@ -2,6 +2,7 @@ package de.unidisk.dao;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IKeywordRepository;
+import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
@@ -42,7 +43,15 @@ public class KeywordDAO {
         return true;
     }
 
+
     public Keyword addKeyword(String name, int topicId){
+        return createKeyword(new CreateKeywordParams(name,String.valueOf(topicId),false));
+    }
+
+    public Keyword createKeyword(CreateKeywordParams params){
+        final int topicId = Integer.parseInt(params.getTopicId());
+        final String name = params.getName();
+
         if(keywordExists(topicId,name))
             return null;
         final boolean topicExists = new TopicDAO().topicExists(topicId);
@@ -55,7 +64,7 @@ public class KeywordDAO {
             transaction.begin();
         }
 
-        final Keyword keyword = new Keyword(name,topicId);
+        final Keyword keyword = new Keyword(name,topicId, params.isSuggestion());
         currentSession.save(keyword);
 
         transaction.commit();
