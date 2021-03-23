@@ -1,5 +1,6 @@
 package de.unidisk.entities.hibernate;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -10,19 +11,20 @@ import java.util.List;
 @Entity
 @Table(
         uniqueConstraints={
-                @UniqueConstraint(columnNames = {"name", "userId"})
+                @UniqueConstraint(columnNames = {"name", "userId"}),
+                @UniqueConstraint(columnNames = {"parentProjectId", "projectSubtype"})
                 },
         indexes =    {
                 @Index(columnList = "userId", name = "project_user_id_idx"),
+                @Index(columnList = "parentProjectId", name = "project_parent_idx"),
         }
 )
 public class Project {
     @Id
-
     @GeneratedValue
     private int id;
 
-    @Column(nullable = false)
+    @Column()
     private String name;
 
     @Column(nullable = false)
@@ -38,6 +40,19 @@ public class Project {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Topic> topics;
 
+    @ColumnDefault("null")
+    @Column(nullable = true)
+    // Using int as type doesn't seem to work because Hibernate always uses 0 instead of null as default
+    private Integer parentProjectId;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ProjectSubtype projectSubtype;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "parentProjectId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<Project> subprojects;
+
     public Project() {
     }
 
@@ -49,6 +64,14 @@ public class Project {
 
     public Project(String name) {
         this.name = name;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if(projectSubtype == null)
+        {
+            projectSubtype = ProjectSubtype.DEFAULT;
+        }
     }
 
     public int getId() {
@@ -110,5 +133,33 @@ public class Project {
 
     public boolean canEdit(){
         return this.projectState == ProjectState.IDLE;
+    }
+
+    public Integer getParentProjectId() {
+        return parentProjectId;
+    }
+
+    public boolean isSubproject(){
+        return projectSubtype != ProjectSubtype.DEFAULT;
+    }
+
+    public void setParentProjectId(int parentProjectId) {
+        this.parentProjectId = parentProjectId;
+    }
+
+    public ProjectSubtype getProjectSubtype() {
+        return projectSubtype;
+    }
+
+    public void setProjectSubtype(ProjectSubtype projectSubtype) {
+        this.projectSubtype = projectSubtype;
+    }
+
+    public List<Project> getSubprojects() {
+        return subprojects;
+    }
+
+    public void setSubprojects(List<Project> subprojects) {
+        this.subprojects = subprojects;
     }
 }

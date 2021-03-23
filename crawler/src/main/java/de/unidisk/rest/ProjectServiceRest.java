@@ -7,6 +7,7 @@ import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.rest.authentication.AuthNeeded;
 import de.unidisk.rest.authentication.ContextUser;
 import de.unidisk.rest.dto.project.CreateProjectDto;
+import de.unidisk.rest.dto.project.ProjectPreview;
 import de.unidisk.rest.dto.project.UpdateProjectDto;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
@@ -21,6 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Path("/project")
 public class ProjectServiceRest {
@@ -42,7 +44,8 @@ public class ProjectServiceRest {
     public Response projects(@Context SecurityContext context){
         final ContextUser user = (ContextUser) context.getUserPrincipal();
         final List<Project> projects = this.projectRepository.getUserProjects(user.getId());
-        return Response.ok(projects).build();
+        final List<ProjectPreview> previews = projects.stream().map(ProjectPreview::fromEntity).collect(Collectors.toList());
+        return Response.ok(previews).build();
     }
 
     @GET
