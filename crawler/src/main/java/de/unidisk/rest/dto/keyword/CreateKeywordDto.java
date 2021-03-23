@@ -4,12 +4,27 @@ public class CreateKeywordDto {
 
     String topicId;
     String name;
+    boolean isSuggestion;
 
     public  CreateKeywordDto(){}
 
     public CreateKeywordDto(String topicId, String name) {
         this.topicId = topicId;
         this.name = name;
+    }
+
+    public CreateKeywordDto(String topicId, String name, boolean isSuggestion) {
+        this.topicId = topicId;
+        this.name = name;
+        this.isSuggestion = isSuggestion;
+    }
+
+    public boolean isSuggestion() {
+        return isSuggestion;
+    }
+
+    public void setSuggestion(boolean suggestion) {
+        isSuggestion = suggestion;
     }
 
     public String getTopicId() {

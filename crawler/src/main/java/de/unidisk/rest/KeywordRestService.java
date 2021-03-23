@@ -55,7 +55,7 @@ public class KeywordRestService extends CRUDService<Keyword, CreateKeywordDto, U
         }
 
 
-        final CreateKeywordParams params = new CreateKeywordParams(dto.getName(),dto.getTopicId());
+        final CreateKeywordParams params = new CreateKeywordParams(dto.getName(),dto.getTopicId(),dto.isSuggestion());
         final Keyword keyword;
         try {
             keyword = this.keywordRepository.createKeyword(params);
