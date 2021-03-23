@@ -106,6 +106,11 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
+    public void rateTopicScore(String topicScoreId, ResultRelevance relevance) throws EntityNotFoundException {
+        new TopicScoreDAO().rateScore(Integer.parseInt(topicScoreId),relevance);
+    }
+
+    @Override
     public List<ProjectView> getProjects() {
         return getAll().stream().map(ProjectView::fromProject).collect(Collectors.toList());
     }
@@ -214,7 +219,7 @@ public class ProjectDAO  implements IProjectRepository {
     {
         int pId = Integer.parseInt(projectId);
         return HibernateUtil.execute((session -> {
-            return  session.createQuery("select new de.unidisk.view.results.Result(t.topic.id, t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university )" +
+            return  session.createQuery("select new de.unidisk.view.results.Result(t.id, t.topic.id, t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university, t.resultRelevance )" +
                     " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
                     .setParameter("pId",pId).list();
         }));
