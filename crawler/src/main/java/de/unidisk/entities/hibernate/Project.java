@@ -45,7 +45,7 @@ public class Project {
     // Using int as type doesn't seem to work because Hibernate always uses 0 instead of null as default
     private Integer parentProjectId;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ProjectSubtype projectSubtype;
 
@@ -64,6 +64,14 @@ public class Project {
 
     public Project(String name) {
         this.name = name;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if(projectSubtype == null)
+        {
+            projectSubtype = ProjectSubtype.DEFAULT;
+        }
     }
 
     public int getId() {
@@ -132,7 +140,7 @@ public class Project {
     }
 
     public boolean isSubproject(){
-        return projectSubtype != null;
+        return projectSubtype != ProjectSubtype.DEFAULT;
     }
 
     public void setParentProjectId(int parentProjectId) {

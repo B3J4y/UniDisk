@@ -1,8 +1,9 @@
 package de.unidisk.entities.hibernate;
 
 public enum ProjectSubtype {
+    DEFAULT,
     // Only contains keywords that were created by user
-    CustomOnly,
+    CUSTOM_ONLY,
     // Project which was automatically generated from topic names
-    ByTopics
+    BY_TOPICS
 }

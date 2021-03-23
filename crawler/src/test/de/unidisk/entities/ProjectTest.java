@@ -3,13 +3,11 @@ package de.unidisk.entities;
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
 import de.unidisk.contracts.exceptions.DuplicateException;
-import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.view.results.Result;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
@@ -237,7 +235,7 @@ public class ProjectTest implements HibernateLifecycle {
     public void createSubproject() throws DuplicateException {
         ProjectDAO dao = new ProjectDAO();
         final Project parentProject = dao.createProject(createArgs("test"));
-        final ProjectSubtype projectSubtype = ProjectSubtype.ByTopics;
+        final ProjectSubtype projectSubtype = ProjectSubtype.BY_TOPICS;
         final Project childProject = dao.createProject(CreateProjectParams.subproject(parentProject.getId(), projectSubtype));
         assertEquals(childProject.getParentProjectId().intValue(), parentProject.getId());
         assertEquals(childProject.getProjectSubtype(),projectSubtype);

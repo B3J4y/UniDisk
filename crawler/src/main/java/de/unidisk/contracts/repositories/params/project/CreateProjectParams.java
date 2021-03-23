@@ -13,7 +13,7 @@ public class CreateProjectParams {
         this.userId = userId;
         this.name = name;
         this.parentProjectId = -1;
-        this.projectSubtype = null;
+        this.projectSubtype = ProjectSubtype.DEFAULT;
     }
 
     private CreateProjectParams(int parentProjectId, ProjectSubtype subtype) {
