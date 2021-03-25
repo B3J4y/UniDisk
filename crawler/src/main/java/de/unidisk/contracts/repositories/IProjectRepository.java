@@ -45,4 +45,7 @@ public interface IProjectRepository extends Serializable {
     void clearProjectError(int projectId);
 
     void rateTopicScore(String topicScoreId, ResultRelevance relevance) throws EntityNotFoundException;
+
+    List<Project> getSubprojects(String projectId);
+    Project generateSubprojectByCustom(String projectId);
 }

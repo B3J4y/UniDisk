@@ -104,4 +104,14 @@ public class HibernateProjectRepo implements IProjectRepository {
         projectDAO.rateTopicScore(topicScoreId,relevance);
     }
 
+    @Override
+    public List<Project> getSubprojects(String projectId) {
+        return projectDAO.getSubprojects(projectId);
+    }
+
+    @Override
+    public Project generateSubprojectByCustom(String projectId) {
+        return projectDAO.generateSubprojectByCustom(projectId);
+    }
+
 }

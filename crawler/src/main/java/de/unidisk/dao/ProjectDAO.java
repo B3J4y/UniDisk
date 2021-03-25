@@ -24,6 +24,8 @@ public class ProjectDAO  implements IProjectRepository {
     public ProjectDAO() {
     }
 
+
+
     public Project createProject(CreateProjectParams params) throws DuplicateException {
         Project project;
         if(params.areSubprojectParams()){
@@ -108,6 +110,55 @@ public class ProjectDAO  implements IProjectRepository {
     @Override
     public void rateTopicScore(String topicScoreId, ResultRelevance relevance) throws EntityNotFoundException {
         new TopicScoreDAO().rateScore(Integer.parseInt(topicScoreId),relevance);
+    }
+
+    @Override
+    public List<Project> getSubprojects(String projectId) {
+        return HibernateUtil.execute(session -> session.createQuery("select p from Project p " +
+                "LEFT JOIN Topic t ON p.id = t.projectId " +
+                "LEFT JOIN Keyword  k ON t.id = k.topicId " +
+                "where p.parentProjectId = :id", Project.class)
+                .setParameter("id", Integer.parseInt(projectId))
+                .list());
+    }
+
+    @Override
+    public Project generateSubprojectByCustom(String projectId) {
+        return HibernateUtil.execute(session ->  {
+            final Optional<Project> optionalParentProject  = this.getProjectDetails(projectId);
+            if(!optionalParentProject.isPresent())
+                return null;
+            final Project parentProject = optionalParentProject.get();
+
+            try {
+                final Project subtypeProject = this.createProject(CreateProjectParams.subproject(parentProject.getId(),ProjectSubtype.CUSTOM_ONLY));
+                final List<Topic> subtypeTopics = new ArrayList<>();
+                parentProject.getTopics().forEach(topic -> {
+                    final Topic t = new Topic();
+                    t.setName(topic.getName());
+                    t.setProjectId(subtypeProject.getId());
+                    session.save(t);
+                    final List<Keyword> keywords = new ArrayList<>();
+                    t.setKeywords(keywords);
+                    topic.getKeywords().forEach(keyword -> {
+                        if(keyword.isSuggestion())
+                            return;
+                        final Keyword k = new Keyword();
+                        k.setName(keyword.getName());
+                        k.setTopicId(t.getId());
+                        session.save(k);
+                        keywords.add(k);
+                    });
+                    subtypeTopics.add(t);
+                });
+                subtypeProject.setTopics(subtypeTopics);
+                session.update(subtypeProject);
+                return subtypeProject;
+            } catch (DuplicateException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
     }
 
     @Override
