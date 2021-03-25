@@ -57,9 +57,10 @@ public class ProjectGenerationService {
                 );
                 keywords.add(keyword);
             }
-            topic.setKeywords(keywords);
+            topicCopy.setKeywords(keywords);
             topics.add(topicCopy);
         }
+        projectCopy.setTopics(topics);
 
 
         return projectCopy;
