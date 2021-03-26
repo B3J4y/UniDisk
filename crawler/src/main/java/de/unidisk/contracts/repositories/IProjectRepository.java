@@ -44,15 +44,6 @@ public interface IProjectRepository extends Serializable {
      */
     Project getProjectDetailsOrFail(String projectId) throws EntityNotFoundException;
 
-
-    /**
-     * Loads project details of project with given id.
-     * @param projectId id of project
-     * @return project with loaded topics and keywords
-     * @throws EntityNotFoundException if project with id doesn't exist
-     */
-    Project getProjectDetailsOrFail(String projectId) throws EntityNotFoundException;
-
     Project createProject(CreateProjectParams params) throws DuplicateException;
     Project updateProject(UpdateProjectParams params) throws DuplicateException;
     boolean deleteProject(String projectId);
