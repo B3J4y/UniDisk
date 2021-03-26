@@ -4,14 +4,11 @@ import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.config.SolrConfiguration;
 import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.model.ScoreResult;
+import de.unidisk.entities.hibernate.*;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
 import de.unidisk.solr.services.SolrScoringService;
 import de.unidisk.dao.ProjectDAO;
-import de.unidisk.entities.hibernate.Keyword;
-import de.unidisk.entities.hibernate.Project;
-import de.unidisk.entities.hibernate.ProjectState;
-import de.unidisk.entities.hibernate.Topic;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.services.IResultService;
 import de.unidisk.services.HibernateResultService;
@@ -89,7 +86,7 @@ public class SolrApp {
         }
 
     }
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] params) throws Exception {
         final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(),
                 new HibernateTopicRepo(),
                 SolrConfiguration.getInstance());

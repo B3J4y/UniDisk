@@ -1,4 +1,4 @@
-package de.unidisk.crawler.rest;
+package de.unidisk.rest;
 import javax.ws.rs.*;
 
 

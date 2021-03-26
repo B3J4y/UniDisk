@@ -1,9 +1,14 @@
 package de.unidisk.repositories;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
+import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.entities.hibernate.ResultRelevance;
 import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
@@ -30,8 +35,38 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
+    public List<Project> getUserProjects(String userId) {
+        return projectDAO.getUserProjects(userId);
+    }
+
+    @Override
+    public Optional<Project> findUserProjectByName(String userId, String name) {
+        return projectDAO.findUserProjectByName(userId,name);
+    }
+
+    @Override
     public Optional<Project> getProject(String projectId) {
         return projectDAO.getProject(projectId);
+    }
+
+    @Override
+    public Optional<Project> getProjectDetails(String projectId) {
+        return projectDAO.getProjectDetails(projectId);
+    }
+
+    @Override
+    public Project getProjectDetailsOrFail(String projectId) throws EntityNotFoundException {
+        return projectDAO.getProjectDetailsOrFail(projectId);
+    }
+
+    @Override
+    public Project createProject(CreateProjectParams params) throws DuplicateException {
+        return this.projectDAO.createProject(params);
+    }
+
+    @Override
+    public Project updateProject(UpdateProjectParams params) throws DuplicateException {
+        return this.projectDAO.updateProject(params);
     }
 
     @Override
@@ -67,6 +102,21 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public void clearProjectError(int projectId) {
         projectDAO.clearProjectError(projectId);
+    }
+
+    @Override
+    public void rateTopicScore(String topicScoreId, ResultRelevance relevance) throws EntityNotFoundException {
+        projectDAO.rateTopicScore(topicScoreId,relevance);
+    }
+
+    @Override
+    public List<Project> getSubprojects(String projectId) {
+        return projectDAO.getSubprojects(projectId);
+    }
+
+    @Override
+    public Project generateSubprojectByCustom(String projectId) throws DuplicateException, EntityNotFoundException {
+        return projectDAO.generateSubprojectByCustom(projectId);
     }
 
 }

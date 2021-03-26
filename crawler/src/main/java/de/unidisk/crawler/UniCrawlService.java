@@ -34,7 +34,7 @@ public class UniCrawlService implements SimpleCrawl.IProgressListener {
             logger.info("No seeds to crawl.");
             return;
         }
-        start(seeds);
+        //start(seeds);
     }
 
     private void start(List<UniversitySeed> seeds){

@@ -1,6 +1,9 @@
 package de.unidisk.dao;
 
 import de.unidisk.common.ApplicationState;
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -21,7 +24,8 @@ public class HibernateTestSetup {
     }
 
     public static void Setup(ApplicationState state){
-
+        // current user id used for all users
+        final String userId = "0";
         final ProjectDAO projectDAO = new ProjectDAO();
         final TopicDAO topicDAO = new TopicDAO();
         final TopicScoreDAO topicScoreDAO = new TopicScoreDAO();
@@ -36,7 +40,17 @@ public class HibernateTestSetup {
         final List<String> universityNames = state.getUniversities().stream().map(University::getName).collect(Collectors.toList());
 
         state.getProjectList().forEach((p) -> {
-            final Project dbProject = projectDAO.createProject(p.getName());
+            final Project dbProject;
+            Project dbProject1;
+
+            try {
+                dbProject1 = projectDAO.createProject(new CreateProjectParams(userId,p.getName()));
+            } catch (DuplicateException e) {
+                e.printStackTrace();
+                dbProject1 = null;
+            }
+
+            dbProject = dbProject1;
             if(dbProject == null){
                 //project already exists, might happen if setup is run multiple times against persistent database
                 return;

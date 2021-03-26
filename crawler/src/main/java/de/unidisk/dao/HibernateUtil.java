@@ -1,10 +1,12 @@
 package de.unidisk.dao;
 
 import de.unidisk.config.SystemConfiguration;
+import de.unidisk.contracts.exceptions.DuplicateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.exception.ConstraintViolationException;
 
 import java.util.function.Function;
 
@@ -37,6 +39,28 @@ public class HibernateUtil {
         }
         catch (Exception e) {
             if (tx!=null) tx.rollback();
+
+            throw e;
+        }
+        finally {
+            sess.close();
+        }
+    }
+
+    public static <T> T executeUpdate(Function<Session,T> action) throws DuplicateException {
+        Session sess = getSessionFactory().openSession();
+        Transaction tx = null;
+        try {
+            tx = sess.beginTransaction();
+            final T result = action.apply(sess);
+            tx.commit();
+            return result;
+        }
+        catch (Exception e) {
+            if (tx!=null) tx.rollback();
+
+            if(e instanceof javax.persistence.PersistenceException && e.getCause() instanceof  ConstraintViolationException)
+                throw new DuplicateException();
             throw e;
         }
         finally {

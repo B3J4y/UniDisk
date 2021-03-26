@@ -1,5 +1,9 @@
 package de.unidisk.dao;
 
+import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.IKeywordRepository;
+import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
+import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
@@ -9,6 +13,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import org.hibernate.exception.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +43,15 @@ public class KeywordDAO {
         return true;
     }
 
+
     public Keyword addKeyword(String name, int topicId){
+        return createKeyword(new CreateKeywordParams(name,String.valueOf(topicId),false));
+    }
+
+    public Keyword createKeyword(CreateKeywordParams params){
+        final int topicId = Integer.parseInt(params.getTopicId());
+        final String name = params.getName();
+
         if(keywordExists(topicId,name))
             return null;
         final boolean topicExists = new TopicDAO().topicExists(topicId);
@@ -51,11 +64,28 @@ public class KeywordDAO {
             transaction.begin();
         }
 
-        final Keyword keyword = new Keyword(name,topicId);
+        final Keyword keyword = new Keyword(name,topicId, params.isSuggestion());
         currentSession.save(keyword);
 
         transaction.commit();
         currentSession.close();
+        return keyword;
+    }
+
+    public Keyword updateKeyword(UpdateKeywordParams params) throws DuplicateException
+    {
+        final Optional<Keyword> k = get(Integer.parseInt(params.getKeywordId()));
+        if (!k.isPresent()) {
+            return null;
+        }
+        final Keyword keyword = k.get();
+        keyword.setName(params.getName());
+
+        HibernateUtil.executeUpdate(session -> {
+            session.update(keyword);
+            return null;
+        });
+
         return keyword;
     }
 
