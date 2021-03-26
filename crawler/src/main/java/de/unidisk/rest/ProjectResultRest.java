@@ -14,15 +14,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 @Path("/result")
-public class ProjectResult {
+public class ProjectResultRest {
 
     @Inject
     IProjectRepository projectRepository;
 
-    public ProjectResult() {
+    public ProjectResultRest() {
     }
 
-    public ProjectResult(IProjectRepository projectRepository) {
+    public ProjectResultRest(IProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
     }
 

@@ -1,5 +1,6 @@
 package de.unidisk.repositories;
 
+import de.unidisk.common.ProjectResult;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
@@ -72,6 +73,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public List<Result> getResults(String projectId) {
         return projectDAO.getResults(projectId);
+    }
+
+    @Override
+    public List<ProjectResult> getAllResults(String projectId) {
+        return projectDAO.getAllResults(projectId);
     }
 
     @Override

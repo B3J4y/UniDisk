@@ -1,5 +1,6 @@
 package de.unidisk.contracts.repositories;
 
+import de.unidisk.common.ProjectResult;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
@@ -35,6 +36,7 @@ public interface IProjectRepository extends Serializable {
 
 
     List<Result> getResults(String projectId);
+    List<ProjectResult> getAllResults(String projectId);
 
     boolean canEdit(String projectId);
 

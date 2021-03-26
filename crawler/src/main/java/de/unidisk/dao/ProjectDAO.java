@@ -1,5 +1,6 @@
 package de.unidisk.dao;
 
+import de.unidisk.common.ProjectResult;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
@@ -15,6 +16,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.query.Query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -223,6 +225,24 @@ public class ProjectDAO  implements IProjectRepository {
                     " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
                     .setParameter("pId",pId).list();
         }));
+    }
+
+    public List<ProjectResult> getAllResults(String projectId) {
+        int pId = Integer.parseInt(projectId);
+        final Optional<Project> optionalProject = this.findProjectById(pId);
+        if (!optionalProject.isPresent())
+            return Collections.emptyList();
+        final Project project = optionalProject.get();
+
+        final List<Project> projects = Collections.singletonList(project);
+        projects.addAll(project.getSubprojects());
+
+
+        final List<ProjectResult> results = projects.parallelStream().map(proj -> {
+            final List<Result> projectResult = this.getResults(String.valueOf(proj.getId()));
+            return new ProjectResult(projectResult, project.getProjectSubtype());
+        }).collect(Collectors.toList());
+        return results;
     }
 
     @Override
