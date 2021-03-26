@@ -55,6 +55,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
+    public Project getProjectDetailsOrFail(String projectId) throws EntityNotFoundException {
+        return projectDAO.getProjectDetailsOrFail(projectId);
+    }
+
+    @Override
     public Project createProject(CreateProjectParams params) throws DuplicateException {
         return this.projectDAO.createProject(params);
     }
@@ -102,6 +107,16 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public void rateTopicScore(String topicScoreId, ResultRelevance relevance) throws EntityNotFoundException {
         projectDAO.rateTopicScore(topicScoreId,relevance);
+    }
+
+    @Override
+    public List<Project> getSubprojects(String projectId) {
+        return projectDAO.getSubprojects(projectId);
+    }
+
+    @Override
+    public Project generateSubprojectByCustom(String projectId) throws DuplicateException, EntityNotFoundException {
+        return projectDAO.generateSubprojectByCustom(projectId);
     }
 
 }
