@@ -1,6 +1,5 @@
 import { Project, Topic } from 'data/entity';
 import { FeedbackStatus } from 'data/repositories';
-import { ResultRelevanceDto } from 'remote/repository/api/dto/Project';
 import { DeleteEvent, EntityEvent } from './base';
 import { Event } from './bus';
 

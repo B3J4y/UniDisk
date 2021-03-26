@@ -19,7 +19,7 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
   const [name, setName] = React.useState('');
   const [container, setContainer] = React.useState(provider.getKeywordDetailContainer());
 
-  const [loading, setLoading] = React.useState(false);
+  const [, setLoading] = React.useState(false);
   const [currentRecommendation, setCurrentRecommendation] = React.useState<
     KeywordRecommedationResult | undefined
   >(undefined);
