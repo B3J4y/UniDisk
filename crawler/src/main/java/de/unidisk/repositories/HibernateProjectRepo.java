@@ -76,11 +76,6 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
-    public List<Result> getResults(String projectId) {
-        return projectDAO.getResults(projectId);
-    }
-
-    @Override
     public List<ProjectResult> getAllResults(String projectId) {
         return projectDAO.getAllResults(projectId);
     }

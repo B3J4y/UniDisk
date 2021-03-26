@@ -48,8 +48,6 @@ public interface IProjectRepository extends Serializable {
     Project updateProject(UpdateProjectParams params) throws DuplicateException;
     boolean deleteProject(String projectId);
 
-
-    List<Result> getResults(String projectId);
     List<ProjectResult> getAllResults(String projectId);
 
     boolean canEdit(String projectId);
