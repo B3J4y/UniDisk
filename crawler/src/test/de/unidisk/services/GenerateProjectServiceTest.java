@@ -28,9 +28,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -82,12 +80,10 @@ public class GenerateProjectServiceTest implements HibernateLifecycle {
         );
 
 
-        final Map<String,List<String>> topicKeywordsMap = Map.ofEntries(
-                entry("Custom", Arrays.asList("Katze","Hund","Löwe","Tiger")),
-                entry("Mixed", Arrays.asList("Schokolade","Test", "Ente")),
-                // all words are suggestions
-                entry("Stichwortlos", Arrays.asList("Baum","Haus"))
-        );
+        final Map<String,List<String>> topicKeywordsMap = new HashMap<>();
+        topicKeywordsMap.put("Custom", Arrays.asList("Katze","Hund","Löwe","Tiger"));
+        topicKeywordsMap.put("Mixed", Arrays.asList("Schokolade","Test", "Ente"));
+        topicKeywordsMap.put("Stichwortlos", Arrays.asList("Baum","Haus"));
 
         final List<String> customResults = Arrays.asList("1","2","Hund", "Katze","Bär", "Baum");
 
@@ -100,7 +96,7 @@ public class GenerateProjectServiceTest implements HibernateLifecycle {
 
 
         final Project project = createProject("test",topicKeywordsMap
-                , Set.of());
+                ,new HashSet());
 
         final Project newProject = projectService.generateProjectFromTopics(String.valueOf(project.getId()));
         assertEquals(project.getTopics().size(), newProject.getTopics().size());
