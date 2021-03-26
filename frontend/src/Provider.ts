@@ -2,6 +2,7 @@ import { API_ENDPOINT, USE_STUBS } from 'config';
 import { KeywordRepository, ProjectRepository, TopicRepository } from 'data/repositories';
 import { ProjectAllContainer, ProjectDetailContainer } from 'model';
 import { KeywordDetailContainer } from 'model/keyword/Detail';
+import { FeedbackResultContainer } from 'model/project/Feedback';
 import { TopicDetailContainer } from 'model/topic/Detail';
 import React, { useContext } from 'react';
 import { TopicApiRepository } from 'remote/repository';
@@ -60,6 +61,9 @@ export const provider = {
   },
   getKeywordRecommendationService: () => {
     return new KeywordRecommendationService();
+  },
+  getFeedbackResultContainer: () => {
+    return new FeedbackResultContainer(getProjectRepository(), eventBus);
   },
 };
 

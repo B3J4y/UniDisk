@@ -1,3 +1,4 @@
+import { FeedbackStatus } from 'data/repositories';
 import { Keyword } from './Keyword';
 import { University } from './University';
 
@@ -13,8 +14,10 @@ export type Topic = {
 export type TopicDetails = Required<Topic>;
 
 export type TopicResult = {
+  id: string;
   topic: BaseTopic;
   score: number;
   entryCount: number;
   university: University;
+  relevance: FeedbackStatus;
 };

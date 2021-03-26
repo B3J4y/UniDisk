@@ -1,4 +1,4 @@
-import { Project, Topic, TopicDetails } from 'data/entity';
+import { Project, Topic } from 'data/entity';
 
 export type CreateTopicArgs = {
   projectId: Project['id'];

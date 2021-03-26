@@ -19,7 +19,8 @@ import AssessmentIcon from '@material-ui/icons/Assessment';
 import BuildIcon from '@material-ui/icons/Build';
 import MapIcon from '@material-ui/icons/Map';
 import { Project, ProjectDetails, ProjectState, Topic } from 'data/entity';
-import MaterialTable from 'material-table';
+import { ProjectEvaluationResult, ProjectType } from 'data/repositories';
+import * as htmlToImage from 'html-to-image';
 import { ProjectDetailContainer } from 'model';
 import { useProvider } from 'Provider';
 import React from 'react';
@@ -27,8 +28,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { OLMap } from 'ui/components/forms/Map';
 import { ProjectTopics } from 'ui/components/project/TopicTable';
 import { Provider, Subscribe } from 'unstated-typescript';
-import * as htmlToImage from 'html-to-image';
-import { ProjectEvaluationResult } from 'data/repositories';
+import { ProjectEvaluationPage } from './Evaluation';
 type Views = 'general' | 'map' | 'results';
 
 function useQuery() {
@@ -313,43 +313,7 @@ type ProjectResultsProps = {
   result: ProjectEvaluationResult;
 };
 function ProjectResults(props: ProjectResultsProps) {
-  const { project, result } = props;
-
-  const { topicScores } = result;
-  return (
-    <MaterialTable
-      localization={{
-        body: {
-          emptyDataSourceMessage: `Keine Ergebnisse vorhanden`,
-        },
-        toolbar: {
-          searchPlaceholder: 'Suche',
-          searchTooltip: 'Suche',
-        },
-        pagination: {
-          labelRowsPerPage: 'Zeilen pro Seite:',
-          labelRowsSelect: 'Zeilen',
-          labelDisplayedRows: '{from}-{to} von {count}',
-          nextAriaLabel: 'Nächste Seite',
-        },
-        header: {
-          actions: 'Aktionen',
-        },
-      }}
-      columns={[
-        { title: 'Universität', field: 'university.name' },
-        { title: 'Thema', field: 'topic.name' },
-        { title: 'Score', field: 'score', type: 'numeric' },
-        {
-          title: 'Anzahl Einträge',
-          field: 'entryCount',
-          type: 'numeric',
-        },
-      ]}
-      data={topicScores}
-      title="Auswertung"
-    />
-  );
+  return <ProjectEvaluationPage result={props.result} />;
 }
 
 type MapController = {
@@ -361,7 +325,7 @@ type ProjectResultMapProps = {
 };
 function ProjectResultMap(props: ProjectResultMapProps) {
   const { onCreate, result } = props;
-  const { topicScores } = result;
+  const topicScores = result.results[ProjectType.Default]!;
 
   const topics = Array.from(new Set(topicScores.map((score) => score.topic.name)));
   const [visibleTopics, setVisibleTopics] = React.useState(new Set(topics));

@@ -10,8 +10,20 @@ export type UpdateProjectArgs = {
 };
 
 export type ProjectEvaluationResult = {
-  topicScores: TopicResult[];
+  results: Record<ProjectType, TopicResult[]>;
 };
+
+export enum FeedbackStatus {
+  Relevant,
+  NotRelevant,
+  None,
+}
+
+export enum ProjectType {
+  Default,
+  ByTopic,
+  Enhanced,
+}
 
 export interface ProjectRepository {
   findAll(): Promise<Project[]>;
@@ -31,4 +43,6 @@ export interface ProjectRepository {
 
   enqueue(projectId: Project['id']): Promise<void>;
   dequeue(projectId: Project['id']): Promise<void>;
+
+  rateResult(id: string, status: FeedbackStatus): Promise<void>;
 }

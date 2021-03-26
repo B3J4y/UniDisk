@@ -1,31 +1,48 @@
 import { Project, ProjectDetails, ProjectState } from 'data/entity';
 import {
   CreateProjectArgs,
+  FeedbackStatus,
   ProjectEvaluationResult,
   ProjectRepository,
+  ProjectType,
   UpdateProjectArgs,
 } from 'data/repositories';
 
 export class ProjectRepositoryStub implements ProjectRepository {
+  public async rateResult(): Promise<void> {}
+
   public async getResult(id: string): Promise<ProjectEvaluationResult | undefined> {
     const project = ProjectRepositoryStub.projects.find((p) => p.id === id);
     if (!id) return undefined;
+    const scores =
+      project?.topics.map((topic, id) => {
+        return {
+          id: id.toString(),
+          relevance: FeedbackStatus.None,
+          topic,
+          university: {
+            id: '15',
+            name: 'Uni Potsdam',
+            lat: 10,
+            lng: 5,
+          },
+          score: 0.5,
+          entryCount: 20,
+        };
+      }) ?? [];
 
     return {
-      topicScores:
-        project?.topics.map((topic) => {
-          return {
-            topic,
-            university: {
-              id: '15',
-              name: 'Uni Potsdam',
-              lat: 10,
-              lng: 5,
-            },
-            score: 0.5,
-            entryCount: 20,
-          };
-        }) ?? [],
+      results: {
+        [ProjectType.Default]: scores,
+        [ProjectType.Enhanced]: scores.map((score) => ({
+          ...score,
+          id: '14',
+        })),
+        [ProjectType.ByTopic]: scores.map((score) => ({
+          ...score,
+          id: '13',
+        })),
+      },
     };
   }
 

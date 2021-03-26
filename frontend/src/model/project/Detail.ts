@@ -3,6 +3,7 @@ import {
   CreateProjectArgs,
   ProjectEvaluationResult,
   ProjectRepository,
+  ProjectType,
   UpdateProjectArgs,
 } from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';
@@ -15,6 +16,7 @@ import {
   ProjectUpdatedEvent,
   TopicCreatedEvent,
   TopicDeletedEvent,
+  TopicRelevanceChangeEvent,
   TopicUpdatedEvent,
 } from 'services/event';
 import { EventBus } from 'services/event/bus';
@@ -46,6 +48,8 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   }
   public constructor(private repository: ProjectRepository, private eventBus: EventBus) {
     super();
+
+    console.log('created');
 
     eventBus.subscribe(TopicCreatedEvent, (event: TopicCreatedEvent) => {
       const project = this.state.entity.data;
@@ -140,6 +144,50 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       };
 
       this.setState({ ...this.state, entity: Resource.success(updatedProject) });
+    });
+
+    eventBus.subscribe(TopicRelevanceChangeEvent, (event: TopicRelevanceChangeEvent) => {
+      console.log(event);
+      const resultData = this.state.result.data;
+      if (!resultData) return;
+
+      const { results } = resultData;
+      let foundScore = false;
+      const projects = {
+        ...results,
+      };
+
+      Object.keys(results).forEach((key) => {
+        // Score id can always only belong to one project
+        if (foundScore) return;
+
+        const projectType = (key as unknown) as ProjectType;
+
+        const scores = results[projectType];
+        if (!scores) return;
+
+        const newScores = scores.map((score) => {
+          foundScore = true;
+          if (score.id === event.id) {
+            return {
+              ...score,
+              relevance: event.relevance,
+            };
+          }
+          return score;
+        });
+        if (!foundScore) return;
+
+        projects[projectType] = newScores;
+      });
+
+      console.log({ foundScore });
+      if (!foundScore) return;
+
+      this.setState({
+        ...this.state,
+        result: Resource.success({ results: projects }),
+      });
     });
   }
 

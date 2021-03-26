@@ -1,8 +1,10 @@
 import { Project, ProjectDetails, ProjectState, TopicResult } from 'data/entity';
 import {
   CreateProjectArgs,
+  FeedbackStatus,
   ProjectEvaluationResult,
   ProjectRepository,
+  ProjectType,
   UpdateProjectArgs,
 } from 'data/repositories';
 import { BaseApiRepository, RepositoryArgs } from './Base';
@@ -11,6 +13,8 @@ import {
   ProjectModelDto,
   ProjectResultDto,
   ProjectStateDto,
+  ProjectSubtypeDto,
+  ResultRelevanceDto,
   UpdateProjectDto,
 } from './dto/Project';
 
@@ -41,29 +45,84 @@ function mapModelDtoToEntity(dto: ProjectModelDto): Project {
   };
 }
 
+function mapFromRelevanceDto(state: ResultRelevanceDto): FeedbackStatus {
+  switch (state) {
+    case ResultRelevanceDto.relevant:
+      return FeedbackStatus.Relevant;
+    case ResultRelevanceDto.notRelevant:
+      return FeedbackStatus.NotRelevant;
+    default:
+      return FeedbackStatus.None;
+  }
+}
+
+function mapRelevanceToDto(state: FeedbackStatus): ResultRelevanceDto {
+  switch (state) {
+    case FeedbackStatus.Relevant:
+      return ResultRelevanceDto.relevant;
+    case FeedbackStatus.NotRelevant:
+      return ResultRelevanceDto.notRelevant;
+    default:
+      return ResultRelevanceDto.none;
+  }
+}
+
+function projectTypeFromDto(type: ProjectSubtypeDto): ProjectType {
+  switch (type) {
+    case ProjectSubtypeDto.ByTopics:
+      return ProjectType.ByTopic;
+    case ProjectSubtypeDto.CustomOnly:
+      return ProjectType.Enhanced;
+    default:
+      return ProjectType.Default;
+  }
+}
+
 export class ProjectApiRepository extends BaseApiRepository implements ProjectRepository {
   public constructor(args: RepositoryArgs) {
     super({ ...args, defaultPath: 'project' });
   }
+
+  rateResult(id: string, status: FeedbackStatus): Promise<void> {
+    return this.withDefaultClient<void>(async (client) => {
+      const dto = {
+        relevance: mapRelevanceToDto(status),
+      };
+      await client.post(`/result/${id}`, dto);
+    });
+  }
+
   getResult(id: string): Promise<ProjectEvaluationResult | undefined> {
     return this.withClient<ProjectEvaluationResult>(async (client) => {
       const response = await client.get(`/${id}/results`);
-      const resultDto = response.data as ProjectResultDto;
-      const scores: TopicResult[] = resultDto.map((dto) => {
-        const { topic: topicName, topicId, university } = dto;
-        return {
-          topic: { id: topicId.toString(), name: topicName },
-          score: dto.score,
-          entryCount: dto.entryCount,
-          university: {
-            ...university,
-            id: university.id.toString(),
-          },
-        };
+      const resultDto = response.data as ProjectResultDto[];
+      const scores: [ProjectType, TopicResult[]][] = resultDto.map((dto) => {
+        const projectType = projectTypeFromDto(dto.projectSubtype);
+
+        const results: TopicResult[] = dto.results.map((result) => {
+          const { topic: topicName, topicId, university, id } = result;
+          return {
+            id: id.toString(),
+            relevance: mapFromRelevanceDto(result.relevance),
+            topic: { id: topicId.toString(), name: topicName },
+            score: result.score,
+            entryCount: result.entryCount,
+            university: {
+              ...university,
+              id: university.id.toString(),
+            },
+          };
+        });
+        return [projectType, results];
       });
 
       return {
-        topicScores: scores,
+        results: scores.reduce((prev, [type, results]) => {
+          return {
+            ...prev,
+            [type]: results,
+          };
+        }, {} as Record<ProjectType, TopicResult[]>),
       };
     });
   }

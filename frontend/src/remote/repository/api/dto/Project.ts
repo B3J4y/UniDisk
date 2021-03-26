@@ -22,16 +22,35 @@ export type ProjectModelDto = {
   processingError: string;
 };
 
+export enum ResultRelevanceDto {
+  relevant = 'RELEVANT',
+  notRelevant = 'NOT_RELEVANT',
+  none = 'NONE',
+}
+
 export type ResultDto = {
+  id: number;
   topicId: number;
   topic: string;
   score: number;
   entryCount: number;
+  relevance: ResultRelevanceDto;
   university: {
     id: number;
     name: string;
     lat: number;
     lng: number;
+    seedUrl: string;
   };
 };
-export type ProjectResultDto = ResultDto[];
+
+export enum ProjectSubtypeDto {
+  Default = 'DEFAULT',
+  CustomOnly = 'CUSTOM_ONLY',
+  ByTopics = 'BY_TOPICS',
+}
+
+export type ProjectResultDto = {
+  projectSubtype: ProjectSubtypeDto;
+  results: ResultDto[];
+};

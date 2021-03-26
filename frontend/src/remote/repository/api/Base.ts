@@ -13,7 +13,7 @@ export type RepositoryArgs = {
 
 export abstract class BaseApiRepository {
   private client: AxiosInstance | undefined;
-
+  private defaultClient: AxiosInstance | undefined;
   private setup: Promise<void>;
 
   protected constructor(args: RepositoryArgs) {
@@ -23,6 +23,12 @@ export abstract class BaseApiRepository {
         const token = await tokenProvider.getToken();
         this.client = axios.create({
           baseURL: endpoint + (args.defaultPath ?? ''),
+          headers: {
+            Authorization: token,
+          },
+        });
+        this.defaultClient = axios.create({
+          baseURL: endpoint,
           headers: {
             Authorization: token,
           },
@@ -48,8 +54,20 @@ export abstract class BaseApiRepository {
     return this.client!;
   }
 
+  protected async getDefaultClient(): Promise<AxiosInstance> {
+    await this.setup;
+    return this.defaultClient!;
+  }
+
   protected async withClient<T>(callback: (client: AxiosInstance) => Promise<T>): Promise<T> {
     const client = await this.getClient();
+    return await callback(client);
+  }
+
+  protected async withDefaultClient<T>(
+    callback: (client: AxiosInstance) => Promise<T>,
+  ): Promise<T> {
+    const client = await this.getDefaultClient();
     return await callback(client);
   }
 }
