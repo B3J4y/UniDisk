@@ -1,6 +1,5 @@
-import IAuthenticationService from '../../data/services/Authentication';
+import IAuthenticationService, { AuthToken } from '../../data/services/Authentication';
 import { User } from '../../data/user/User';
-import { AuthToken } from '../util';
 
 export class AuthStub implements IAuthenticationService {
   onTokenChanged(callback: (token: string) => void): void {}
