@@ -55,6 +55,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
+    public Project getProjectDetailsOrFail(String projectId) throws EntityNotFoundException {
+        return projectDAO.getProjectDetailsOrFail(projectId);
+    }
+
+    @Override
     public Project createProject(CreateProjectParams params) throws DuplicateException {
         return this.projectDAO.createProject(params);
     }
@@ -110,7 +115,7 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
-    public Project generateSubprojectByCustom(String projectId) {
+    public Project generateSubprojectByCustom(String projectId) throws DuplicateException, EntityNotFoundException {
         return projectDAO.generateSubprojectByCustom(projectId);
     }
 

@@ -2,6 +2,7 @@ package de.unidisk.entities;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
@@ -245,7 +246,7 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void generateSubprojectByCustom() throws DuplicateException {
+    public void generateSubprojectByCustom() throws DuplicateException, EntityNotFoundException {
        final ProjectDAO dao = new ProjectDAO();
        final TopicDAO topicDao = new TopicDAO();
        final KeywordDAO keywordDAO = new KeywordDAO();

@@ -123,16 +123,21 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
-    public Project generateSubprojectByCustom(String projectId) {
-        return HibernateUtil.execute(session ->  {
-            final Optional<Project> optionalParentProject  = this.getProjectDetails(projectId);
-            if(!optionalParentProject.isPresent())
-                return null;
-            final Project parentProject = optionalParentProject.get();
+    public Project generateSubprojectByCustom(String projectId) throws EntityNotFoundException, DuplicateException {
 
+        final Project parentProject = this.getProjectDetailsOrFail(projectId);
+        final DuplicateException[] duplicateException = new DuplicateException[1];
+
+        final Project result = HibernateUtil.execute(session ->  {
+            final Project subtypeProject;
             try {
-                final Project subtypeProject = this.createProject(CreateProjectParams.subproject(parentProject.getId(),ProjectSubtype.CUSTOM_ONLY));
-                final List<Topic> subtypeTopics = new ArrayList<>();
+                subtypeProject = this.createProject(CreateProjectParams.subproject(parentProject.getId(), ProjectSubtype.CUSTOM_ONLY));
+            } catch (DuplicateException e) {
+                e.printStackTrace();
+                duplicateException[0] = e;
+                return null;
+            }
+            final List<Topic> subtypeTopics = new ArrayList<>();
                 parentProject.getTopics().forEach(topic -> {
                     final Topic t = new Topic();
                     t.setName(topic.getName());
@@ -154,11 +159,11 @@ public class ProjectDAO  implements IProjectRepository {
                 subtypeProject.setTopics(subtypeTopics);
                 session.update(subtypeProject);
                 return subtypeProject;
-            } catch (DuplicateException e) {
-                e.printStackTrace();
-                return null;
-            }
+
         });
+        if(duplicateException[0] != null)
+                throw duplicateException[0];
+        return result;
     }
 
     @Override
@@ -205,6 +210,14 @@ public class ProjectDAO  implements IProjectRepository {
                     .uniqueResultOptional();
 
         });
+    }
+
+    @Override
+    public Project getProjectDetailsOrFail(String projectId) throws EntityNotFoundException {
+        final Optional<Project> optionalProject = this.getProjectDetails(projectId);
+        if(!optionalProject.isPresent())
+                throw new EntityNotFoundException(Project.class, Integer.parseInt(projectId));
+        return optionalProject.get();
     }
 
     public boolean deleteProject(String name){

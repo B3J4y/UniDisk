@@ -1,5 +1,6 @@
 package de.unidisk.services;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.contracts.exceptions.DuplicateException;
@@ -35,12 +36,8 @@ public class ProjectGenerationService {
         this.keywordRecommendationService = keywordRecommendationService;
     }
 
-    public Project generateProjectFromTopics(String projectId) throws DuplicateException {
-
-        final Optional<Project> optionalProject = projectRepository.getProjectDetails(projectId);
-        if(!optionalProject.isPresent())
-                return null;
-        final Project project = optionalProject.get();
+    public Project generateProjectFromTopics(String projectId) throws DuplicateException, EntityNotFoundException {
+        final Project project = projectRepository.getProjectDetailsOrFail(projectId);
         final Project projectCopy = projectRepository.createProject(CreateProjectParams.subproject(
                 Integer.parseInt(projectId),
                 ProjectSubtype.BY_TOPICS
