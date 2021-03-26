@@ -15,7 +15,6 @@ export class FeedbackResultContainer extends Container<FeedbackResultState> {
 
   public async rate(resultId: string, status: FeedbackStatus): Promise<void> {
     const stream = Operation.execute(() => this.repository.rateResult(resultId, status));
-    console.log('rate', { resultId, status });
     for await (const event of stream) {
       this.setState({
         ...this.state,
@@ -24,7 +23,6 @@ export class FeedbackResultContainer extends Container<FeedbackResultState> {
     }
     if (this.state.status.isFinished) {
       this.eventBus.publish(new TopicRelevanceChangeEvent(resultId, status));
-      console.log('published');
     }
   }
 }

@@ -2,6 +2,7 @@ import { API_ENDPOINT, USE_STUBS } from 'config';
 import { KeywordRepository, ProjectRepository, TopicRepository } from 'data/repositories';
 import { ProjectAllContainer, ProjectDetailContainer } from 'model';
 import { KeywordDetailContainer } from 'model/keyword/Detail';
+import { UserContainer } from 'model/LoginState';
 import { FeedbackResultContainer } from 'model/project/Feedback';
 import { TopicDetailContainer } from 'model/topic/Detail';
 import React, { useContext } from 'react';
@@ -64,6 +65,9 @@ export const provider = {
   },
   getFeedbackResultContainer: () => {
     return new FeedbackResultContainer(getProjectRepository(), eventBus);
+  },
+  getUserContainer: () => {
+    return new UserContainer(getAuthenticationService());
   },
 };
 

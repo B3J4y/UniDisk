@@ -1,5 +1,4 @@
 import { Grid, IconButton, Link, makeStyles, Tooltip } from '@material-ui/core';
-import MaterialTable from 'material-table';
 import React, { useEffect } from 'react';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
@@ -7,6 +6,7 @@ import { useProvider } from 'Provider';
 import { Subscribe } from 'unstated-typescript';
 import { FeedbackStatus, ProjectEvaluationResult, ProjectType } from 'data/repositories';
 import { TopicResult } from 'data/entity';
+import { LocalizedTable } from 'ui/components/Table';
 
 export type ProjectEvaluationPageProps = {
   result: ProjectEvaluationResult;
@@ -30,12 +30,12 @@ type UniversityFeedbackUrl = {
 //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffleArray<T>(array: T[]): T[] {
   const arrayCopy = array.slice(0);
-  //   for (var i = arrayCopy.length - 1; i > 0; i--) {
-  //     var j = Math.floor(Math.random() * (i + 1));
-  //     var temp = arrayCopy[i];
-  //     arrayCopy[i] = arrayCopy[j];
-  //     arrayCopy[j] = temp;
-  //   }
+  for (var i = arrayCopy.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = arrayCopy[i];
+    arrayCopy[i] = arrayCopy[j];
+    arrayCopy[j] = temp;
+  }
   return arrayCopy;
 }
 
@@ -56,7 +56,6 @@ function FeedbackTable(props: FeedbackTableProps) {
     Object.values(ProjectType).filter((v) => typeof v === 'number'),
   ) as ProjectType[];
 
-  console.log(enums);
   type ItemType = {
     topic: {
       name: string;
@@ -85,25 +84,7 @@ function FeedbackTable(props: FeedbackTableProps) {
   });
 
   return (
-    <MaterialTable
-      localization={{
-        body: {
-          emptyDataSourceMessage: `Keine Ergebnisse vorhanden`,
-        },
-        toolbar: {
-          searchPlaceholder: 'Suche',
-          searchTooltip: 'Suche',
-        },
-        pagination: {
-          labelRowsPerPage: 'Zeilen pro Seite:',
-          labelRowsSelect: 'Zeilen',
-          labelDisplayedRows: '{from}-{to} von {count}',
-          nextAriaLabel: 'Nächste Seite',
-        },
-        header: {
-          actions: 'Aktionen',
-        },
-      }}
+    <LocalizedTable
       columns={[
         { title: 'Thema', field: 'topic.name', grouping: true, defaultGroupOrder: 0 },
         ...Object.keys(enums).map((key, i) => {
@@ -198,25 +179,7 @@ function ProjectResults(props: ProjectResultsProps) {
   const { topicScores } = props;
 
   return (
-    <MaterialTable
-      localization={{
-        body: {
-          emptyDataSourceMessage: `Keine Ergebnisse vorhanden`,
-        },
-        toolbar: {
-          searchPlaceholder: 'Suche',
-          searchTooltip: 'Suche',
-        },
-        pagination: {
-          labelRowsPerPage: 'Zeilen pro Seite:',
-          labelRowsSelect: 'Zeilen',
-          labelDisplayedRows: '{from}-{to} von {count}',
-          nextAriaLabel: 'Nächste Seite',
-        },
-        header: {
-          actions: 'Aktionen',
-        },
-      }}
+    <LocalizedTable
       columns={[
         { title: 'Universität', field: 'university.name' },
         { title: 'Thema', field: 'topic.name' },

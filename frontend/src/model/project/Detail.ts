@@ -49,8 +49,6 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   public constructor(private repository: ProjectRepository, private eventBus: EventBus) {
     super();
 
-    console.log('created');
-
     eventBus.subscribe(TopicCreatedEvent, (event: TopicCreatedEvent) => {
       const project = this.state.entity.data;
       if (!project || project.id !== event.projectId) return;
@@ -147,7 +145,6 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
     });
 
     eventBus.subscribe(TopicRelevanceChangeEvent, (event: TopicRelevanceChangeEvent) => {
-      console.log(event);
       const resultData = this.state.result.data;
       if (!resultData) return;
 
@@ -180,8 +177,6 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
 
         projects[projectType] = newScores;
       });
-
-      console.log({ foundScore });
       if (!foundScore) return;
 
       this.setState({

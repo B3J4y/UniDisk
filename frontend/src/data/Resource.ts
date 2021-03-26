@@ -5,11 +5,6 @@ export enum ResourceState {
   Success,
 }
 
-export type PageResult<T> = {
-  items: T[];
-  page: number;
-};
-
 export class Resource<T> {
   public data: T | null;
   public state: ResourceState;
