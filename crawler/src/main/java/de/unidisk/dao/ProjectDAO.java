@@ -22,6 +22,8 @@ public class ProjectDAO  implements IProjectRepository {
     public ProjectDAO() {
     }
 
+
+
     public Project createProject(CreateProjectParams params) throws DuplicateException {
         Project project;
         if(params.areSubprojectParams()){
@@ -231,11 +233,9 @@ public class ProjectDAO  implements IProjectRepository {
     public Project getProjectDetailsOrFail(String projectId) throws EntityNotFoundException {
         final Optional<Project> optionalProject = this.getProjectDetails(projectId);
         if(!optionalProject.isPresent())
-            throw new EntityNotFoundException(Project.class, Integer.parseInt(projectId));
+                throw new EntityNotFoundException(Project.class, Integer.parseInt(projectId));
         return optionalProject.get();
     }
-
-
 
     public boolean deleteProject(String name){
         Optional<Project> project = findProject(name);

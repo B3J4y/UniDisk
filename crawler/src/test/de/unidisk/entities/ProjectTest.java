@@ -2,7 +2,9 @@ package de.unidisk.entities;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
@@ -243,4 +245,18 @@ public class ProjectTest implements HibernateLifecycle {
         assertEquals(childProject.getProjectState(), ProjectState.IDLE);
     }
 
+    @Test
+    public void generateSubprojectByCustom() throws DuplicateException, EntityNotFoundException {
+       final ProjectDAO dao = new ProjectDAO();
+       final TopicDAO topicDao = new TopicDAO();
+       final KeywordDAO keywordDAO = new KeywordDAO();
+       final Project parentProject = dao.createProject(createArgs("test"));
+       final Topic topic = topicDao.createTopic("test", parentProject.getId());
+       final Keyword keyword = keywordDAO.createKeyword(new CreateKeywordParams("custom", String.valueOf(topic.getId()),false));
+       keywordDAO.createKeyword(new CreateKeywordParams("suggested", String.valueOf(topic.getId()),true));
+       final Project copy = dao.generateSubprojectByCustom(String.valueOf(parentProject.getId()));
+        assertEquals(1,copy.getTopics().size());
+        assertEquals(1,copy.getTopics().get(0).getKeywords().size());
+        assertEquals(keyword.getName(),copy.getTopics().get(0).getKeywords().get(0).getName());
+    }
 }
