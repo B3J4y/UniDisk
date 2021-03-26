@@ -135,6 +135,10 @@ public class Project {
         return this.projectState == ProjectState.IDLE;
     }
 
+    public boolean finishedProcessing(){
+        return this.projectState == ProjectState.FINISHED;
+    }
+
     public Integer getParentProjectId() {
         return parentProjectId;
     }

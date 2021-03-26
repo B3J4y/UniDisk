@@ -69,7 +69,8 @@ public class ProjectServiceRest {
     @AuthNeeded
     public Response projectResults(@PathParam("id") String id,@Context SecurityContext context){
         return this.runProject(id,context, project -> {
-            if(project.getProjectState() != ProjectState.FINISHED)
+            final boolean finishedProcessing = this.projectRepository.projectFinishedProcessing(id);
+            if(!finishedProcessing)
                 return Response.status(400).entity("Projekt befindet sich momentan in der Bearbeitung.").build();
 
             final List<ProjectResult> results = this.projectRepository.getAllResults(id);
