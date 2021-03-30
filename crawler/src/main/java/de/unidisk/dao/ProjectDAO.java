@@ -10,10 +10,7 @@ import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -175,8 +172,7 @@ public class ProjectDAO  implements IProjectRepository {
                 return false;
 
             final Project project = optionalProject.get();
-            final Stream<Project> projectsStream = Stream.concat(project.getSubprojects().stream(),Stream.of(project));
-
+            final Stream<Project> projectsStream = mergeProjectWithSubprojects(project).stream();
 
             final boolean finished = projectsStream.map(Project::finishedProcessing).reduce(true,Boolean::logicalAnd);
             return finished;
@@ -313,8 +309,7 @@ public class ProjectDAO  implements IProjectRepository {
             return Collections.emptyList();
         final Project project = optionalProject.get();
 
-        final List<Project> projects = Collections.singletonList(project);
-        projects.addAll(project.getSubprojects());
+        final List<Project> projects = mergeProjectWithSubprojects(project);
 
 
         final List<ProjectResult> results = projects.parallelStream().map(proj -> {
@@ -322,6 +317,12 @@ public class ProjectDAO  implements IProjectRepository {
             return new ProjectResult(projectResult, project.getProjectSubtype());
         }).collect(Collectors.toList());
         return results;
+    }
+
+    private List<Project> mergeProjectWithSubprojects(Project project){
+        final List<Project> projects = Arrays.asList(project);
+        projects.addAll(project.getSubprojects());
+        return projects;
     }
 
     @Override
