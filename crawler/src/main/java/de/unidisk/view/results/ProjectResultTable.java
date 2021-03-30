@@ -80,7 +80,7 @@ public class ProjectResultTable {
             projectStatusMessage = null;
         }
 
-        results = projectRepository.getAllResults(this.projectId).get(0).getResults();
+        results = projectRepository.getProjectResults(this.projectId).get(0).getResults();
         vibisibilityMap.clear();
         results.forEach(r -> vibisibilityMap.put(r.getTopic(),true));
         RefreshMap(results);

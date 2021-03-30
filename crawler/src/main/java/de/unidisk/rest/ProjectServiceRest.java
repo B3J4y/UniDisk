@@ -73,7 +73,7 @@ public class ProjectServiceRest {
             if(!finishedProcessing)
                 return Response.status(400).entity("Projekt befindet sich momentan in der Bearbeitung.").build();
 
-            final List<ProjectResult> results = this.projectRepository.getAllResults(id);
+            final List<ProjectResult> results = this.projectRepository.getProjectResults(id);
             return Response.ok(project).entity(results).build();
         });
     }

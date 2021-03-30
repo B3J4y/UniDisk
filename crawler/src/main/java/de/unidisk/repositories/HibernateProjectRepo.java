@@ -10,9 +10,7 @@ import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.entities.hibernate.ResultRelevance;
-import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.project.ProjectView;
-import de.unidisk.view.results.Result;
 
 
 import javax.faces.bean.ApplicationScoped;
@@ -76,8 +74,8 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
-    public List<ProjectResult> getAllResults(String projectId) {
-        return projectDAO.getAllResults(projectId);
+    public List<ProjectResult> getProjectResults(String projectId) {
+        return projectDAO.getProjectResults(projectId);
     }
 
     @Override

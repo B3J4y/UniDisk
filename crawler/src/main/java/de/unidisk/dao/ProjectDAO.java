@@ -306,7 +306,7 @@ public class ProjectDAO  implements IProjectRepository {
         }));
     }
 
-    public List<ProjectResult> getAllResults(String projectId) {
+    public List<ProjectResult> getProjectResults(String projectId) {
         int pId = Integer.parseInt(projectId);
         final Optional<Project> optionalProject = this.findProjectById(pId);
         if (!optionalProject.isPresent())
