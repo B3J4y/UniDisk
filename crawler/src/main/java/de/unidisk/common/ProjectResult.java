@@ -18,7 +18,4 @@ public class ProjectResult {
         return results;
     }
 
-    public ProjectSubtype getProjectSubtype() {
-        return projectSubtype;
-    }
 }
