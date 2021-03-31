@@ -10,19 +10,20 @@ import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.view.results.Result;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static de.unidisk.entities.util.TestFactory.randomUniversityUrl;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class ProjectTest implements HibernateLifecycle {
@@ -258,5 +259,41 @@ public class ProjectTest implements HibernateLifecycle {
         assertEquals(1,copy.getTopics().size());
         assertEquals(1,copy.getTopics().get(0).getKeywords().size());
         assertEquals(keyword.getName(),copy.getTopics().get(0).getKeywords().get(0).getName());
+    }
+
+    @Test
+    public void projectFinishedProcessingWithoutSubprojects() throws DuplicateException {
+        final ProjectDAO dao = new ProjectDAO();
+        final Project project = dao.createProject(new CreateProjectParams("user","test"));
+        assertFalse(dao.projectFinishedProcessing(String.valueOf(project.getId())));
+        dao.updateProjectState(project.getId(), ProjectState.FINISHED);
+        assertTrue(dao.projectFinishedProcessing(String.valueOf(project.getId())));
+    }
+
+    @Test
+    public void projectFinishedProcessingWithSubprojects() throws DuplicateException {
+        final ProjectDAO dao = new ProjectDAO();
+        final Project project = dao.createProject(new CreateProjectParams("user","test"));
+        final List<Project> subprojects = Arrays.asList(
+                dao.createProject(CreateProjectParams.subproject(project.getId(), ProjectSubtype.BY_TOPICS)),
+                dao.createProject(CreateProjectParams.subproject(project.getId(), ProjectSubtype.CUSTOM_ONLY))
+                );
+
+        // Helper
+        final Function<Void,Boolean> getFinishedStatus = (a) -> dao.projectFinishedProcessing(String.valueOf(project.getId()));
+        final Function<Project,Void> setFinished = (p) -> {
+            dao.updateProjectState(p.getId(), ProjectState.FINISHED);
+            return null;
+        };
+
+        assertFalse(getFinishedStatus.apply(null));
+        setFinished.apply(project);
+        assertFalse(getFinishedStatus.apply(null));
+        setFinished.apply(subprojects.get(0));
+        assertFalse(getFinishedStatus.apply(null));
+        dao.updateProjectState(subprojects.get(1).getId(), ProjectState.WAITING);
+        assertFalse(getFinishedStatus.apply(null));
+        setFinished.apply(subprojects.get(1));
+        assertTrue(getFinishedStatus.apply(null));
     }
 }

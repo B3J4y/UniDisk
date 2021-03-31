@@ -1,23 +1,18 @@
 package de.unidisk.dao;
 
+import de.unidisk.common.ProjectResult;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.contracts.repositories.IProjectRepository;
-import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.project.ProjectView;
 import de.unidisk.view.results.Result;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.query.Query;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ProjectDAO  implements IProjectRepository {
 
@@ -167,6 +162,24 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
+    public boolean projectFinishedProcessing(String projectId) {
+        return HibernateUtil.execute(session -> {
+            final Optional<Project> optionalProject = session.createQuery("select p from Project p " +
+                    "where p.id = :id", Project.class)
+                    .setParameter("id", Integer.parseInt(projectId))
+                    .uniqueResultOptional();
+            if(!optionalProject.isPresent())
+                return false;
+
+            final Project project = optionalProject.get();
+            final Stream<Project> projectsStream = mergeProjectWithSubprojects(project).stream();
+
+            final boolean finished = projectsStream.map(Project::finishedProcessing).reduce(true,Boolean::logicalAnd);
+            return finished;
+        });
+    }
+
+    @Override
     public List<ProjectView> getProjects() {
         return getAll().stream().map(ProjectView::fromProject).collect(Collectors.toList());
     }
@@ -287,6 +300,29 @@ public class ProjectDAO  implements IProjectRepository {
                     " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
                     .setParameter("pId",pId).list();
         }));
+    }
+
+    public List<ProjectResult> getProjectResults(String projectId) {
+        int pId = Integer.parseInt(projectId);
+        final Optional<Project> optionalProject = this.findProjectById(pId);
+        if (!optionalProject.isPresent())
+            return Collections.emptyList();
+        final Project project = optionalProject.get();
+
+        final List<Project> projects = mergeProjectWithSubprojects(project);
+
+
+        final List<ProjectResult> results = projects.parallelStream().map(proj -> {
+            final List<Result> projectResult = this.getResults(String.valueOf(proj.getId()));
+            return new ProjectResult(projectResult, project.getProjectSubtype());
+        }).collect(Collectors.toList());
+        return results;
+    }
+
+    private List<Project> mergeProjectWithSubprojects(Project project){
+        final List<Project> projects = Arrays.asList(project);
+        projects.addAll(project.getSubprojects());
+        return projects;
     }
 
     @Override

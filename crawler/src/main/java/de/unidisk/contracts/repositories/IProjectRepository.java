@@ -1,5 +1,6 @@
 package de.unidisk.contracts.repositories;
 
+import de.unidisk.common.ProjectResult;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
@@ -35,7 +36,6 @@ public interface IProjectRepository extends Serializable {
      * if project with id exists.
      */
     Optional<Project> getProjectDetails(String projectId);
-
     /**
      * Loads project details of project with given id.
      * @param projectId id of project
@@ -48,8 +48,7 @@ public interface IProjectRepository extends Serializable {
     Project updateProject(UpdateProjectParams params) throws DuplicateException;
     boolean deleteProject(String projectId);
 
-
-    List<Result> getResults(String projectId);
+    List<ProjectResult> getProjectResults(String projectId);
 
     boolean canEdit(String projectId);
 
@@ -63,4 +62,5 @@ public interface IProjectRepository extends Serializable {
 
     List<Project> getSubprojects(String projectId);
     Project generateSubprojectByCustom(String projectId) throws EntityNotFoundException, DuplicateException;
+    boolean projectFinishedProcessing(String projectId);
 }

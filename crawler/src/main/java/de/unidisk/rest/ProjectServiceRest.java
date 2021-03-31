@@ -1,5 +1,6 @@
 package de.unidisk.rest;
 
+import de.unidisk.common.ProjectResult;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
@@ -11,8 +12,6 @@ import de.unidisk.rest.dto.project.ProjectPreview;
 import de.unidisk.rest.dto.project.UpdateProjectDto;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
-import de.unidisk.view.results.Result;
-
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -70,10 +69,11 @@ public class ProjectServiceRest {
     @AuthNeeded
     public Response projectResults(@PathParam("id") String id,@Context SecurityContext context){
         return this.runProject(id,context, project -> {
-            if(project.getProjectState() != ProjectState.FINISHED)
+            final boolean finishedProcessing = this.projectRepository.projectFinishedProcessing(id);
+            if(!finishedProcessing)
                 return Response.status(400).entity("Projekt befindet sich momentan in der Bearbeitung.").build();
 
-            final List<Result> results = this.projectRepository.getResults(id);
+            final List<ProjectResult> results = this.projectRepository.getProjectResults(id);
             return Response.ok(project).entity(results).build();
         });
     }

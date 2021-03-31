@@ -1,5 +1,6 @@
 package de.unidisk.repositories;
 
+import de.unidisk.common.ProjectResult;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
@@ -9,9 +10,7 @@ import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.entities.hibernate.ResultRelevance;
-import de.unidisk.view.model.KeywordItem;
 import de.unidisk.view.project.ProjectView;
-import de.unidisk.view.results.Result;
 
 
 import javax.faces.bean.ApplicationScoped;
@@ -75,8 +74,8 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
-    public List<Result> getResults(String projectId) {
-        return projectDAO.getResults(projectId);
+    public List<ProjectResult> getProjectResults(String projectId) {
+        return projectDAO.getProjectResults(projectId);
     }
 
     @Override
@@ -117,6 +116,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public Project generateSubprojectByCustom(String projectId) throws DuplicateException, EntityNotFoundException {
         return projectDAO.generateSubprojectByCustom(projectId);
+    }
+
+    @Override
+    public boolean projectFinishedProcessing(String projectId) {
+        return projectDAO.projectFinishedProcessing(projectId);
     }
 
 }
