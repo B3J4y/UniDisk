@@ -320,7 +320,7 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     private List<Project> mergeProjectWithSubprojects(Project project){
-        final List<Project> projects = Arrays.asList(project);
+        final List<Project> projects = new ArrayList<Project>(Arrays.asList(project));
         projects.addAll(project.getSubprojects());
         return projects;
     }
