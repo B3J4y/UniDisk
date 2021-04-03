@@ -49,6 +49,10 @@ public class Project {
     @Enumerated(EnumType.STRING)
     private ProjectSubtype projectSubtype;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parentProjectId", insertable = false, updatable = false)
+    private Project parentProject;
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "parentProjectId", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Project> subprojects;
@@ -165,5 +169,9 @@ public class Project {
 
     public void setSubprojects(List<Project> subprojects) {
         this.subprojects = subprojects;
+    }
+
+    public Project getParentProject() {
+        return parentProject;
     }
 }
