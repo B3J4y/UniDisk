@@ -36,6 +36,13 @@ public class ProjectGenerationService {
         this.keywordRecommendationService = keywordRecommendationService;
     }
 
+    public List<Project> generateSubprojects(String projectId) throws DuplicateException, EntityNotFoundException {
+        final List<Project> subprojects = new ArrayList<>();
+        subprojects.add(generateProjectFromTopics(projectId));
+        subprojects.add(projectRepository.generateSubprojectByCustom(projectId));
+        return subprojects;
+    }
+
     public Project generateProjectFromTopics(String projectId) throws DuplicateException, EntityNotFoundException {
         final Project project = projectRepository.getProjectDetailsOrFail(projectId);
         final Project projectCopy = projectRepository.createProject(CreateProjectParams.subproject(

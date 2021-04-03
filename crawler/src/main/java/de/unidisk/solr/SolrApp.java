@@ -2,11 +2,15 @@ package de.unidisk.solr;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.config.SolrConfiguration;
+import de.unidisk.contracts.repositories.IKeywordRepository;
+import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.model.ScoreResult;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
+import de.unidisk.services.KeywordRecommendationService;
+import de.unidisk.services.ProjectGenerationService;
 import de.unidisk.solr.services.SolrScoringService;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.contracts.repositories.IProjectRepository;
@@ -26,12 +30,14 @@ public class SolrApp {
     private IProjectRepository projectRepository;
     private IScoringService scoringService;
     private IResultService resultService;
+    private ProjectGenerationService projectGenerationService;
 
     public SolrApp(IProjectRepository projectRepository, IScoringService scoringService,
-                   IResultService resultService) {
+                   IResultService resultService, ProjectGenerationService projectGenerationService) {
         this.projectRepository = projectRepository;
         this.scoringService = scoringService;
         this.resultService = resultService;
+        this.projectGenerationService = projectGenerationService;
     }
 
     public void execute() throws Exception {
@@ -46,6 +52,13 @@ public class SolrApp {
         for(Project p : pendingProjects) {
             logger.info("Start processing project " + p.getName() + " .");
             projectRepository.updateProjectState(p.getId(), ProjectState.RUNNING);
+
+            final boolean subprojectsGenerated = p.getSubprojects().size() == ProjectSubtype.values().length - 1;
+            if(!subprojectsGenerated){
+                logger.debug("Generate subprojects");
+                projectGenerationService.generateSubprojects(String.valueOf(p.getId()));
+            }
+
             logger.debug("Entering main");
 
             try {
@@ -87,13 +100,22 @@ public class SolrApp {
 
     }
     public static void main(String[] params) throws Exception {
-        final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(),
-                new HibernateTopicRepo(),
+        final IKeywordRepository keywordRepository = new HibernateKeywordRepo();
+        final ITopicRepository topicRepository = new HibernateTopicRepo();
+
+        final IScoringService scoringService = new SolrScoringService(keywordRepository,
+                topicRepository,
                 SolrConfiguration.getInstance());
         final IProjectRepository projectRepository = new ProjectDAO();
         final IResultService resultService = new HibernateResultService();
+        final ProjectGenerationService projectGenerationService = new ProjectGenerationService(
+                projectRepository,
+                topicRepository,
+                keywordRepository,
+                new KeywordRecommendationService()
+        );
 
-        SolrApp sapp = new SolrApp(projectRepository,scoringService,resultService);
+        SolrApp sapp = new SolrApp(projectRepository,scoringService,resultService,projectGenerationService);
         sapp.execute();
     }
 }

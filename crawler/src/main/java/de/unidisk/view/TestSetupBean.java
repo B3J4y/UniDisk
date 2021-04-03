@@ -14,6 +14,8 @@ import de.unidisk.crawler.UniCrawlService;
 import de.unidisk.dao.HibernateTestSetup;
 import de.unidisk.dao.HibernateUtil;
 import de.unidisk.entities.hibernate.Project;
+import de.unidisk.services.KeywordRecommendationService;
+import de.unidisk.services.ProjectGenerationService;
 import de.unidisk.solr.SolrApp;
 import de.unidisk.solr.services.SolrScoringService;
 import org.apache.log4j.LogManager;
@@ -109,7 +111,13 @@ public class TestSetupBean {
 
         scoringTimer = new Timer();
         final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository, SolrConfiguration.getInstance());
-        solrApp = new SolrApp(projectRepository,scoringService,resultService);
+        final ProjectGenerationService projectGenerationService = new ProjectGenerationService(
+                projectRepository,
+                topicRepository,
+                keywordRepository,
+                new KeywordRecommendationService()
+        );
+        solrApp = new SolrApp(projectRepository,scoringService,resultService,projectGenerationService);
         scoringTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
