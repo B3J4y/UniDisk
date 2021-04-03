@@ -68,8 +68,7 @@ public class TopicScoreTests implements HibernateLifecycle {
                 topicDAO.createTopic(topic.getName()+"1",subproject.getId())
             };
 
-            for(int i = 0; i < subprojectTopics.length;i++){
-                final Topic t = subprojectTopics[i];
+            for (final Topic t : subprojectTopics) {
                 final TopicScore score = topicScoreDAO.addScore(t, 1, metaData);
                 topicScores.add(score);
             }

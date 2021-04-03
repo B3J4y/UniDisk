@@ -45,7 +45,7 @@ public class TopicScoreDAO implements ScoringDAO {
             final Topic topic = score.getTopic();
             final int projectId = topic.getProjectId();
 
-            final List<TopicScore> similarScores = this.findSimilarTopicScoresOfProject(projectId, topic.getName(), session);
+            final List<TopicScore> similarScores = this.findSimilarTopicScoresOfProject(score, session);
             for(TopicScore similarScore : similarScores){
                 if(similarScore.getId() == score.getId())
                     continue;
@@ -59,16 +59,19 @@ public class TopicScoreDAO implements ScoringDAO {
         return updatedScore;
     }
 
-    private List<TopicScore> findSimilarTopicScoresOfProject(int projectId, String topicName, Session session) {
-
+    private List<TopicScore> findSimilarTopicScoresOfProject(TopicScore topicScore, Session session) {
+        final Topic topic = topicScore.getTopic();
+        final int projectId = topic.getProjectId();
         final Project parentProject = getParentProject(projectId,session);
 
         return session.createQuery("select distinct ts from Project p " +
                 "INNER JOIN Project sp ON sp.parentProjectId = p.id "+
                 "INNER JOIN Topic t on t.projectId = p.id OR t.projectId = sp.id " +
                 "INNER JOIN TopicScore ts on t.id = ts.topic.id " +
-                "WHERE t.name = :topic AND (p.id = :projectId OR sp.id = :projectId)", TopicScore.class)
-                .setParameter("topic", topicName)
+                "WHERE t.name = :topic AND (p.id = :projectId OR sp.id = :projectId) " +
+                "AND ts.searchMetaData.url = :url", TopicScore.class)
+                .setParameter("topic", topicScore.getTopic().getName())
+                .setParameter("url", topicScore.getSearchMetaData().getUrl())
                 .setParameter("projectId", parentProject.getId()).getResultList();
     }
 
