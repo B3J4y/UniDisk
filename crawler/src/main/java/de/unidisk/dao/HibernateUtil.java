@@ -23,7 +23,8 @@ public class HibernateUtil {
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             Configuration config = new Configuration();
-            sessionFactory = config.configure(SystemConfiguration.getInstance().getDatabaseConfiguration().getConfigFile()).buildSessionFactory();
+            final String configurationFile = SystemConfiguration.getInstance().getDatabaseConfiguration().getConfigFile();
+            sessionFactory = config.configure(configurationFile).buildSessionFactory();
         }
         return sessionFactory;
     }
