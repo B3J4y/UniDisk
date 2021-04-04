@@ -2,44 +2,41 @@ package de.unidisk.solr;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.config.SolrConfiguration;
-import de.unidisk.config.SystemConfiguration;
+import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.services.IResultService;
 import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.datatype.SolrStichwort;
 import de.unidisk.crawler.datatype.Stichwort;
-import de.unidisk.crawler.datatype.Variable;
 import de.unidisk.crawler.model.CrawlDocument;
 import de.unidisk.crawler.model.ScoreResult;
 import de.unidisk.crawler.simple.SimpleSolarSystem;
 import de.unidisk.dao.HibernateTestSetup;
 import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.*;
-import de.unidisk.entities.solr.SolrDocument;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
 import de.unidisk.services.HibernateResultService;
+import de.unidisk.services.KeywordRecommendationService;
+import de.unidisk.services.ProjectGenerationService;
 import de.unidisk.solr.nlp.datatype.RegExpStichwort;
 import de.unidisk.solr.services.SolrScoringService;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrInputDocument;
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.condition.DisabledIf;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SolrTest {
 
@@ -116,9 +113,18 @@ public class SolrTest {
     }
     @Test
     public void solrAppTest(){
-        final IScoringService scoringService = new SolrScoringService(new HibernateKeywordRepo(), new HibernateTopicRepo(), SolrConfiguration.getInstance());
-        final IProjectRepository projectRepository = new ProjectDAO();
+        final IKeywordRepository keywordRepository = new HibernateKeywordRepo();
+        final ITopicRepository topicRepository = new HibernateTopicRepo();
+
+        final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository, SolrConfiguration.getInstance()); final IProjectRepository projectRepository = new ProjectDAO();
         final IResultService resultService = new HibernateResultService();
+        final ProjectGenerationService projectGenerationService = new ProjectGenerationService(
+                projectRepository,
+                topicRepository,
+                keywordRepository,
+                new KeywordRecommendationService()
+        );
+
         final ApplicationState state = new ApplicationState(
                 Arrays.asList(new Project("test", ProjectState.IDLE, Arrays.asList(
                         new Topic("Test", 0, Arrays.asList(new Keyword("test",0)))
@@ -127,7 +133,7 @@ public class SolrTest {
         HibernateTestSetup.Setup(state);
 
 
-        SolrApp sapp = new SolrApp(projectRepository,scoringService,resultService);
+        SolrApp sapp = new SolrApp(projectRepository,scoringService,resultService, projectGenerationService);
         try {
             sapp.execute();
             assertTrue(true);
