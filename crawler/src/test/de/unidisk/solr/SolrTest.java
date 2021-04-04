@@ -20,8 +20,6 @@ import de.unidisk.entities.hibernate.*;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
 import de.unidisk.services.HibernateResultService;
-import de.unidisk.services.KeywordRecommendationService;
-import de.unidisk.services.ProjectGenerationService;
 import de.unidisk.solr.nlp.datatype.RegExpStichwort;
 import de.unidisk.solr.services.SolrScoringService;
 import de.unidisk.util.SolrLifecycle;
@@ -148,20 +146,12 @@ public class SolrTest implements HibernateLifecycle {
         final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository, SolrConfiguration.getInstance());
         final IProjectRepository projectRepository = new ProjectDAO();
         final IResultService resultService = new HibernateResultService();
-        final ProjectGenerationService projectGenerationService = new ProjectGenerationService(
-                projectRepository,
-                topicRepository,
-                keywordRepository,
-                new KeywordRecommendationService()
-        );
         final ApplicationState state = new ApplicationState(
                 Arrays.asList(new Project("test", ProjectState.IDLE, Arrays.asList(
                         new Topic("Test", 0, Arrays.asList(new Keyword("test",0)))
                 ))), Arrays.asList(new University("potsdam",0,0,"https://www.uni-potsdam.de/de/"))
         );
         HibernateTestSetup.Setup(state);
-
-
 
         SolrApp sapp = new SolrApp(projectRepository,scoringService,resultService);
         try {
