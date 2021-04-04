@@ -53,8 +53,9 @@ public class SolrApp {
             logger.info("Start processing project " + p.getName() + " .");
             projectRepository.updateProjectState(p.getId(), ProjectState.RUNNING);
 
+            final boolean isParentProject = !p.isSubproject();
             final boolean subprojectsGenerated = p.getSubprojects().size() == ProjectSubtype.values().length - 1;
-            if(!subprojectsGenerated){
+            if(isParentProject && !subprojectsGenerated){
                 logger.debug("Generate subprojects");
                 projectGenerationService.generateSubprojects(String.valueOf(p.getId()));
             }
