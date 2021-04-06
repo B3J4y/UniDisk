@@ -27,7 +27,8 @@ public class HibernateUtil {
             Configuration config = new Configuration();
             final String configurationFile = SystemConfiguration.getInstance().getDatabaseConfiguration().getConfigFile();
             config = config.configure(configurationFile);
-            final boolean isDockerEnv = System.getenv("DOCKER_COMPOSE").equals("1");
+            final String dockerEnvValue =  System.getenv("DOCKER_COMPOSE");
+            final boolean isDockerEnv = dockerEnvValue != null && dockerEnvValue.equals("1");
             if(isDockerEnv){
                 final String connectionUrl = config.getProperty(CONNECTION_URL_PROP);
                 final boolean isMemoryDb = connectionUrl.startsWith("jdbc:h2:mem");
