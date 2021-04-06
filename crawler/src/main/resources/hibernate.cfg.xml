@@ -17,7 +17,7 @@
         <property name="connection.pool_size">100</property>
         <property name="connection.username">user</property>
         <property name="connection.password">secret</property>
-        <property name="hibernate.connection.url">jdbc:mysql://unidisk_db:3306/unidisk</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/unidisk</property>
 
         <mapping class="de.unidisk.entities.hibernate.Keyword"/>
         <mapping class="de.unidisk.entities.hibernate.KeyWordScore"/>
