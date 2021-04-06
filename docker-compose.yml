@@ -6,9 +6,11 @@ services:
       - 8081:8080
     depends_on:
       - db
+    environment:
+      - DOCKER_COMPOSE=1
   db:
     container_name: unidisk_db
-    image: mysql
+    image: mysql:8
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: secret
