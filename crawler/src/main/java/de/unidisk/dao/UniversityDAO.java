@@ -28,21 +28,18 @@ public class UniversityDAO {
     }
 
     public University addUniversity(University university) {
-        Session currentSession = HibernateUtil.getSessionFactory().openSession();
-        Transaction tnx = currentSession.beginTransaction();
-        Optional<University> optUni = currentSession.createQuery("select u from University u where u.name like :name ", University.class)
-                .setParameter("name", university.getName())
-                .uniqueResultOptional();
+        return HibernateUtil.execute(session -> {
+            Optional<University> optUni = session.createQuery("select u from University u where u.name like :name ", University.class)
+                    .setParameter("name", university.getName())
+                    .uniqueResultOptional();
 
-        if (!optUni.isPresent()) {
+            if (optUni.isPresent()) {
+                return optUni.get();
+            }
 
-            currentSession.saveOrUpdate(university);
-            tnx.commit();
-        } else {
-            university = optUni.get();
-        }
-        currentSession.close();
-        return university;
+            session.saveOrUpdate(university);
+            return university;
+        });
     }
 
     public Optional<University> get(int id){
