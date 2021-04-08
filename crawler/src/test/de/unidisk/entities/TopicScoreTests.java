@@ -30,7 +30,7 @@ public class TopicScoreTests implements HibernateLifecycle {
         SearchMetaData metaData = new SearchMetaDataDAO().createMetaData(new URL("http://www.uni-potsdam.de/home"), university.getId(),
                 ZonedDateTime.now().toEpochSecond());
 
-       return (TopicScore) new TopicScoreDAO().addScore(topic, 1, metaData);
+       return new TopicScoreDAO().addScore(topic, 1, metaData);
     }
 
     @Test

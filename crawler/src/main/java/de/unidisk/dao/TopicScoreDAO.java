@@ -3,17 +3,16 @@ package de.unidisk.dao;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 import java.util.List;
 import java.util.Optional;
 
-public class TopicScoreDAO implements ScoringDAO {
+public class TopicScoreDAO implements ScoringDAO<TopicScore> {
     public TopicScoreDAO() {
     }
 
     @Override
-    public ScoredInput queryInput(Input input, Session currentSession) {
+    public TopicScore queryInput(Input input, Session currentSession) {
         return currentSession.createQuery("select ts from TopicScore ts where ts.topic.id = :id ", TopicScore.class)
                 .setParameter("id", input.getId())
                 .uniqueResultOptional()
@@ -22,7 +21,7 @@ public class TopicScoreDAO implements ScoringDAO {
 
     @Override
     public TopicScore addScore(Input input, double score, SearchMetaData smd){
-        return  (TopicScore) ScoringDAO.super.addScore(input,score,smd);
+        return ScoringDAO.super.addScore(input,score,smd);
     }
 
     private TopicScore findOrFail(int topicScoreId) throws EntityNotFoundException {
