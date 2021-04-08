@@ -24,8 +24,10 @@ A Crawler to search for keywords and compare the score
 
 We use Docker to simplify development.
 Run `docker compose up -d` to create a development environment with a MySQL, Solr and Tomcat Server.
+The API is then available under _localhost:8081/unidisk/rest_.
 In order for code changes to take effect, the services need to be rebuilt (`docker-compose up -d --build`). This takes some time therefore
 it makes sense to instead kill the web service (`docker rm -fv unidisk_web_1`) and start the server via IntelliJ (or any other way).
+If the server is started via IntelliJ the API is accessible from _localhost:8080/unidisk_war/rest_.
 
 #### Admin Dashboards
 

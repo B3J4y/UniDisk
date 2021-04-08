@@ -20,11 +20,25 @@ public class HibernateUtil {
     private static final String memoryConfig = "hibernate.cfg.mem.xml";
     private static String config = memoryConfig;
 
+    private static final String CONNECTION_URL_PROP = "hibernate.connection.url";
+
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             Configuration config = new Configuration();
             final String configurationFile = SystemConfiguration.getInstance().getDatabaseConfiguration().getConfigFile();
-            sessionFactory = config.configure(configurationFile).buildSessionFactory();
+            config = config.configure(configurationFile);
+            final String dockerEnvValue =  System.getenv("DOCKER_COMPOSE");
+            final boolean isDockerEnv = dockerEnvValue != null && dockerEnvValue.equals("1");
+            if(isDockerEnv){
+                final String connectionUrl = config.getProperty(CONNECTION_URL_PROP);
+                final boolean isMemoryDb = connectionUrl.startsWith("jdbc:h2:mem");
+                if(!isMemoryDb){
+                    // changes jdbc:mysql://localhost:3306/unidisk to jdbc:mysql://db:3306/unidisk
+                    final String containerConnectionUrl = connectionUrl.replace("localhost:","db:");
+                    config = config.setProperty(CONNECTION_URL_PROP, containerConnectionUrl);
+                }
+            }
+            sessionFactory = config.buildSessionFactory();
         }
         return sessionFactory;
     }

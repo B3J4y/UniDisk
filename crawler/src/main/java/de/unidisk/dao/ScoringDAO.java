@@ -6,11 +6,11 @@ import de.unidisk.entities.hibernate.SearchMetaData;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-public interface ScoringDAO {
-    default ScoredInput addScore(Input input, double score, SearchMetaData smd) {
+public interface ScoringDAO<TScoreInput extends ScoredInput > {
+    default TScoreInput addScore(Input input, double score, SearchMetaData smd) {
         Session currentSession = HibernateUtil.getSessionFactory().openSession();
         Transaction tnx = currentSession.beginTransaction();
-        ScoredInput scoredInput = queryInput(input, currentSession);
+        TScoreInput scoredInput = queryInput(input, currentSession);
 
         scoredInput.setScore(score);
         scoredInput.setSearchMetaData(smd);
@@ -20,5 +20,5 @@ public interface ScoringDAO {
         return scoredInput;
     }
 
-    ScoredInput queryInput(Input input, Session currenSesstion);
+    TScoreInput queryInput(Input input, Session currenSesstion);
 }
