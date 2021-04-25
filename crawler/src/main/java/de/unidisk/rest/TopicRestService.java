@@ -59,12 +59,12 @@ public class TopicRestService extends CRUDService<Topic, CreateTopicDto, UpdateT
     @Override
     protected Response executeUpdate(ContextUser user, UpdateTopicDto updateTopicDto, Topic topic) {
         final Project project = this.projectRepository.getProject(String.valueOf(topic.getProjectId())).get();
-        if(project.getUserId().equals(user.getId())){
+        if(!project.getUserId().equals(user.getId())){
             return Response.status(Response.Status.FORBIDDEN).build();
         }
 
         try {
-            final UpdateTopicParams params = new UpdateTopicParams(topic.getId(), topic.getName());
+            final UpdateTopicParams params = new UpdateTopicParams(topic.getId(), updateTopicDto.getName());
             final Topic  updated = this.topicRepository.updateTopic(params);
             return Response.ok(updated).build();
         } catch (DuplicateException e) {
