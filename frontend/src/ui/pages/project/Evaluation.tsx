@@ -5,7 +5,7 @@ import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import { useProvider } from 'Provider';
 import { Subscribe } from 'unstated-typescript';
 import { FeedbackStatus, ProjectEvaluationResult, ProjectType } from 'data/repositories';
-import { TopicResult } from 'data/entity';
+import { KeywordResult, TopicResult } from 'data/entity';
 import { LocalizedTable } from 'ui/components/Table';
 
 export type ProjectEvaluationPageProps = {
@@ -51,74 +51,258 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
+function prepareProjectResults(results: TopicResult[]) {
+  console.log(results);
+  const topicResults = results.map((topic) => {
+    const { keywords } = topic;
+
+    const urlScores: Record<string, number> = {};
+
+    keywords.forEach((keyword) => {
+      const url = keyword.searchMetaData.url;
+      const score = keyword.score;
+      if (urlScores[url] !== undefined) {
+        urlScores[url] += score;
+      } else {
+        urlScores[url] = score;
+      }
+    });
+
+    const reverseScoreMap = Object.keys(urlScores).reduce((prev, cur) => {
+      const value = urlScores[cur] as number;
+      return {
+        ...prev,
+        [value]: cur,
+      };
+    }, {} as Record<number, string>);
+
+    const scores = Object.values(urlScores);
+    scores.sort((v1, v2) => v2 - v1);
+
+    const topN = 3;
+
+    const topScoreUrls = scores
+      .slice(0, topN)
+      .map((score) => ({ url: reverseScoreMap[score], score }));
+
+    const mappedScores = topScoreUrls.map((topScore) => {
+      const result = {
+        score: topScore.score,
+        url: topScore.url,
+      };
+      return result;
+    });
+
+    return {
+      topScores: mappedScores,
+      topic: topic.topic,
+      university: topic.university,
+    };
+  });
+
+  return topicResults;
+}
+
 function FeedbackTable(props: FeedbackTableProps) {
   const enums: ProjectType[] = shuffleArray(
     Object.values(ProjectType).filter((v) => typeof v === 'number'),
   ) as ProjectType[];
 
-  type ItemType = {
-    topic: {
-      name: string;
-    };
-  } & Record<ProjectType, CustomTopicResult>;
   const results = props.results.results;
 
   if (Object.keys(results).length !== enums.length)
     return <ProjectResults topicScores={results[ProjectType.Default]} />;
 
-  const items: ItemType[] = results[0].map((item, index) => {
-    const subtypeScores: Record<ProjectType, CustomTopicResult> = enums.reduce((prev, cur) => {
-      const subtypeResults = results[cur];
-      return {
-        ...prev,
-        [cur]: subtypeResults[index],
-      };
-    }, {} as Record<ProjectType, CustomTopicResult>);
+  //https://stackoverflow.com/questions/6913512/how-to-sort-an-array-of-objects-by-multiple-fields
+  const fieldSorter = (fields) => (a, b) =>
+    fields
+      .map((o) => {
+        let dir = 1;
+        if (o[0] === '-') {
+          dir = -1;
+          o = o.substring(1);
+        }
+        return a[o] > b[o] ? dir : a[o] < b[o] ? -dir : 0;
+      })
+      .reduce((p, n) => (p ? p : n), 0);
 
+  const mappedResults = Object.keys(results).map((key) => {
+    const projectType = (key as unknown) as ProjectType;
+    const projectResults = results[projectType];
+    const topicResults = prepareProjectResults(projectResults);
+
+    topicResults.sort(fieldSorter(['topic', 'university']));
     return {
-      topic: {
-        name: item.university.name,
-      },
-      ...subtypeScores,
+      results: topicResults,
+      type: projectType,
     };
   });
 
   return (
-    <LocalizedTable
-      columns={[
-        { title: 'Thema', field: 'topic.name', grouping: true, defaultGroupOrder: 0 },
-        ...Object.keys(enums).map((key, i) => {
-          const type = (key as unknown) as ProjectType;
-          return {
-            title: `Universität ${i + 1}`,
-            field: type,
-
-            render: (item: ItemType) => {
-              return <TableItem result={item[type]} />;
-            },
-          };
-        }),
-      ]}
-      data={items}
-      title="Auswertung"
-    />
+    <Grid container>
+      {mappedResults.map((r) => {
+        return (
+          <Grid item xs>
+            {r.results.map((result) => {
+              return (
+                <>
+                  <h4>
+                    {result.topic.name} {result.university.name}
+                  </h4>
+                  {result.topScores.map((score) => {
+                    return (
+                      <p>
+                        <a href={score.url}>{score.url}</a>
+                      </p>
+                    );
+                  })}
+                </>
+              );
+            })}
+          </Grid>
+        );
+      })}
+    </Grid>
   );
+
+  // const maxEntryCount = Math.max(...mappedResults.map((tr) => tr.results.length));
+
+  // console.log(mappedResults);
+
+  // const items: ItemType[] = [];
+
+  // for (let topicIndex = 0; topicIndex < maxEntryCount; topicIndex++) {
+  //   const topicItems = enums.map((e) => {
+  //     const results = mappedResults.find((r) => r.type === e)!.results;
+  //     const topic = topicIndex < results.length ? results[topicIndex] : undefined;
+  //   });
+  // }
+
+  // // Array.from(topicNames.keys())
+  // //   .map((topicId) => {
+  // //     // const topic = results[ProjectType.Default].find((x) => x.topic.id === topicId)!.topic;
+
+  // //     const topics = Object.keys(results).reduce((prev, key) => {
+  // //       const type = (key as unknown) as ProjectType;
+  // //       const x = results[type];
+  // //       return {
+  // //         ...prev,
+  // //         [type]: x.find((a) => a.topic.name === topicId)?.keywords ?? [],
+  // //       };
+  // //     }, {} as Record<ProjectType, KeywordResult[]>);
+
+  // //     // console.log({ topicId, topics });
+
+  // //     const maxKeywords = Math.max(...Object.values(topics).map((t) => t.length));
+
+  // //     const topicItems: ItemType[] = [];
+
+  // //     for (let i = 0; i < maxKeywords; i++) {
+  // //       const item: Partial<ItemType> = {
+  // //         topic: {
+  // //           name: topicId,
+  // //         },
+  // //       };
+
+  // //       Object.keys(enums).forEach((key) => {
+  // //         const type = (key as unknown) as ProjectType;
+  // //         const keywords = topics[type];
+  // //         const keyword = i < keywords.length ? keywords[i] : undefined;
+  // //         item[type] = { ...keyword!, url: keyword!.searchMetaData!.url };
+  // //       });
+
+  // //       topicItems.push(item as ItemType);
+  // //     }
+
+  // //     return topicItems;
+  // //   })
+  // //   .flat();
+
+  // // const items: ItemType[] = results[0]
+  // //   .map((item, index) => {
+  // //     const subtypeScores: Record<ProjectType, KeywordResult[]> = enums.reduce((prev, cur) => {
+  // //       const subtypeResults = results[cur];
+  // //       const topicResult = subtypeResults[index];
+  // //       return {
+  // //         ...prev,
+  // //         [cur]: topicResult?.keywords,
+  // //       };
+  // //     }, {} as Record<ProjectType, KeywordResult[]>);
+  // //     const topic = {
+  // //       name: item.university.name,
+  // //     };
+
+  // //     const maxResults = Math.max(
+  // //       ...Object.keys(subtypeScores).map((key) => subtypeScores[key].length),
+  // //     );
+
+  // //     const topicItems: ItemType[] = [];
+  // //     for (let i = 0; i < maxResults; i++) {
+  // //       const items = Object.keys(subtypeScores).reduce((prev, key) => {
+  // //         const subtypeItems = subtypeScores[key];
+  // //         if (i < subtypeItems.length)
+  // //           return {
+  // //             ...prev,
+  // //             [key]: undefined,
+  // //           };
+
+  // //         return {
+  // //           ...prev,
+  // //           [key]: subtypeItems[i],
+  // //         };
+  // //       }, {} as Record<ProjectType, KeywordResult>);
+
+  // //       topicItems.push({ ...items, topic });
+  // //     }
+
+  // //     return topicItems;
+  // //   })
+  // //   .flat();
+
+  // return (
+  //   <LocalizedTable
+  //     columns={[
+  //       { title: 'Thema', field: 'topic.name', grouping: true, defaultGroupOrder: 0 },
+  //       ...Object.keys(enums).map((key, i) => {
+  //         const type = (key as unknown) as ProjectType;
+  //         return {
+  //           title: `V ${i + 1}`,
+  //           field: type,
+
+  //           render: (item: ItemType) => {
+  //             return <TableItem result={undefined} />;
+  //           },
+  //         };
+  //       }),
+  //     ]}
+  //     data={items}
+  //     title="Auswertung"
+  //   />
+  // );
 }
 
 type TableItemProps = {
-  result: CustomTopicResult;
+  result: KeywordResult | undefined;
 };
 function TableItem(props: TableItemProps) {
   const { result } = props;
-  const { university } = result;
-  const styles = useStyles();
-  const provider = useProvider();
-  const container = provider.getFeedbackResultContainer();
-  const [feedbackState, setFeedbackState] = React.useState<FeedbackStatus>(result.relevance);
 
   useEffect(() => {
-    setFeedbackState(props.result.relevance);
-  }, [props.result.relevance]);
+    if (result?.relevance) setFeedbackState(result.relevance);
+  }, [result?.relevance]);
+  const styles = useStyles();
+  const provider = useProvider();
+  const [feedbackState, setFeedbackState] = React.useState<FeedbackStatus>(
+    result?.relevance ?? FeedbackStatus.None,
+  );
+
+  if (!result) return <p></p>;
+
+  const {
+    searchMetaData: { url },
+  } = result;
+
+  const container = provider.getFeedbackResultContainer();
 
   const isRelevant = feedbackState === FeedbackStatus.Relevant;
   const isNotRelevant = feedbackState === FeedbackStatus.NotRelevant;
@@ -129,8 +313,8 @@ function TableItem(props: TableItemProps) {
         return (
           <Grid container xs={12} justify="center" alignItems="center">
             <Grid item>
-              <Link href={university.url} target="_blank">
-                {university.name}
+              <Link href={url} target="_blank">
+                {url}
               </Link>
             </Grid>
             <Grid item>

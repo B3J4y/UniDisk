@@ -1,3 +1,5 @@
+import { KeywordResult } from 'data/entity';
+
 export type CreateProjectDto = {
   name: string;
 };
@@ -28,13 +30,16 @@ export enum ResultRelevanceDto {
   none = 'NONE',
 }
 
+export type KeywordResultDto = Omit<KeywordResult, 'relevance'> & {
+  relevance: ResultRelevanceDto;
+};
+
 export type ResultDto = {
   id: number;
   topicId: number;
   topic: string;
   score: number;
   entryCount: number;
-  relevance: ResultRelevanceDto;
   university: {
     id: number;
     name: string;
@@ -42,6 +47,7 @@ export type ResultDto = {
     lng: number;
     seedUrl: string;
   };
+  keywords: KeywordResultDto[];
 };
 
 export enum ProjectSubtypeDto {

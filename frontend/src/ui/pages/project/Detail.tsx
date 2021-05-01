@@ -234,7 +234,7 @@ function GeneralProjectDetails() {
     <Subscribe to={[ProjectDetailContainer]}>
       {(container) => {
         const project = container.state.entity.data!;
-        const { topics } = project;
+        const topics = project.topics ?? [];
         if (!selectedTopic && topics.length > 0) {
           window.requestAnimationFrame(() => {
             setSelectedTopic(topics[0]);

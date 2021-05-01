@@ -96,14 +96,20 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
     return this.withClient<ProjectEvaluationResult>(async (client) => {
       const response = await client.get(`/${id}/results`);
       const resultDto = response.data as ProjectResultDto[];
+
       const scores: [ProjectType, TopicResult[]][] = resultDto.map((dto) => {
         const projectType = projectTypeFromDto(dto.projectSubtype);
 
         const results: TopicResult[] = dto.results.map((result) => {
-          const { topic: topicName, topicId, university, id } = result;
+          const { topic: topicName, topicId, university, id, keywords } = result;
           return {
             id: id.toString(),
-            relevance: mapFromRelevanceDto(result.relevance),
+            keywords: keywords.map((keyword) => {
+              return {
+                ...keyword,
+                relevance: mapFromRelevanceDto(keyword.relevance),
+              };
+            }),
             topic: { id: topicId.toString(), name: topicName },
             score: result.score,
             entryCount: result.entryCount,
@@ -115,8 +121,7 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
         });
         return [projectType, results];
       });
-
-      return {
+      const projectResults = {
         results: scores.reduce((prev, [type, results]) => {
           return {
             ...prev,
@@ -124,6 +129,8 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
           };
         }, {} as Record<ProjectType, TopicResult[]>),
       };
+      console.log(projectResults);
+      return projectResults;
     });
   }
 

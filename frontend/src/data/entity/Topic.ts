@@ -13,11 +13,21 @@ export type Topic = {
 
 export type TopicDetails = Required<Topic>;
 
+export type KeywordResult = {
+  id: string;
+  keywordId: number;
+  keyword: string;
+  searchMetaData: {
+    url: string;
+  };
+  score: number;
+  relevance: FeedbackStatus;
+};
 export type TopicResult = {
   id: string;
   topic: BaseTopic;
   score: number;
   entryCount: number;
   university: University;
-  relevance: FeedbackStatus;
+  keywords: KeywordResult[];
 };

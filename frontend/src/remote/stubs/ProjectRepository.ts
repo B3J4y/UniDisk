@@ -18,8 +18,9 @@ export class ProjectRepositoryStub implements ProjectRepository {
       project?.topics.map((topic, id) => {
         return {
           id: id.toString(),
-          relevance: FeedbackStatus.None,
+
           topic,
+          keywords: [],
           university: {
             id: '15',
             name: 'Uni Potsdam',
