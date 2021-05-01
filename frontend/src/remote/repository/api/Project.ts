@@ -3,8 +3,11 @@ import {
   CreateProjectArgs,
   FeedbackStatus,
   ProjectEvaluationResult,
+  ProjectRelevanceScore,
   ProjectRepository,
+  ProjectResult,
   ProjectType,
+  RateResultArgs,
   UpdateProjectArgs,
 } from 'data/repositories';
 import { BaseApiRepository, RepositoryArgs } from './Base';
@@ -83,12 +86,15 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
     super({ ...args, defaultPath: 'project' });
   }
 
-  rateResult(id: string, status: FeedbackStatus): Promise<void> {
+  rateResult(args: RateResultArgs): Promise<void> {
+    const { topicId, url, relevance } = args;
     return this.withDefaultClient<void>(async (client) => {
       const dto = {
-        relevance: mapRelevanceToDto(status),
+        relevance: mapRelevanceToDto(relevance),
+        topicId: topicId,
+        url: url,
       };
-      await client.post(`/result/${id}`, dto);
+      await client.post(`/result/topic`, dto);
     });
   }
 
@@ -97,37 +103,52 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
       const response = await client.get(`/${id}/results`);
       const resultDto = response.data as ProjectResultDto[];
 
-      const scores: [ProjectType, TopicResult[]][] = resultDto.map((dto) => {
-        const projectType = projectTypeFromDto(dto.projectSubtype);
+      const scores: [ProjectType, TopicResult[], ProjectRelevanceScore[]][] = resultDto.map(
+        (dto) => {
+          const projectType = projectTypeFromDto(dto.projectSubtype);
 
-        const results: TopicResult[] = dto.results.map((result) => {
-          const { topic: topicName, topicId, university, id, keywords } = result;
-          return {
-            id: id.toString(),
-            keywords: keywords.map((keyword) => {
-              return {
-                ...keyword,
-                relevance: mapFromRelevanceDto(keyword.relevance),
-              };
-            }),
-            topic: { id: topicId.toString(), name: topicName },
-            score: result.score,
-            entryCount: result.entryCount,
-            university: {
-              ...university,
-              id: university.id.toString(),
-            },
-          };
-        });
-        return [projectType, results];
-      });
+          const results: TopicResult[] = dto.results.map((result) => {
+            const { topic: topicName, topicId, university, id, keywords } = result;
+            return {
+              id: id.toString(),
+              keywords: keywords.map((keyword) => {
+                return {
+                  ...keyword,
+                  relevance: mapFromRelevanceDto(keyword.relevance),
+                };
+              }),
+              topic: { id: topicId.toString(), name: topicName },
+              score: result.score,
+              entryCount: result.entryCount,
+              university: {
+                ...university,
+                id: university.id.toString(),
+              },
+            };
+          });
+
+          const relevanceScores: ProjectRelevanceScore[] = dto.relevanceScores.map((score) => {
+            return {
+              url: score.searchMetaData.url,
+              topicId: score.topicId.toString(),
+              relevance: mapFromRelevanceDto(score.resultRelevance),
+            };
+          });
+          return [projectType, results, relevanceScores];
+        },
+      );
       const projectResults = {
-        results: scores.reduce((prev, [type, results]) => {
+        results: scores.reduce((prev, [type, results, relevanceScores]) => {
+          const projectResult: ProjectResult = {
+            topicResults: results,
+            relevanceScores,
+          };
+
           return {
             ...prev,
-            [type]: results,
+            [type]: projectResult,
           };
-        }, {} as Record<ProjectType, TopicResult[]>),
+        }, {} as Record<ProjectType, ProjectResult>),
       };
       console.log(projectResults);
       return projectResults;

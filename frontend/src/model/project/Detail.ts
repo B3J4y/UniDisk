@@ -1,9 +1,9 @@
 import { ProjectDetails, ProjectState } from 'data/entity';
 import {
   CreateProjectArgs,
+  FeedbackStatus,
   ProjectEvaluationResult,
   ProjectRepository,
-  ProjectType,
   UpdateProjectArgs,
 } from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';
@@ -25,6 +25,7 @@ export type ProjectDetailState = EntityDetailState<ProjectDetails> & {
   enqueue: Operation;
   dequeue: Operation;
   result: Resource<ProjectEvaluationResult | undefined>;
+  topicResults: Record<string, Record<string, FeedbackStatus>>;
 };
 
 export class ProjectDetailContainer extends EntityDetailStateContainer<
@@ -145,44 +146,14 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
     });
 
     eventBus.subscribe(TopicRelevanceChangeEvent, (event: TopicRelevanceChangeEvent) => {
-      const resultData = this.state.result.data;
-      if (!resultData) return;
+      const topicScores = this.state.topicResults[event.args.topicId];
+      if (!topicScores) {
+        this.state.topicResults[event.args.topicId] = {};
+      }
 
-      const { results } = resultData;
-      let foundScore = false;
-      const projects = {
-        ...results,
-      };
+      this.state.topicResults[event.args.topicId][event.args.url] = event.args.relevance;
 
-      Object.keys(results).forEach((key) => {
-        // Score id can always only belong to one project
-        if (foundScore) return;
-
-        const projectType = (key as unknown) as ProjectType;
-
-        const scores = results[projectType];
-        if (!scores) return;
-
-        const newScores = scores.map((score) => {
-          foundScore = true;
-          if (score.id === event.id) {
-            return {
-              ...score,
-              relevance: event.relevance,
-            };
-          }
-          return score;
-        });
-        if (!foundScore) return;
-
-        projects[projectType] = newScores;
-      });
-      if (!foundScore) return;
-
-      this.setState({
-        ...this.state,
-        result: Resource.success({ results: projects }),
-      });
+      this.setState({ ...this.state });
     });
   }
 
@@ -247,6 +218,23 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
     }
 
     for await (const event of Resource.execute(() => this.repository.getResult(project.id))) {
+      if (event.hasData) {
+        const topicResults: Record<string, Record<string, FeedbackStatus>> = {};
+
+        Object.values(event.data!.results).forEach((result) => {
+          result.relevanceScores.forEach((score) => {
+            if (!topicResults[score.topicId]) {
+              topicResults[score.topicId] = {};
+            }
+
+            topicResults[score.topicId][score.url] = score.relevance;
+          });
+        });
+        this.setState({
+          ...this.state,
+          topicResults,
+        });
+      }
       this.setState({
         ...this.state,
         result: event,
@@ -270,6 +258,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       enqueue: Operation.idle(),
       dequeue: Operation.idle(),
       result: Resource.idle(),
+      topicResults: {},
     };
   }
 
@@ -281,4 +270,11 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   }
 
   private getProject = () => this.state.entity.data;
+
+  public getRelevance(args: { topicId: string; url: string }): FeedbackStatus {
+    const topicRelevances = this.state.topicResults[args.topicId];
+    if (!topicRelevances) return FeedbackStatus.None;
+
+    return topicRelevances[args.url] ?? FeedbackStatus.None;
+  }
 }

@@ -1,4 +1,4 @@
-import { FeedbackStatus, ProjectRepository } from 'data/repositories';
+import { FeedbackStatus, ProjectRepository, RateResultArgs } from 'data/repositories';
 import { Operation } from 'data/Resource';
 import { TopicRelevanceChangeEvent } from 'services/event';
 import { EventBus } from 'services/event/bus';
@@ -13,8 +13,8 @@ export class FeedbackResultContainer extends Container<FeedbackResultState> {
     super();
   }
 
-  public async rate(resultId: string, status: FeedbackStatus): Promise<void> {
-    const stream = Operation.execute(() => this.repository.rateResult(resultId, status));
+  public async rate(args: RateResultArgs): Promise<void> {
+    const stream = Operation.execute(() => this.repository.rateResult(args));
     for await (const event of stream) {
       this.setState({
         ...this.state,
@@ -22,7 +22,7 @@ export class FeedbackResultContainer extends Container<FeedbackResultState> {
       });
     }
     if (this.state.status.isFinished) {
-      this.eventBus.publish(new TopicRelevanceChangeEvent(resultId, status));
+      this.eventBus.publish(new TopicRelevanceChangeEvent(args));
     }
   }
 }

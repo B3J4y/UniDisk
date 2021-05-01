@@ -34,15 +34,24 @@ export class ProjectRepositoryStub implements ProjectRepository {
 
     return {
       results: {
-        [ProjectType.Default]: scores,
-        [ProjectType.Enhanced]: scores.map((score) => ({
-          ...score,
-          id: '14',
-        })),
-        [ProjectType.ByTopic]: scores.map((score) => ({
-          ...score,
-          id: '13',
-        })),
+        [ProjectType.Default]: {
+          topicResults: scores,
+          relevanceScores: [],
+        },
+        [ProjectType.Enhanced]: {
+          topicResults: scores.map((score) => ({
+            ...score,
+            id: '14',
+          })),
+          relevanceScores: [],
+        },
+        [ProjectType.ByTopic]: {
+          relevanceScores: [],
+          topicResults: scores.map((score) => ({
+            ...score,
+            id: '13',
+          })),
+        },
       },
     };
   }

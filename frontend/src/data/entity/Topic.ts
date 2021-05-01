@@ -22,6 +22,7 @@ export type KeywordResult = {
   };
   score: number;
   relevance: FeedbackStatus;
+  pageTitle: string;
 };
 export type TopicResult = {
   id: string;

@@ -56,7 +56,16 @@ export enum ProjectSubtypeDto {
   ByTopics = 'BY_TOPICS',
 }
 
+export type RelevanceScoreDto = {
+  topicId: number;
+  resultRelevance: ResultRelevanceDto;
+  searchMetaData: {
+    url: string;
+  };
+};
+
 export type ProjectResultDto = {
   projectSubtype: ProjectSubtypeDto;
   results: ResultDto[];
+  relevanceScores: RelevanceScoreDto[];
 };

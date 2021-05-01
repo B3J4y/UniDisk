@@ -1,31 +1,25 @@
 import { Grid, IconButton, Link, makeStyles, Tooltip } from '@material-ui/core';
-import React, { useEffect } from 'react';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import { useProvider } from 'Provider';
-import { Subscribe } from 'unstated-typescript';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { TopicResult } from 'data/entity';
 import { FeedbackStatus, ProjectEvaluationResult, ProjectType } from 'data/repositories';
-import { KeywordResult, TopicResult } from 'data/entity';
+import { ProjectDetailContainer } from 'model';
+import { useProvider } from 'Provider';
+import React, { useEffect } from 'react';
 import { LocalizedTable } from 'ui/components/Table';
+import { Subscribe } from 'unstated-typescript';
 
 export type ProjectEvaluationPageProps = {
   result: ProjectEvaluationResult;
 };
 
 export function ProjectEvaluationPage(props: ProjectEvaluationPageProps) {
-  return <FeedbackTable results={props.result} />;
+  return (
+    <Subscribe to={[ProjectDetailContainer]}>
+      {(container) => <FeedbackTable results={props.result} container={container} />}
+    </Subscribe>
+  );
 }
-
-type CustomTopicResult = {
-  id: string;
-  university: UniversityFeedbackUrl;
-  relevance: FeedbackStatus;
-};
-
-type UniversityFeedbackUrl = {
-  url: string;
-  name: string;
-};
 
 //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 function shuffleArray<T>(array: T[]): T[] {
@@ -41,6 +35,7 @@ function shuffleArray<T>(array: T[]): T[] {
 
 type FeedbackTableProps = {
   results: ProjectEvaluationResult;
+  container: ProjectDetailContainer;
 };
 
 const useStyles = makeStyles(() => ({
@@ -51,15 +46,16 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-function prepareProjectResults(results: TopicResult[]) {
-  console.log(results);
+function prepareProjectResults(results: TopicResult[], top: number = 3) {
   const topicResults = results.map((topic) => {
     const { keywords } = topic;
 
     const urlScores: Record<string, number> = {};
+    const urlPageNames: Record<string, string> = {};
 
     keywords.forEach((keyword) => {
       const url = keyword.searchMetaData.url;
+      urlPageNames[url] = keyword.pageTitle;
       const score = keyword.score;
       if (urlScores[url] !== undefined) {
         urlScores[url] += score;
@@ -79,16 +75,15 @@ function prepareProjectResults(results: TopicResult[]) {
     const scores = Object.values(urlScores);
     scores.sort((v1, v2) => v2 - v1);
 
-    const topN = 3;
-
     const topScoreUrls = scores
-      .slice(0, topN)
+      .slice(0, top)
       .map((score) => ({ url: reverseScoreMap[score], score }));
 
     const mappedScores = topScoreUrls.map((topScore) => {
       const result = {
         score: topScore.score,
         url: topScore.url,
+        pageTitle: urlPageNames[topScore.url],
       };
       return result;
     });
@@ -103,7 +98,22 @@ function prepareProjectResults(results: TopicResult[]) {
   return topicResults;
 }
 
+//https://stackoverflow.com/questions/6913512/how-to-sort-an-array-of-objects-by-multiple-fields
+const fieldSorter = (fields) => (a, b) =>
+  fields
+    .map((o) => {
+      let dir = 1;
+      if (o[0] === '-') {
+        dir = -1;
+        o = o.substring(1);
+      }
+      return a[o] > b[o] ? dir : a[o] < b[o] ? -dir : 0;
+    })
+    .reduce((p, n) => (p ? p : n), 0);
+
 function FeedbackTable(props: FeedbackTableProps) {
+  const { container } = props;
+
   const enums: ProjectType[] = shuffleArray(
     Object.values(ProjectType).filter((v) => typeof v === 'number'),
   ) as ProjectType[];
@@ -111,25 +121,12 @@ function FeedbackTable(props: FeedbackTableProps) {
   const results = props.results.results;
 
   if (Object.keys(results).length !== enums.length)
-    return <ProjectResults topicScores={results[ProjectType.Default]} />;
-
-  //https://stackoverflow.com/questions/6913512/how-to-sort-an-array-of-objects-by-multiple-fields
-  const fieldSorter = (fields) => (a, b) =>
-    fields
-      .map((o) => {
-        let dir = 1;
-        if (o[0] === '-') {
-          dir = -1;
-          o = o.substring(1);
-        }
-        return a[o] > b[o] ? dir : a[o] < b[o] ? -dir : 0;
-      })
-      .reduce((p, n) => (p ? p : n), 0);
+    return <ProjectResults topicScores={results[ProjectType.Default].topicResults} />;
 
   const mappedResults = Object.keys(results).map((key) => {
     const projectType = (key as unknown) as ProjectType;
     const projectResults = results[projectType];
-    const topicResults = prepareProjectResults(projectResults);
+    const topicResults = prepareProjectResults(projectResults.topicResults);
 
     topicResults.sort(fieldSorter(['topic', 'university']));
     return {
@@ -138,54 +135,62 @@ function FeedbackTable(props: FeedbackTableProps) {
     };
   });
 
+  const maxResults = Math.max(...mappedResults.map((r) => r.results.length));
+
   return (
     <Grid container>
-      {mappedResults.map((r) => {
-        return (
-          <Grid item xs>
-            {r.results.map((result) => {
-              return (
-                <>
-                  <h4>
-                    {result.topic.name} {result.university.name}
-                  </h4>
-                  {result.topScores.map((score) => {
-                    return (
-                      <p>
-                        <a href={score.url}>{score.url}</a>
-                      </p>
-                    );
-                  })}
-                </>
-              );
-            })}
-          </Grid>
-        );
+      {Array.from({ length: maxResults }).map((_, index) => {
+        const children = enums.map((projectType) => {
+          // @ts-ignore
+          const results = mappedResults.find((r) => r.type === projectType.toString());
+          if (!results) return <Grid item xs></Grid>;
+          const result = index < results.results.length ? results.results[index] : undefined;
+          if (!result) return <Grid item xs></Grid>;
+
+          return (
+            <Grid item xs>
+              <h4>
+                {result.topic.name} {result.university.name}
+              </h4>
+              {result.topScores.map((score) => {
+                const relevance = container.getRelevance({
+                  url: score.url,
+                  topicId: result.topic.id,
+                });
+                return (
+                  <TableItem
+                    url={score.url}
+                    pageTitle={score.pageTitle}
+                    relevance={relevance}
+                    topicId={result.topic.id}
+                  />
+                );
+              })}
+            </Grid>
+          );
+        });
+
+        return <Grid container>{children}</Grid>;
       })}
     </Grid>
   );
 }
 
 type TableItemProps = {
-  result: KeywordResult | undefined;
+  url: string;
+  pageTitle: string;
+  relevance: FeedbackStatus;
+  topicId: string;
 };
 function TableItem(props: TableItemProps) {
-  const { result } = props;
+  const { url, pageTitle, topicId } = props;
 
   useEffect(() => {
-    if (result?.relevance) setFeedbackState(result.relevance);
-  }, [result?.relevance]);
+    if (props.relevance) setFeedbackState(props.relevance);
+  }, [props.relevance]);
   const styles = useStyles();
   const provider = useProvider();
-  const [feedbackState, setFeedbackState] = React.useState<FeedbackStatus>(
-    result?.relevance ?? FeedbackStatus.None,
-  );
-
-  if (!result) return <p></p>;
-
-  const {
-    searchMetaData: { url },
-  } = result;
+  const [feedbackState, setFeedbackState] = React.useState<FeedbackStatus>(props.relevance);
 
   const container = provider.getFeedbackResultContainer();
 
@@ -199,7 +204,7 @@ function TableItem(props: TableItemProps) {
           <Grid container xs={12} justify="center" alignItems="center">
             <Grid item>
               <Link href={url} target="_blank">
-                {url}
+                {pageTitle}
               </Link>
             </Grid>
             <Grid item>
@@ -209,7 +214,11 @@ function TableItem(props: TableItemProps) {
                   style={{ color: isRelevant ? 'green' : undefined }}
                   onClick={() => {
                     const newState = isRelevant ? FeedbackStatus.None : FeedbackStatus.Relevant;
-                    c.rate(result.id, newState ?? FeedbackStatus.None);
+                    c.rate({
+                      relevance: newState ?? FeedbackStatus.None,
+                      url,
+                      topicId,
+                    });
                     setFeedbackState(newState);
                   }}
                 >
@@ -226,7 +235,11 @@ function TableItem(props: TableItemProps) {
                     const newState = isNotRelevant
                       ? FeedbackStatus.None
                       : FeedbackStatus.NotRelevant;
-                    c.rate(result.id, newState ?? FeedbackStatus.None);
+                    c.rate({
+                      relevance: newState ?? FeedbackStatus.None,
+                      url,
+                      topicId,
+                    });
                     setFeedbackState(newState);
                   }}
                 >

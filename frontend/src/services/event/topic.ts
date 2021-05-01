@@ -1,5 +1,5 @@
 import { Project, Topic } from 'data/entity';
-import { FeedbackStatus } from 'data/repositories';
+import { RateResultArgs } from 'data/repositories';
 import { DeleteEvent, EntityEvent } from './base';
 import { Event } from './bus';
 
@@ -26,7 +26,7 @@ export class TopicUpdatedEvent extends EntityEvent<Topic> {
 
 export class TopicRelevanceChangeEvent extends Event {
   eventName = 'TopicRelevanceChangeEvent';
-  public constructor(public id: string, public relevance: FeedbackStatus) {
+  public constructor(public args: RateResultArgs) {
     super();
   }
 }

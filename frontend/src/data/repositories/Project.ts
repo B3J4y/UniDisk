@@ -9,8 +9,18 @@ export type UpdateProjectArgs = {
   projectId: Project['id'];
 };
 
+export type ProjectRelevanceScore = {
+  url: string;
+  relevance: FeedbackStatus;
+  topicId: string;
+};
+export type ProjectResult = {
+  topicResults: TopicResult[];
+  relevanceScores: ProjectRelevanceScore[];
+};
+
 export type ProjectEvaluationResult = {
-  results: Record<ProjectType, TopicResult[]>;
+  results: Record<ProjectType, ProjectResult>;
 };
 
 export enum FeedbackStatus {
@@ -24,6 +34,12 @@ export enum ProjectType {
   ByTopic,
   Enhanced,
 }
+
+export type RateResultArgs = {
+  relevance: FeedbackStatus;
+  url: string;
+  topicId: string;
+};
 
 export interface ProjectRepository {
   findAll(): Promise<Project[]>;
@@ -44,5 +60,5 @@ export interface ProjectRepository {
   enqueue(projectId: Project['id']): Promise<void>;
   dequeue(projectId: Project['id']): Promise<void>;
 
-  rateResult(id: string, status: FeedbackStatus): Promise<void>;
+  rateResult(args: RateResultArgs): Promise<void>;
 }
