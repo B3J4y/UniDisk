@@ -1,5 +1,6 @@
 package de.unidisk.entities.hibernate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -49,6 +50,7 @@ public class Project {
     @Enumerated(EnumType.STRING)
     private ProjectSubtype projectSubtype;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parentProjectId", insertable = false, updatable = false)
     private Project parentProject;
@@ -164,6 +166,9 @@ public class Project {
     }
 
     public List<Project> getSubprojects() {
+        if(this.subprojects == null){
+            this.subprojects = new ArrayList<>();
+        }
         return subprojects;
     }
 
@@ -171,6 +176,7 @@ public class Project {
         this.subprojects = subprojects;
     }
 
+    @JsonIgnore
     public Project getParentProject() {
         return parentProject;
     }

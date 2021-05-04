@@ -1,12 +1,15 @@
 package de.unidisk.entities.hibernate;
 
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"searchMetaData_id"}),
+        }
+)
 public class TopicScore implements ScoredInput {
     @Id
     @GeneratedValue
@@ -14,14 +17,11 @@ public class TopicScore implements ScoredInput {
     @OneToOne
     private SearchMetaData searchMetaData;
 
-    @OneToOne(cascade= CascadeType.REMOVE)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    @ManyToOne
     private Topic topic;
-    private double score;
 
-    @Column()
-    @Enumerated(EnumType.STRING)
-    private ResultRelevance resultRelevance;
+    private double score;
 
     public TopicScore() {
     }
@@ -34,14 +34,6 @@ public class TopicScore implements ScoredInput {
 
     public TopicScore(Topic topic) {
         this.topic = topic;
-    }
-
-    @PrePersist
-    public void prePersist() {
-        if(resultRelevance == null)
-        {
-            resultRelevance = ResultRelevance.NONE;
-        }
     }
 
     public int getId() {
@@ -57,6 +49,7 @@ public class TopicScore implements ScoredInput {
         return searchMetaData;
     }
 
+    @JsonIgnore
     @Override
     public Input getInput() {
         return topic;
@@ -83,13 +76,5 @@ public class TopicScore implements ScoredInput {
     @Override
     public void setScore(double score) {
         this.score = score;
-    }
-
-    public ResultRelevance getResultRelevance() {
-        return resultRelevance;
-    }
-
-    public void setResultRelevance(ResultRelevance resultRelevance) {
-        this.resultRelevance = resultRelevance;
     }
 }
