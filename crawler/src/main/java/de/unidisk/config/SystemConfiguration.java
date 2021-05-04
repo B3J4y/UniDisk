@@ -1,7 +1,9 @@
 package de.unidisk.config;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -18,6 +20,8 @@ public class SystemConfiguration {
 
   private boolean production;
   private long scoringInterval;
+
+  static private final Logger logger = LogManager.getLogger(SystemConfiguration.class.getName());
 
   protected SystemConfiguration() throws IOException {
     Properties properties = new Properties();
@@ -51,6 +55,17 @@ public class SystemConfiguration {
 
 
     final String storageLocation = properties.getProperty(prefix+"storageLocation");
+    final File storageDir = new File(storageLocation);
+
+    if(!storageDir.exists()){
+      final boolean created = storageDir.mkdirs();
+      if(created){
+        logger.info("Created crawler storage directory at " + storageDir.getAbsolutePath() +" .");
+      }
+    }
+
+    logger.info("Crawler storage location at " + storageDir.getAbsolutePath() );
+
     final int maxDepth = Integer.parseInt(properties.getProperty(prefix+"maxDepth"));
     final int maxVisits = Integer.parseInt(properties.getProperty(prefix+"maxSeedVisits"));
     final long uniCrawlInterval = Long.parseLong(properties.getProperty(prefix+"uni.interval"));
