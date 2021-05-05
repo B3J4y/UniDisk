@@ -40,12 +40,4 @@ describe('Project API', () => {
     expect(result).toBeDefined();
     expect(result!.id).toBe(project.id);
   });
-
-  it('enqueue', async () => {
-    fail();
-  });
-
-  it('dequeue', async () => {
-    fail();
-  });
 });
