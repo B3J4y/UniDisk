@@ -64,20 +64,11 @@ function prepareProjectResults(results: TopicResult[], top: number = 3) {
       }
     });
 
-    const reverseScoreMap = Object.keys(urlScores).reduce((prev, cur) => {
-      const value = urlScores[cur] as number;
-      return {
-        ...prev,
-        [value]: cur,
-      };
-    }, {} as Record<number, string>);
+    const scores = Object.entries(urlScores);
+    // Sort by score descending
+    scores.sort(([__, v1], [_, v2]) => v2 - v1);
 
-    const scores = Object.values(urlScores);
-    scores.sort((v1, v2) => v2 - v1);
-
-    const topScoreUrls = scores
-      .slice(0, top)
-      .map((score) => ({ url: reverseScoreMap[score], score }));
+    const topScoreUrls = scores.slice(0, top).map(([url, score]) => ({ url, score }));
 
     const mappedScores = topScoreUrls.map((topScore) => {
       const result = {
@@ -91,6 +82,8 @@ function prepareProjectResults(results: TopicResult[], top: number = 3) {
     return {
       topScores: mappedScores,
       topic: topic.topic,
+      topicName: topic.topic.name,
+      universityName: topic.university.name,
       university: topic.university,
     };
   });
@@ -114,8 +107,8 @@ const fieldSorter = (fields) => (a, b) =>
 function FeedbackTable(props: FeedbackTableProps) {
   const { container } = props;
 
-  const enums: ProjectType[] = shuffleArray(
-    Object.values(ProjectType).filter((v) => typeof v === 'number'),
+  const enums: ProjectType[] = Object.values(ProjectType).filter(
+    (v) => typeof v === 'number',
   ) as ProjectType[];
 
   const results = props.results.results;
@@ -128,7 +121,7 @@ function FeedbackTable(props: FeedbackTableProps) {
     const projectResults = results[projectType];
     const topicResults = prepareProjectResults(projectResults.topicResults);
 
-    topicResults.sort(fieldSorter(['topic', 'university']));
+    topicResults.sort(fieldSorter(['topicName', 'universityName']));
     return {
       results: topicResults,
       type: projectType,
@@ -254,10 +247,10 @@ function TableItem(props: TableItemProps) {
   );
 }
 
-type ProjectResultsProps = {
+export type ProjectResultsProps = {
   topicScores: TopicResult[];
 };
-function ProjectResults(props: ProjectResultsProps) {
+export function ProjectResults(props: ProjectResultsProps) {
   const { topicScores } = props;
 
   return (

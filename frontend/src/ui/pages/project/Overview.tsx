@@ -187,7 +187,7 @@ function ProjectSelectionTable(props: ProjectSelectionTableProps) {
   return (
     <Paper>
       <Toolbar>
-        <Grid xs={12} justify="space-between" alignItems="center">
+        <Grid xs={12} container justify="space-between" alignItems="center">
           <Grid item>
             <h2 style={{ width: 'auto', float: 'left', margin: 0 }}>Projekte</h2>
           </Grid>

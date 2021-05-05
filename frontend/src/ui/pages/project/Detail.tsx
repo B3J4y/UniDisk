@@ -28,8 +28,11 @@ import { useLocation, useParams } from 'react-router-dom';
 import { OLMap } from 'ui/components/forms/Map';
 import { ProjectTopics } from 'ui/components/project/TopicTable';
 import { Provider, Subscribe } from 'unstated-typescript';
-import { ProjectEvaluationPage } from './Evaluation';
-type Views = 'general' | 'map' | 'results';
+import { ProjectEvaluationPage, ProjectResults as ProjectResultsTable } from './Evaluation';
+
+import EqualizerIcon from '@material-ui/icons/Equalizer';
+
+type Views = 'general' | 'map' | 'results' | 'evaluation';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -105,6 +108,17 @@ export function ProjectDetailsPage() {
               {activeView === 'results' && (
                 <ProjectResultsGuard project={project}>
                   {(result) => {
+                    return (
+                      <ProjectResultsTable
+                        topicScores={result.results[ProjectType.Default].topicResults}
+                      />
+                    );
+                  }}
+                </ProjectResultsGuard>
+              )}
+              {activeView === 'evaluation' && (
+                <ProjectResultsGuard project={project}>
+                  {(result) => {
                     return <ProjectResults project={project} result={result} />;
                   }}
                 </ProjectResultsGuard>
@@ -172,6 +186,11 @@ const items: Item[] = [
   },
   {
     view: 'results',
+    name: 'Ergebnisse',
+    icon: <EqualizerIcon />,
+  },
+  {
+    view: 'evaluation',
     name: 'Auswertung',
     icon: <AssessmentIcon />,
   },
