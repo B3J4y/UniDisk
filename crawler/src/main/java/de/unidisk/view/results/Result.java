@@ -1,7 +1,8 @@
 package de.unidisk.view.results;
 
-import de.unidisk.entities.hibernate.ResultRelevance;
 import de.unidisk.entities.hibernate.University;
+
+import java.util.List;
 
 public class Result {
     int id;
@@ -10,7 +11,9 @@ public class Result {
     University university;
     double score;
     long entryCount;
-    ResultRelevance relevance;
+
+
+    List<KeywordResult> keywords;
 
     public Result(int id, int topicId, String topic, double score, long entryCount, University university) {
         this.id = id;
@@ -19,17 +22,19 @@ public class Result {
         this.score = score;
         this.entryCount = entryCount;
         this.university = university;
-        this.relevance = ResultRelevance.NONE;
     }
 
-    public Result(int id ,int topicId, String topic, double score, long entryCount, University university, ResultRelevance relevance) {
+
+
+    public Result(int id ,int topicId, String topic, double score, long entryCount,
+                  University university, List<KeywordResult> keywords) {
         this.id = id;
         this.topicId = topicId;
         this.topic = topic;
         this.university = university;
         this.score = score;
         this.entryCount = entryCount;
-        this.relevance = relevance;
+        this.keywords = keywords;
     }
 
     public int getTopicId() {
@@ -76,11 +81,7 @@ public class Result {
         this.id = id;
     }
 
-    public void setRelevance(ResultRelevance relevance) {
-        this.relevance = relevance;
-    }
-
-    public ResultRelevance getRelevance() {
-        return relevance;
+    public List<KeywordResult> getKeywords() {
+        return keywords;
     }
 }

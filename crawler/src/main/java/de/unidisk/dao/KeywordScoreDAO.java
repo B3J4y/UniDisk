@@ -1,5 +1,6 @@
 package de.unidisk.dao;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -18,25 +19,40 @@ public class KeywordScoreDAO implements ScoringDAO {
                 .orElse(new KeyWordScore((Keyword) input));
     }
 
+    private KeyWordScore findOrFail(int keywordScoreId) throws EntityNotFoundException {
+        final Optional<KeyWordScore> score = HibernateUtil.execute(session -> {
+            return session.createQuery("select p from KeyWordScore p where p.id = :id", KeyWordScore.class)
+                    .setParameter("id", keywordScoreId)
+                    .uniqueResultOptional();
+
+        });
+        if (!score.isPresent())
+            throw new EntityNotFoundException(KeyWordScore.class, keywordScoreId);
+        return score.get();
+    }
+
     public void setMetaData(int keywordScoreId, int metaDataId){
         final Optional<SearchMetaData> searchMetaData = new SearchMetaDataDAO().get(metaDataId);
         if(!searchMetaData.isPresent())
             throw new IllegalArgumentException("SearchMetaData not found");
-        final Optional<KeyWordScore> score = get(keywordScoreId);
-        if(!score.isPresent())
+        final Optional<KeyWordScore> optionalScore = get(keywordScoreId);
+        if(!optionalScore.isPresent())
             throw new IllegalArgumentException("Score not found");
-        score.get().setSearchMetaData(searchMetaData.get());
+
+        final KeyWordScore score = optionalScore.get();
+
+        score.setSearchMetaData(searchMetaData.get());
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction transaction = currentSession.getTransaction();
         if (!transaction.isActive()) {
             transaction.begin();
         }
-        currentSession.saveOrUpdate(score.get());
+        currentSession.saveOrUpdate(score);
         transaction.commit();
         currentSession.close();
     }
 
-    public KeyWordScore createKeywordScore(int keywordId, double score){
+    public KeyWordScore createKeywordScore(int keywordId, double score, String pageTitle){
         KeywordDAO kDao = new KeywordDAO();
         final Optional<Keyword> keyword = kDao.get(keywordId);
         if(!keyword.isPresent())
@@ -50,6 +66,7 @@ public class KeywordScoreDAO implements ScoringDAO {
         final KeyWordScore keywordScore = new KeyWordScore();
         keywordScore.setScore(score);
         keywordScore.setKeyword(keyword.get());
+        keywordScore.setPageTitle(pageTitle);
         final int id = (int) currentSession.save(keywordScore);
 
         transaction.commit();

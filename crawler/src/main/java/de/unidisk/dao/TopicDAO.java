@@ -2,19 +2,13 @@ package de.unidisk.dao;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
-import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.repositories.params.topic.UpdateTopicParams;
 import de.unidisk.entities.hibernate.*;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import org.hibernate.exception.ConstraintViolationException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.unidisk.dao.HibernateUtil.execute;
@@ -149,23 +143,36 @@ public class TopicDAO {
             throw new EntityNotFoundException(Topic.class,topicId);
 
         return execute(session -> {
-            //Load required data
-            List<Score> scores = session.createQuery("select new de.unidisk.dao.Score((sum(k.score)/COUNT (k.id)), k.searchMetaData.university.id) " +
-                    "from KeyWordScore k where k.keyword.topicId = :topicId group by k.searchMetaData.university.id ", Score.class).setParameter("topicId", topicId).list();
-            List<Integer> uniIds = scores.stream().map(Score::getUniversityId).collect(Collectors.toList());
-            List<University> universities = session.createQuery("select u from University u where u.id in :ids", University.class).setParameter("ids", uniIds).list();
+            List<KeyWordScore> scores = session.createQuery("select k " +
+                    "from KeyWordScore k where k.keyword.topicId = :topicId", KeyWordScore.class).setParameter("topicId", topicId).list();
+            Map<Integer,List<KeyWordScore>> universityScores = new HashMap<>();
 
-            //put universities into map
-            Map<Integer, University> universityMap = universities
-                    .stream()
-                    .collect(Collectors.toMap(University::getId,Function.identity()));
+            scores.forEach(score -> {
+                if(universityScores.containsKey(score.getUniversityId())){
+                    universityScores.get(score.getUniversityId()).add(score);
+                }else {
+                    List<KeyWordScore> scoreList = new ArrayList<>();
+                    scoreList.add(score);
+                    universityScores.put(score.getUniversityId(),scoreList);
+                }
+            });
 
-            //combine data to form results
-            return scores.stream().map(score -> new TopicScore(
-                    fromUniversity(universityMap.get(score.getUniversityId())),
-                    topic.get(),
-                    score.getScore()
-            )).collect(Collectors.toList());
+            Map<Integer,University> universityMap =  scores.stream().collect(Collectors.toMap(KeyWordScore::getUniversityId, score -> score.getSearchMetaData().getUniversity(), (v1, v2) -> v1));
+
+
+
+            return universityScores.keySet().stream().map(universityId -> {
+                List<KeyWordScore> scoreList = universityScores.get(universityId);
+                final double score = scoreList.stream().map(KeyWordScore::getScore).reduce(0.0, Double::sum)/scoreList.size();
+                University university = universityMap.get(universityId);
+
+                final SearchMetaData searchMetaData = fromUniversity(university);
+                return new TopicScore(
+                        searchMetaData,
+                        topic.get(),
+                        score
+                );
+            }).collect(Collectors.toList());
         });
     }
 

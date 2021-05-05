@@ -7,9 +7,8 @@ import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
-import de.unidisk.entities.hibernate.ResultRelevance;
+import de.unidisk.rest.dto.topic.RateTopicResultDto;
 import de.unidisk.view.project.ProjectView;
-import de.unidisk.view.results.Result;
 
 import java.io.Serializable;
 import java.util.List;
@@ -58,7 +57,7 @@ public interface IProjectRepository extends Serializable {
     void setProjectError(int projectId, String message);
     void clearProjectError(int projectId);
 
-    void rateTopicScore(String topicScoreId, ResultRelevance relevance) throws EntityNotFoundException;
+    void rateResult(RateTopicResultDto args) throws EntityNotFoundException;
 
     List<Project> getSubprojects(String projectId);
     Project generateSubprojectByCustom(String projectId) throws EntityNotFoundException, DuplicateException;

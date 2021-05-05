@@ -28,7 +28,7 @@ public class HibernateResultService implements IResultService {
         final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
         final SearchMetaData searchMetaData = searchMetaDataDAO.createMetaData(new URL(result.getUrl()),
                 result.getUniversityId(), result.getTimestamp());
-        final KeyWordScore score = kScoreDao.createKeywordScore(keyword.getId(),result.getScore());
+        final KeyWordScore score = kScoreDao.createKeywordScore(keyword.getId(),result.getScore(), result.getPageTitle());
         kScoreDao.setMetaData(score.getId(),searchMetaData.getId());
     }
 
@@ -41,8 +41,11 @@ public class HibernateResultService implements IResultService {
             throw new EntityNotFoundException(Topic.class,result.getEntityId());
         final TopicScoreDAO scoreDao = new TopicScoreDAO();
         final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
-        final SearchMetaData searchMetaData = searchMetaDataDAO.createMetaData(new URL(result.getUrl()),
-                result.getUniversityId(), result.getTimestamp());
+        final SearchMetaData searchMetaData = searchMetaDataDAO.createMetaData(
+                new URL(result.getUrl()),
+                result.getUniversityId(),
+                result.getTimestamp()
+        );
         scoreDao.addScore(topic.get(),result.getScore(),searchMetaData);
 
     }

@@ -8,6 +8,7 @@ import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
+import de.unidisk.rest.dto.topic.RateTopicResultDto;
 import de.unidisk.view.results.Result;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
@@ -20,8 +21,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static de.unidisk.entities.util.TestFactory.createKeyword;
 import static de.unidisk.entities.util.TestFactory.randomUniversityUrl;
-import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -157,16 +158,13 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
-    public void getResultsReturnsValidData() throws DuplicateException {
+    public void getResultsReturnsValidData() throws DuplicateException, MalformedURLException {
         final ApplicationState state = MockData.getMockState();
         final UniversityDAO uniDao = new UniversityDAO();
         final ProjectDAO projectDAO = new ProjectDAO();
         final TopicDAO topicDAO = new TopicDAO();
         final TopicScoreDAO topicScoreDAO = new TopicScoreDAO();
         final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
-
-        final HashMap<String,Integer> generatedKeywordScores = new HashMap<String,Integer>();
-
         state.getUniversities().forEach((u) -> {
             final University dbUni = uniDao.addUniversity(u);
             u.setId(dbUni.getId());
@@ -180,58 +178,46 @@ public class ProjectTest implements HibernateLifecycle {
         p.setId(dbProject.getId());
         projectDAO.updateProjectState(dbProject.getId(),p.getProjectState());
 
-        state.getUniversities().forEach((university -> {
-            p.getTopics().forEach((topic) -> {
+        for(University university : state.getUniversities()){
+            final HashMap<Integer,Integer> universityScores = new HashMap<>();
+
+            for(Topic topic : p.getTopics()){
                 final Topic dbTopic = topicDAO.createTopic(topic.getName(),dbProject.getId()
                         ,topic.getKeywords().stream().map(Keyword::getName)
-                                .collect(Collectors.toList()));
-                try {
-                    SearchMetaData metaData = searchMetaDataDAO.createMetaData(new URL(university.getSeedUrl()), university.getId(),
-                            ZonedDateTime.now().toEpochSecond());
+                                .collect(Collectors.toList()
+                                ));
 
-                    SearchMetaData metaData2 = searchMetaDataDAO.createMetaData(new URL(university.getSeedUrl()), university.getId(),
-                            ZonedDateTime.now().toEpochSecond());
+                SearchMetaData metaData = searchMetaDataDAO.createMetaData(new URL(university.getSeedUrl()), university.getId(),
+                        ZonedDateTime.now().toEpochSecond());
 
-                    topicScoreDAO.addScore(dbTopic,1,metaData);
-                    topicScoreDAO.addScore(dbTopic,.3,metaData2);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-                generatedKeywordScores.put(dbTopic.getName(),dbTopic.getKeywords().size());
-                dbTopic.getKeywords().forEach(keyword -> {
-                    assert(keyword.getId() != 0);
+                topicScoreDAO.addScore(dbTopic,1,metaData);
+
+
+                for (Keyword keyword : dbTopic.getKeywords()) {
+                    assert (keyword.getId() != 0);
 
                     final int scores = new Random().nextInt(10) + 2;
 
-                    for(int i= 0; i < scores;i++){
+                    for (int i = 0; i < scores; i++) {
                         final double score = new Random().nextDouble();
 
                         final University uni = state.getUniversities().get(new Random().nextInt(universityNames.size()));
-                        SearchMetaDataDAO smdDAO = new SearchMetaDataDAO();
-                        SearchMetaData metaData = null;
-                        try {
-                            metaData = smdDAO.createMetaData(new URL(randomUniversityUrl(uni.getName())), uni.getId(),
-                                    ZonedDateTime.now().toEpochSecond());
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
+
+                        SearchMetaData keywordMetaData = searchMetaDataDAO.createMetaData(new URL(randomUniversityUrl(uni.getName())), uni.getId(),
+                                ZonedDateTime.now().toEpochSecond()
+                        );
 
                         KeywordScoreDAO scoreDAO = new KeywordScoreDAO();
-                        scoreDAO.addScore(keyword, score, metaData);
+                        KeyWordScore keyWordScore = scoreDAO.createKeywordScore(keyword.getId(), score, "page");
+                        scoreDAO.setMetaData(keyWordScore.getId(), keywordMetaData.getId());
                     }
-                });
-            });
-        }));
+                }
+            }
+        }
 
         final List<Result> results = projectDAO.getResults(String.valueOf(dbProject.getId()));
-        Assert.assertEquals( p.getTopics().size() * state.getUniversities().size(),results.size());
-
-        state.getUniversities().forEach(u -> assertTrue(results.stream().anyMatch(r -> u.getId() == r.getUniversity().getId())));
-
-        results.forEach((topicResult) -> {
-            final int expectedTopicHits = generatedKeywordScores.get(topicResult.getTopic());
-            Assert.assertEquals(topicResult.getEntryCount(),expectedTopicHits);
-        });
+        assertEquals( p.getTopics().size() * state.getUniversities().size(),results.size());
+        state.getUniversities().forEach(u -> Assertions.assertTrue(results.stream().anyMatch(r -> u.getId() == r.getUniversity().getId())));
     }
 
     @Test
@@ -295,5 +281,29 @@ public class ProjectTest implements HibernateLifecycle {
         assertFalse(getFinishedStatus.apply(null));
         setFinished.apply(subprojects.get(1));
         assertTrue(getFinishedStatus.apply(null));
+    }
+
+
+    @Test
+    public void rateResultSucceeds() throws MalformedURLException, EntityNotFoundException {
+
+        final ProjectDAO dao = new ProjectDAO();
+        final Keyword keyword = createKeyword();
+        final University university = new UniversityDAO().addUniversity("test");
+        final String url = "https://www.google.com";
+
+        final SearchMetaData smd = new SearchMetaDataDAO().createMetaData(new URL(url),university.getId(), 0L);
+
+        final KeywordScoreDAO keywordScoreDAO = new KeywordScoreDAO();
+        final KeyWordScore kws = keywordScoreDAO.createKeywordScore(keyword.getId(),0, "");
+        keywordScoreDAO.setMetaData(kws.getId(),smd.getId());
+
+        dao.rateResult(new RateTopicResultDto(String.valueOf(keyword.getTopicId()), url, ResultRelevance.RELEVANT));
+        HibernateUtil.execute(session -> {
+            final List<ProjectRelevanceScore> scores = session.createQuery("select s from ProjectRelevanceScore  s", ProjectRelevanceScore.class).list();
+            assertEquals(1, scores.size());
+            assertEquals(ResultRelevance.RELEVANT, scores.get(0).getResultRelevance());
+            return null;
+        });
     }
 }

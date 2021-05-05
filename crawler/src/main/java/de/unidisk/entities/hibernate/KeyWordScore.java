@@ -78,6 +78,7 @@ public class KeyWordScore implements ScoredInput {
         return keyword.getId();
     }
 
+    @JsonIgnore
     public int getUniversityId() {
         return getSearchMetaData().getUniversity().getId();
     }

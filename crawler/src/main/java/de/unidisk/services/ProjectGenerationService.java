@@ -53,9 +53,14 @@ public class ProjectGenerationService {
             final RecommendationResult result = keywordRecommendationService.getTopicRecommendations(topic.getName());
             final List<KeywordRecommendation> recommendations = result.getRecommendations().stream().limit(5).collect(Collectors.toList());
             final List<Keyword> keywords = new ArrayList<>();
+            final String topicId = String.valueOf(topicCopy.getId());
             for(KeywordRecommendation recommendation : recommendations){
                 final Keyword keyword = keywordRepository.createKeyword(
-                        new CreateKeywordParams(recommendation.getKeyword(), String.valueOf(topicCopy.getId()), true)
+                        new CreateKeywordParams(
+                                recommendation.getKeyword(),
+                                topicId,
+                                true
+                        )
                 );
                 keywords.add(keyword);
             }
