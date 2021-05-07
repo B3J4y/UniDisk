@@ -1,0 +1,7 @@
+.NoElevation {
+  box-shadow: none;
+}
+
+.NoElevation .MuiPaper-elevation6 {
+  box-shadow: none;
+}
