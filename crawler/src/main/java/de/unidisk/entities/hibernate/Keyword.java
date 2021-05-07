@@ -1,7 +1,9 @@
 package de.unidisk.entities.hibernate;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "Keyword")
@@ -14,6 +16,10 @@ public class Keyword implements Input {
     private int topicId;
     private String name;
     private boolean isSuggestion = false;
+
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<KeyWordScore> keyWordScores;
 
     public Keyword() {
 
@@ -84,5 +90,13 @@ public class Keyword implements Input {
 
     public boolean isSuggestion() {
         return isSuggestion;
+    }
+
+    public List<KeyWordScore> getKeyWordScores() {
+        return keyWordScores;
+    }
+
+    public void setKeyWordScores(List<KeyWordScore> keyWordScores) {
+        this.keyWordScores = keyWordScores;
     }
 }

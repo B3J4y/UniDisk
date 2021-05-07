@@ -1,11 +1,12 @@
 package de.unidisk.entities.hibernate;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -17,6 +18,11 @@ public class Topic implements Serializable,Input {
     private int id;
 
 
+    @OneToMany(fetch = FetchType.EAGER,mappedBy = "topic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<TopicScore> topicScores;
+
     private int projectId;
 
     @Column(nullable = false)
@@ -25,6 +31,11 @@ public class Topic implements Serializable,Input {
     @OneToMany(fetch = FetchType.EAGER,mappedBy = "topicId", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Keyword> keywords;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "topicId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(value = FetchMode.SUBSELECT)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private List<ProjectRelevanceScore> relevanceScores;
 
     public Topic() {
     }
@@ -89,4 +100,13 @@ public class Topic implements Serializable,Input {
         return Objects.hash(id, name);
     }
 
+
+    public List<TopicScore> getTopicScores() {
+        return topicScores;
+    }
+
+
+    public List<ProjectRelevanceScore> getRelevanceScores() {
+        return relevanceScores;
+    }
 }

@@ -21,6 +21,8 @@ import org.apache.log4j.Logger;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by carl on 06.01.16.
@@ -32,6 +34,8 @@ public class SolrApp {
     private IResultService resultService;
     private ProjectGenerationService projectGenerationService;
 
+    private static Lock lock = new ReentrantLock();
+
     public SolrApp(IProjectRepository projectRepository, IScoringService scoringService,
                    IResultService resultService, ProjectGenerationService projectGenerationService) {
         this.projectRepository = projectRepository;
@@ -41,7 +45,7 @@ public class SolrApp {
     }
 
     void evaluateProject(Project project) {
-        logger.info("Start processing project " + project.getName() + " .");
+      logInfo("Start processing project " + project.getName() + " with id " + project.getId() +" of type "  + project.getProjectSubtype() + ".");
         try {
             projectRepository.updateProjectState(project.getId(), ProjectState.RUNNING);
             List<Project> generatedProjects = null;
@@ -49,27 +53,33 @@ public class SolrApp {
             final boolean isParentProject = !project.isSubproject();
             final boolean subprojectsGenerated = project.getSubprojects().size() == ProjectSubtype.values().length - 1;
             if(isParentProject && !subprojectsGenerated){
-                logger.debug("Generate subprojects");
+                logInfo("Generate subprojects");
                 generatedProjects = projectGenerationService.generateSubprojects(String.valueOf(project.getId()));
             }
 
-            logger.debug("Entering main");
+            logInfo("Entering main");
 
             final List<Topic> topics = project.getTopics();
+            logInfo("Process " + topics.size() + " topics");
             for(Topic t : topics){
+                logInfo("Process " + t.getKeywords().size() + " keywords for topic " + t.getName());
                 for(Keyword keyword : t.getKeywords()){
                     final List<ScoreResult> scores = this.scoringService.getKeywordScore(project.getId(),keyword.getId());
-                    for(ScoreResult score : scores) {
-                        logger.info("Keyword " + score.getEntityId() + ": " + score.getScore());
-                        this.resultService.createKeywordScore(score);
+                    if(scores.isEmpty()){
+                        logInfo("No keyword scores found for keyword " + keyword.getName());
+                    }else {
+                        for(ScoreResult score : scores) {
+                            this.resultService.createKeywordScore(score);
+                        }
                     }
+
                 }
                 final List<ScoreResult> topicScores = this.scoringService.getTopicScores(project.getId(), t.getId());
                 for(ScoreResult score : topicScores) {
                     this.resultService.createTopicScore(score);
                 }
             }
-            logger.info("finished processing project " + project.getName() + " .");
+            logInfo("finished processing project " + project.getName() + " .");
             projectRepository.updateProjectState(project.getId(),ProjectState.FINISHED);
             /* Immediately evaluate generated projects so user won't have to wait for next evaluation run.
                Only want to do this when the subprojects have been generated now as otherwise they are
@@ -86,7 +96,8 @@ public class SolrApp {
             }else{
                 projectRepository.setProjectError(project.getId(), e.getLocalizedMessage());
             }
-            logger.error("Error occured while processing project " + project.getName() + " with id " + project.getId() + " .");
+            final String errorMessage  = "Error occured while processing project " + project.getName() + " with id " + project.getId() + " .";
+            logger.error(errorMessage);
             logger.error(e);
 
             projectRepository.updateProjectState(project.getId(),ProjectState.ERROR);
@@ -96,17 +107,32 @@ public class SolrApp {
         }
     }
 
+    // Placeholder until someone can figure out how log4j works
+    void logInfo(String message){
+        System.out.println(message);
+    }
+
     public void execute() {
+        lock.lock();
 
-        final List<Project> pendingProjects = projectRepository.getProjects(ProjectState.WAITING);
+        try {
+            final List<Project> pendingProjects = projectRepository.getProjects(ProjectState.WAITING);
 
-        if(pendingProjects.isEmpty()){
-            logger.info("No projects waiting for processing.");
-            return;
+            if (pendingProjects.isEmpty()) {
+                logInfo("No projects waiting for processing.");
+                return;
+            }
+
+            logInfo("Start processing " + pendingProjects.size() + " projects.");
+
+            for (Project project : pendingProjects) {
+                evaluateProject(project);
+            }
+
+            logInfo("Finished processing projects.");
         }
-
-        for(Project project : pendingProjects) {
-            evaluateProject(project);
+        finally {
+            lock.unlock();
         }
     }
 

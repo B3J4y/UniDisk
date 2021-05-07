@@ -2,18 +2,14 @@ package de.unidisk.dao;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.contracts.exceptions.DuplicateException;
-import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
-import de.unidisk.dao.*;
-import de.unidisk.entities.hibernate.*;
+import de.unidisk.entities.hibernate.Keyword;
+import de.unidisk.entities.hibernate.Project;
+import de.unidisk.entities.hibernate.Topic;
+import de.unidisk.entities.hibernate.University;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 public class HibernateTestSetup {
@@ -65,34 +61,6 @@ public class HibernateTestSetup {
                 final Topic dbTopic = topicDAO.createTopic(topic.getName(),dbProject.getId()
                         ,topic.getKeywords().stream().map(Keyword::getName)
                                 .collect(Collectors.toList()));
-                try {
-                    SearchMetaData metaData = searchMetaDataDAO.createMetaData(new URL("http://www.uni-potsdam.de/home"), state.getUniversities().get(0).getId(),
-                            ZonedDateTime.now().toEpochSecond());
-
-                    topicScoreDAO.addScore(dbTopic,1,metaData);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-                dbTopic.getKeywords().forEach(keyword -> {
-                    assert(keyword.getId() != 0);
-
-                    final int scores = 1;
-                    for(int i= 0; i < scores;i++){
-                        final double score = new Random().nextDouble();
-
-                        final University uni = state.getUniversities().get(new Random().nextInt(universityNames.size()));
-                        SearchMetaDataDAO smdDAO = new SearchMetaDataDAO();
-                        SearchMetaData metaData = null;
-                        try {
-                            metaData = smdDAO.createMetaData(new URL(randomUniversityUrl(uni.getName())), uni.getId(),
-                                    ZonedDateTime.now().toEpochSecond());
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                        KeywordScoreDAO scoreDAO = new KeywordScoreDAO();
-                        scoreDAO.addScore(keyword, score, metaData);
-                    }
-                });
             });
         });
 

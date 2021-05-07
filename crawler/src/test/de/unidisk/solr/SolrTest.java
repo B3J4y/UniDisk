@@ -121,7 +121,8 @@ public class SolrTest implements HibernateLifecycle {
                     (float) d.get("score"),
                     universityId,
                     crawlDocument.datum,
-                    crawlDocument.url
+                    crawlDocument.url,
+                    crawlDocument.title
             );
         }).collect(Collectors.toList());
         assertTrue(true);

@@ -3,11 +3,13 @@ package de.unidisk.dao;
 import de.unidisk.common.ProjectResult;
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.entities.hibernate.*;
-import de.unidisk.contracts.repositories.IProjectRepository;
+import de.unidisk.rest.dto.topic.RateTopicResultDto;
 import de.unidisk.view.project.ProjectView;
+import de.unidisk.view.results.KeywordResult;
 import de.unidisk.view.results.Result;
 
 import java.util.*;
@@ -103,10 +105,45 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     @Override
-    public void rateTopicScore(String topicScoreId, ResultRelevance relevance) throws EntityNotFoundException {
-        new TopicScoreDAO().rateScore(Integer.parseInt(topicScoreId),relevance);
-    }
+    public void rateResult(RateTopicResultDto args) throws EntityNotFoundException {
+        final int topicId = Integer.parseInt(args.getTopicId());
 
+        HibernateUtil.execute(session -> {
+
+            final Optional<ProjectRelevanceScore> existingScore = session.createQuery("Select score from ProjectRelevanceScore score " +
+            "where score.topicId = :topicId and score.searchMetaData.url = :url"
+            ).setParameter("topicId", topicId)
+                    .setParameter("url", args.getUrl()).uniqueResultOptional();
+
+            if(existingScore.isPresent()){
+                final ProjectRelevanceScore score = existingScore.get();
+                score.setResultRelevance(args.getRelevance());
+                session.update(score);
+                return null;
+            }
+
+            final List<SearchMetaData> searchMetaDataList = session.createQuery("" +
+                    "Select smd from SearchMetaData  smd " +
+                    "INNER JOIN KeyWordScore kws ON kws.searchMetaData.id = smd.id " +
+                    "INNER JOIN Topic t ON t.id = kws.keyword.topicId " +
+                            "where t.id = :topicId AND smd.url = :url",
+                    SearchMetaData.class
+            ).setParameter("topicId", topicId)
+            .setParameter("url", args.getUrl()).list();
+
+            if(searchMetaDataList.isEmpty())
+                throw new IllegalArgumentException("No search metadata with with matching arguments found.");
+
+            final SearchMetaData searchMetaData =searchMetaDataList.get(0);
+
+            final ProjectRelevanceScore score = new ProjectRelevanceScore();
+            score.setSearchMetaData(searchMetaData);
+            score.setTopicId(topicId);
+            score.setResultRelevance(args.getRelevance());
+            session.save(score);
+            return null;
+        });
+    }
     @Override
     public List<Project> getSubprojects(String projectId) {
         return HibernateUtil.execute(session -> session.createQuery("select p from Project p " +
@@ -133,27 +170,27 @@ public class ProjectDAO  implements IProjectRepository {
                 return null;
             }
             final List<Topic> subtypeTopics = new ArrayList<>();
-                parentProject.getTopics().forEach(topic -> {
-                    final Topic t = new Topic();
-                    t.setName(topic.getName());
-                    t.setProjectId(subtypeProject.getId());
-                    session.save(t);
-                    final List<Keyword> keywords = new ArrayList<>();
-                    t.setKeywords(keywords);
-                    topic.getKeywords().forEach(keyword -> {
-                        if(keyword.isSuggestion())
-                            return;
-                        final Keyword k = new Keyword();
-                        k.setName(keyword.getName());
-                        k.setTopicId(t.getId());
-                        session.save(k);
-                        keywords.add(k);
-                    });
-                    subtypeTopics.add(t);
+            parentProject.getTopics().forEach(topic -> {
+                final Topic t = new Topic();
+                t.setName(topic.getName());
+                t.setProjectId(subtypeProject.getId());
+                session.save(t);
+                final List<Keyword> keywords = new ArrayList<>();
+                t.setKeywords(keywords);
+                topic.getKeywords().forEach(keyword -> {
+                    if(keyword.isSuggestion())
+                        return;
+                    final Keyword k = new Keyword();
+                    k.setName(keyword.getName());
+                    k.setTopicId(t.getId());
+                    session.save(k);
+                    keywords.add(k);
                 });
-                subtypeProject.setTopics(subtypeTopics);
-                session.update(subtypeProject);
-                return subtypeProject;
+                subtypeTopics.add(t);
+            });
+            subtypeProject.setTopics(subtypeTopics);
+            session.update(subtypeProject);
+            return subtypeProject;
 
         });
         if(duplicateException[0] != null)
@@ -296,9 +333,59 @@ public class ProjectDAO  implements IProjectRepository {
     {
         int pId = Integer.parseInt(projectId);
         return HibernateUtil.execute((session -> {
-            return  session.createQuery("select new de.unidisk.view.results.Result(t.id, t.topic.id, t.topic.name, t.score, (select count(k.id) FROM KeyWordScore k where k.keyword.topicId = t.topic.id), t.searchMetaData.university, t.resultRelevance )" +
-                    " from TopicScore t WHERE t.topic.projectId = :pId", Result.class)
-                    .setParameter("pId",pId).list();
+            final Optional<Project> p =  session.createQuery("select p from Project p where p.id = :pId", Project.class)
+                    .setParameter("pId",pId).uniqueResultOptional();
+            if(!p.isPresent())
+                return new ArrayList<>();
+
+            final Project project = p.get();
+
+            return project.getTopics().stream().flatMap(topic -> {
+                final Map<Integer, List<KeyWordScore>> universityScores = new HashMap<>();
+                topic.getKeywords().stream().flatMap(keyword -> keyword.getKeyWordScores().stream()).forEach(keyWordScore ->{
+                    final int universityId = keyWordScore.getSearchMetaData().getUniversity().getId();
+                    if(universityScores.containsKey(universityId)){
+                        universityScores.get(universityId).add(keyWordScore);
+                    }else {
+                        final ArrayList<KeyWordScore> list = new ArrayList<>();
+                        list.add(keyWordScore);
+                        universityScores.put(universityId,list);
+                    }
+                });
+
+
+                final List<Result> topicResults = topic.getTopicScores().stream().map(topicScore -> {
+                    final int universityId = topicScore.getSearchMetaData().getUniversity().getId();
+                    final List<KeyWordScore> scores = universityScores.get(universityId);
+                    if(scores == null)
+                        return null;
+
+                    final List<KeywordResult> keywordResults = topic.getKeywords().stream().flatMap(keyword -> {
+                        final Stream<KeyWordScore> keyWordScoreStream = scores.stream().filter(s -> s.getKeywordId() == keyword.getId());
+                        return keyWordScoreStream.map(keyWordScore ->
+                                new KeywordResult(
+                                        keyword.getId(),
+                                        keyword.getName(),
+                                        keyWordScore.getSearchMetaData(),
+                                        keyWordScore.getScore(),
+                                        keyWordScore.getPageTitle()
+                                )
+                        );
+                    }).collect(Collectors.toList());
+
+
+                    return new Result(
+                            topicScore.getId(),
+                            topic.getId(),
+                            topic.getName(),
+                            topicScore.getScore(),
+                            keywordResults.size(),
+                            topicScore.getSearchMetaData().getUniversity(),
+                            keywordResults
+                    );
+                }).filter(Objects::nonNull).collect(Collectors.toList());
+                return topicResults.stream();
+            }).collect(Collectors.toList());
         }));
     }
 
@@ -314,7 +401,8 @@ public class ProjectDAO  implements IProjectRepository {
 
         final List<ProjectResult> results = projects.parallelStream().map(proj -> {
             final List<Result> projectResult = this.getResults(String.valueOf(proj.getId()));
-            return new ProjectResult(projectResult, project.getProjectSubtype());
+            final List<ProjectRelevanceScore> scores = proj.getTopics().stream().flatMap(topic -> topic.getRelevanceScores().stream()).collect(Collectors.toList());
+            return new ProjectResult(projectResult, proj.getProjectSubtype(),scores);
         }).collect(Collectors.toList());
         return results;
     }

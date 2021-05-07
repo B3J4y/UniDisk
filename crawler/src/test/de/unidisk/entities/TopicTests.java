@@ -2,13 +2,9 @@ package de.unidisk.entities;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
-import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
-import de.unidisk.entities.templates.CRUDTest;
-import de.unidisk.entities.templates.ChildTests;
-import de.unidisk.entities.templates.ParentTests;
 import de.unidisk.entities.util.TestFactory;
 import de.unidisk.util.DataFactory;
 import org.junit.Assert;
@@ -151,7 +147,10 @@ public class TopicTests implements HibernateLifecycle {
         t.setProjectId(parentProject.getId());
         final University u = new UniversityDAO().addUniversity(new University("UP",0,1,"https://www.google.com"));
         final TopicDAO dao = new TopicDAO();
-        final Topic dbTopic = dao.createTopic(t.getName(), t.getProjectId(),t.getKeywords().stream().map(k -> k.getName()).collect(Collectors.toList()));
+        final Topic dbTopic = dao.createTopic(t.getName(), t.getProjectId(),
+                t.getKeywords().stream().map(Keyword::getName)
+                        .collect(Collectors.toList()
+                        ));
 
         final Random random = new Random();
         final Map<Integer,Double> keywordScoreMap = new HashMap<Integer,Double>();

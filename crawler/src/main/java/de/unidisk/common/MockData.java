@@ -2,7 +2,6 @@ package de.unidisk.common;
 
 import de.unidisk.entities.hibernate.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,8 +17,11 @@ public class MockData {
     public static List<University> getMockUniversities(){
         return Arrays.asList(
             new University("Universität Potsdam",52.4010314,13.0097211,"https://www.uni-potsdam.de"),
-                new University("TU Berlin",52.5125322,13.3247559,"https://www.tu-berlin.de/menue/home"),
-                new University("FH Potsdam", 52.4132004,13.0483612,"https://www.fh-potsdam.de")
+                new University("TU Berlin",52.5125322,13.3247559,"https://www.tu-berlin.de"),
+                new University("FH Potsdam", 52.4132004,13.0483612,"https://www.fh-potsdam.de"),
+                new University("HPI", 52.4132004,13.0097211,"https://hpi.de/"),
+                new University("TU München",48.1486926,11.5686501,"https://www.tum.de/"),
+                new University("FH Aachen",50.7647135,6.0792746,"https://www.fh-aachen.de/")
         );
     }
 
@@ -58,10 +60,27 @@ public class MockData {
         ));
 
         final Project p3 = new Project("Beispielprojekt", ProjectState.WAITING,Arrays.asList(
-                new Topic("Aufwendiges Thema",0,Arrays.asList(
-                        new Keyword("schweres Stichwort"),
-                        new Keyword("langes Stichwort")
-                ))
+                new Topic(
+                        "Geräte",0, Arrays.asList(
+                        new Keyword(
+                                "Tablet"
+                        ),
+
+                        new Keyword(
+                                "Smartphone"
+                        ),
+                        new Keyword("Laptop"),
+                        new Keyword("IOT")
+                )
+                ),
+                new Topic(
+                        "Software", 0, Arrays.asList(
+                        new Keyword("Microsoft"),
+                        new Keyword("O365"),
+                        new Keyword("Moodle"),
+                        new Keyword("Office")
+                )
+                )
         ));
 
         final Project p4 = new Project("Fehlerprojekt", ProjectState.ERROR,Arrays.asList(

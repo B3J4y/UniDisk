@@ -20,16 +20,6 @@ public class SearchMetaDataDAO {
 
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction tnx = currentSession.beginTransaction();
-        Optional<SearchMetaData> optSMD = currentSession.createQuery("select s from SearchMetaData s where s.university.id = :id AND s.timestamp = :time AND s.url like :url", SearchMetaData.class)
-                .setParameter("id", universityId)
-                .setParameter("time", timestamp)
-                .setParameter("url", url.toExternalForm())
-                .uniqueResultOptional();
-        if (optSMD.isPresent()) {
-            tnx.commit();
-            currentSession.close();
-            return optSMD.get();
-        }
 
         SearchMetaData smd = new SearchMetaData();
         smd.setUrl(url.toExternalForm());

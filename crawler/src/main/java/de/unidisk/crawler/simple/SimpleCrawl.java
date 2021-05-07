@@ -2,6 +2,7 @@ package de.unidisk.crawler.simple;
 
 import de.unidisk.crawler.model.CrawlDocument;
 import de.unidisk.crawler.model.UniversitySeed;
+import de.unidisk.crawler.util.DomainHelper;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.crawler.Page;
@@ -51,7 +52,6 @@ public class SimpleCrawl implements ICrawler {
     }
 
     private void startCrawl(UniversitySeed seed, Boolean isParallel) throws Exception {
-
         String crawlStorageFolder = this.storageLocation;
         int numberOfCrawlers = 1;
 
@@ -59,6 +59,7 @@ public class SimpleCrawl implements ICrawler {
         config.setMaxDepthOfCrawling(crawlConfiguration.getMaxLinkDepth());
         config.setMaxPagesToFetch(crawlConfiguration.getMaxPages());
         config.setCrawlStorageFolder(crawlStorageFolder);
+        config.setResumableCrawling(true);
         // Instantiate the controller for this crawl.
         PageFetcher pageFetcher = new PageFetcher(config);
 
@@ -87,17 +88,30 @@ public class SimpleCrawl implements ICrawler {
     }
 
     private CrawlController.WebCrawlerFactory<UniversityCrawler> CreateCrawler(UniversitySeed seed){
+        final String domain = DomainHelper.getDomain(seed.getSeedUrl());
         CrawlController.WebCrawlerFactory<UniversityCrawler> factory = () -> new UniversityCrawler(
                 whiteList,
-                (page) -> processPage(page, seed.getUniversityId()),
+                (page) -> processPage(page, seed.getUniversityId(), domain),
                 this.crawlConfiguration
         );
         return factory;
     }
 
-    Void processPage(Page page, int universityId){
+
+
+    Void processPage(Page page, int universityId, String universityDomain){
         if (!(page.getParseData() instanceof HtmlParseData))
             return null;
+
+        final String pageDomain = DomainHelper.getDomain(page.getWebURL().getURL());
+
+        // Prevents cross domain storage 
+        // e.g. Uni Potsdam has link to TU Berlin, TU Berlin sites
+        // would then be stored with id of UP which would mess up results
+        if(!pageDomain.equals(universityDomain)){
+            //System.out.println("Skip " + page.getWebURL() + " for university with domain " + universityDomain);
+            return null;
+        }
 
         HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
         String html = htmlParseData.getHtml();

@@ -1,20 +1,23 @@
 package de.unidisk.services;
 
 import de.unidisk.contracts.services.recommendation.IKeywordRecommendationService;
+import de.unidisk.contracts.services.recommendation.KeywordRecommendation;
 import de.unidisk.contracts.services.recommendation.RecommendationResult;
 
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class KeywordRecommendationService implements IKeywordRecommendationService {
 
     @Override
     public RecommendationResult getTopicRecommendations(String topic) {
+        final List<KeywordRecommendation> recommendations = new ArrayList<>();
+        recommendations.add(new KeywordRecommendation(1,topic+" 2"));
+        recommendations.add(new KeywordRecommendation(.7,topic+" 4"));
         return new RecommendationResult(
-                new ArrayList<>(),
-                ""
+                recommendations,
+                "0"
         );
     }
 }

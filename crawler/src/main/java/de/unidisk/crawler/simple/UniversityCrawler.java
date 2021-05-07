@@ -1,21 +1,16 @@
 package de.unidisk.crawler.simple;
 
-import de.unidisk.crawler.model.UniversitySeed;
+import de.unidisk.crawler.util.DomainHelper;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class UniversityCrawler extends WebCrawler {
 
@@ -24,7 +19,8 @@ public class UniversityCrawler extends WebCrawler {
     private Function<Page,Void> pageProcessor;
 
     public UniversityCrawler(String[] whitelist, Function<Page,Void> pageProcessor, CrawlConfiguration configuration) {
-        this.whitelistUrls = new HashSet<String>(Arrays.asList(whitelist));
+        final List<String> domains = Arrays.stream(whitelist).map(DomainHelper::getDomain).filter(Objects::nonNull).collect(Collectors.toList());
+        this.whitelistUrls = new HashSet<String>(domains);
         this.crawlConfiguration = configuration;
         this.pageProcessor = pageProcessor;
     }
@@ -32,14 +28,16 @@ public class UniversityCrawler extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
-        boolean visitPage =  !crawlConfiguration.getFileIgnorePattern().matcher(href).matches()
-                && checkWhiteList(url);
+        boolean ignore = crawlConfiguration.getFileIgnorePattern().matcher(href).matches();
+        boolean whitelisted = checkWhiteList(url);
+        boolean visitPage =  !ignore
+                && whitelisted;
         return visitPage;
     }
 
     private boolean checkWhiteList(WebURL url) {
-        String urlString = url.toString();
-        return whitelistUrls.contains(urlString);
+        String domain = DomainHelper.getDomain(url.getURL());
+        return whitelistUrls.contains(domain);
     }
 
 

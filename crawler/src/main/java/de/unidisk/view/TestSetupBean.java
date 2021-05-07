@@ -118,6 +118,8 @@ public class TestSetupBean {
                 new KeywordRecommendationService()
         );
         solrApp = new SolrApp(projectRepository,scoringService,resultService,projectGenerationService);
+
+        final long scoringInterval = SystemConfiguration.getInstance().getScoringInterval();
         scoringTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -128,7 +130,7 @@ public class TestSetupBean {
                     e.printStackTrace();
                 }
             }
-        } , 0,SystemConfiguration.getInstance().getScoringInterval());
+        } , 0,scoringInterval);
     }
 
     public IUniversityRepository getUniversityRepository() {

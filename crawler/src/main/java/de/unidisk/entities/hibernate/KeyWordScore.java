@@ -1,5 +1,6 @@
 package de.unidisk.entities.hibernate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -15,10 +16,15 @@ public class KeyWordScore implements ScoredInput {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private SearchMetaData searchMetaData;
 
-    @OneToOne
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @Column()
+    private String pageTitle;
+
+    @JsonIgnore
+    @ManyToOne
     private Keyword keyword;
     private double score;
+
+
 
     public KeyWordScore() {
     }
@@ -31,6 +37,7 @@ public class KeyWordScore implements ScoredInput {
         return searchMetaData;
     }
 
+    @JsonIgnore
     @Override
     public Input getInput() {
         return keyword;
@@ -65,5 +72,22 @@ public class KeyWordScore implements ScoredInput {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getKeywordId() {
+        return keyword.getId();
+    }
+
+    @JsonIgnore
+    public int getUniversityId() {
+        return getSearchMetaData().getUniversity().getId();
+    }
+
+    public String getPageTitle() {
+        return pageTitle;
+    }
+
+    public void setPageTitle(String pageTitle) {
+        this.pageTitle = pageTitle;
     }
 }

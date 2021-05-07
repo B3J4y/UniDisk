@@ -1,7 +1,6 @@
 package de.unidisk.entities.util;
 
 import de.unidisk.contracts.exceptions.DuplicateException;
-import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.ProjectDAO;
@@ -10,10 +9,8 @@ import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.SearchMetaData;
 import de.unidisk.entities.hibernate.Topic;
-
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.security.Key;
 import java.util.*;
 
 public final class TestFactory {
@@ -38,6 +35,12 @@ public final class TestFactory {
     }
 
     public static Keyword createKeyword(){
+        final Topic t = createTopic();
+        Keyword k = new KeywordDAO().addKeyword(UUID.randomUUID().toString(),t.getId());
+        return k;
+    }
+
+    public static Topic createTopic(){
         Project p = null;
         try {
             p = new ProjectDAO().createProject(new CreateProjectParams(UUID.randomUUID().toString(),"test"));
@@ -45,8 +48,7 @@ public final class TestFactory {
             e.printStackTrace();
         }
         Topic t = new TopicDAO().createTopic(UUID.randomUUID().toString(),p.getId());
-        Keyword k = new KeywordDAO().addKeyword(UUID.randomUUID().toString(),t.getId());
-        return k;
+        return t;
     }
 
     public static String randomUniversityUrl(String university){
