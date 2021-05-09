@@ -8,9 +8,8 @@ import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.rest.dto.topic.RateTopicResultDto;
-import de.unidisk.view.project.ProjectView;
-import de.unidisk.view.results.KeywordResult;
-import de.unidisk.view.results.Result;
+import de.unidisk.entities.results.KeywordResult;
+import de.unidisk.entities.results.Result;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -214,11 +213,6 @@ public class ProjectDAO  implements IProjectRepository {
             final boolean finished = projectsStream.map(Project::finishedProcessing).reduce(true,Boolean::logicalAnd);
             return finished;
         });
-    }
-
-    @Override
-    public List<ProjectView> getProjects() {
-        return getAll().stream().map(ProjectView::fromProject).collect(Collectors.toList());
     }
 
     @Override

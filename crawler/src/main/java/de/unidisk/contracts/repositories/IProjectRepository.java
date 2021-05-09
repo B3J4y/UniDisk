@@ -8,15 +8,12 @@ import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.rest.dto.topic.RateTopicResultDto;
-import de.unidisk.view.project.ProjectView;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
 public interface IProjectRepository extends Serializable {
-
-    List<ProjectView> getProjects();
 
     List<Project> getUserProjects(String userId);
     Optional<Project> findUserProjectByName(String userId, String name);

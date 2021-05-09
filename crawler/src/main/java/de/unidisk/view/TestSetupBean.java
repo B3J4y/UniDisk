@@ -13,7 +13,11 @@ import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.UniCrawlService;
 import de.unidisk.dao.HibernateTestSetup;
 import de.unidisk.dao.HibernateUtil;
+import de.unidisk.dao.UniversityDAO;
 import de.unidisk.entities.hibernate.Project;
+import de.unidisk.repositories.HibernateKeywordRepo;
+import de.unidisk.repositories.HibernateProjectRepo;
+import de.unidisk.services.HibernateResultService;
 import de.unidisk.services.KeywordRecommendationService;
 import de.unidisk.services.ProjectGenerationService;
 import de.unidisk.solr.SolrApp;
@@ -22,10 +26,8 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.annotation.PreDestroy;
-import javax.faces.bean.ManagedBean;
-import javax.annotation.PostConstruct;
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedProperty;
+import javax.inject.Inject;
+import javax.ws.rs.ext.Provider;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,8 +36,7 @@ import java.util.TimerTask;
  * Dies wird beim Start der Anwendung ausgeführt.
  */
 
-@ManagedBean(eager=true)
-@ApplicationScoped
+@Provider
 public class TestSetupBean {
 
     static private final Logger logger = LogManager.getLogger(TestSetupBean.class.getName());
@@ -44,24 +45,35 @@ public class TestSetupBean {
 
     private SolrApp solrApp;
 
-    @ManagedProperty("#{universityRepo}")
+    @Inject
     private IUniversityRepository universityRepository;
 
-    @ManagedProperty("#{projectRepository}")
+    @Inject
     private IProjectRepository projectRepository;
 
-    @ManagedProperty("#{keywordRepository}")
+    @Inject
     private IKeywordRepository keywordRepository;
 
-    @ManagedProperty("#{topicRepository}")
+    @Inject
     private ITopicRepository topicRepository;
 
-    @ManagedProperty("#{resultService}")
+    @Inject
     private IResultService resultService;
+
+    public TestSetupBean() {
+    }
+
+    public static TestSetupBean Default(){
+        final TestSetupBean bean = new TestSetupBean();
+        bean.setProjectRepository(new HibernateProjectRepo());
+        bean.setKeywordRepository(new HibernateKeywordRepo());
+        bean.setResultService(new HibernateResultService());
+        bean.setUniversityRepository(new UniversityDAO());
+        return bean;
+    }
 
     private Timer crawlTimer,scoringTimer;
 
-    @PostConstruct
     public void init() {
         SystemConfiguration config = SystemConfiguration.getInstance();
         if(config.getDatabaseConfiguration().isInitializeMockData()){

@@ -3,7 +3,6 @@ package de.unidisk.contracts.repositories;
 import de.unidisk.entities.hibernate.University;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IUniversityRepository {
     List<University> getUniversities();
@@ -14,7 +13,6 @@ public interface IUniversityRepository {
     given time period.
      */
     List<University> getUniversities(long timeSinceLastCrawl);
-    Optional<University> getUniversity(int id);
 
     void setLastCrawlTime(int universityId, long timestamp);
 }

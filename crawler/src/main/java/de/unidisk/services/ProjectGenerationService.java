@@ -12,10 +12,12 @@ import de.unidisk.contracts.services.recommendation.KeywordRecommendation;
 import de.unidisk.contracts.services.recommendation.RecommendationResult;
 import de.unidisk.entities.hibernate.*;
 
+import javax.ws.rs.ext.Provider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Provider
 public class ProjectGenerationService {
     IProjectRepository projectRepository;
     ITopicRepository topicRepository;

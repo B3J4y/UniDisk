@@ -7,11 +7,8 @@ import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.entities.hibernate.Keyword;
 
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
 import java.util.Optional;
-@ApplicationScoped
-@ManagedBean(name = "keywordRepository")
+
 public class HibernateKeywordRepo implements IKeywordRepository {
 
     KeywordDAO dao = new KeywordDAO();

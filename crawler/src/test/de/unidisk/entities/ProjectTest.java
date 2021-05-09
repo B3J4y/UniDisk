@@ -9,7 +9,7 @@ import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.rest.dto.topic.RateTopicResultDto;
-import de.unidisk.view.results.Result;
+import de.unidisk.entities.results.Result;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
