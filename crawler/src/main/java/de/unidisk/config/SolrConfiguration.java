@@ -1,21 +1,7 @@
 package de.unidisk.config;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
-import com.google.gson.Gson;
-import de.unidisk.solr.SolrApp;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.common.util.IOUtils;
 
-
-import javax.faces.context.FacesContext;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 

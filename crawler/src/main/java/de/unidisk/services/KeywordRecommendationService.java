@@ -4,10 +4,12 @@ import de.unidisk.contracts.services.recommendation.IKeywordRecommendationServic
 import de.unidisk.contracts.services.recommendation.KeywordRecommendation;
 import de.unidisk.contracts.services.recommendation.RecommendationResult;
 
+import javax.ws.rs.ext.Provider;
 import java.util.ArrayList;
 import java.util.List;
 
 
+@Provider
 public class KeywordRecommendationService implements IKeywordRecommendationService {
 
     @Override

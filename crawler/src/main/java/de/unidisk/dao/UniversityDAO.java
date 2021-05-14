@@ -1,5 +1,6 @@
 package de.unidisk.dao;
 
+import de.unidisk.contracts.repositories.IUniversityRepository;
 import de.unidisk.entities.hibernate.University;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -7,7 +8,7 @@ import org.hibernate.Transaction;
 import java.util.List;
 import java.util.Optional;
 
-public class UniversityDAO {
+public class UniversityDAO implements IUniversityRepository {
 
     public University addUniversity(String name) {
         Session currentSession = HibernateUtil.getSessionFactory().openSession();
@@ -58,28 +59,24 @@ public class UniversityDAO {
         return get(id).isPresent();
     }
 
-    public List<University> getAll() {
-        Session currentSession = HibernateUtil.getSessionFactory().openSession();
-        Transaction tnx = currentSession.beginTransaction();
-
-        List<University> universities = currentSession.createQuery("from University ", University.class).getResultList();
-        currentSession.close();
-        return universities;
+    @Override
+    public List<University> getUniversities() {
+        return HibernateUtil.execute(session -> session.createQuery("from University ", University.class).getResultList());
     }
 
-    public List<University> getAll(long lastCrawl) {
-        Session currentSession = HibernateUtil.getSessionFactory().openSession();
-        Transaction tnx = currentSession.beginTransaction();
-
-        List<University> universities = currentSession.createQuery("select u from University u where abs(u.lastCrawl - :current ) > :period ", University.class)
-                .setParameter("period",lastCrawl)
-                .setParameter("current", System.currentTimeMillis())
-                .getResultList();
-        currentSession.close();
-        return universities;
+    @Override
+    public List<University> getUniversities(long timeSinceLastCrawl) {
+        return HibernateUtil.execute(session -> {
+            List<University> universities = session.createQuery("select u from University u where abs(u.lastCrawl - :current ) > :period ", University.class)
+                    .setParameter("period",timeSinceLastCrawl)
+                    .setParameter("current", System.currentTimeMillis())
+                    .getResultList();
+            return universities;
+        });
     }
 
-    public void setLastCrawl(int universityId, long timestamp){
+    @Override
+    public void setLastCrawlTime(int universityId, long timestamp) {
         final Optional<University> uni = get(universityId);
         if(!uni.isPresent()){
             return;
@@ -96,6 +93,5 @@ public class UniversityDAO {
         currentSession.update(u);
         transaction.commit();
         currentSession.close();
-
     }
 }

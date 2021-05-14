@@ -2,7 +2,7 @@ package de.unidisk.common;
 
 import de.unidisk.entities.hibernate.ProjectRelevanceScore;
 import de.unidisk.entities.hibernate.ProjectSubtype;
-import de.unidisk.view.results.Result;
+import de.unidisk.entities.results.Result;
 
 import java.util.List;
 

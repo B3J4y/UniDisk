@@ -1,4 +1,4 @@
-package de.unidisk.view.results;
+package de.unidisk.entities.results;
 
 import de.unidisk.entities.hibernate.University;
 

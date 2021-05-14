@@ -10,27 +10,14 @@ import de.unidisk.dao.ProjectDAO;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.rest.dto.topic.RateTopicResultDto;
-import de.unidisk.view.project.ProjectView;
 
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-@ApplicationScoped
-@ManagedBean(name = "projectRepository")
+
 public class HibernateProjectRepo implements IProjectRepository {
 
     final ProjectDAO projectDAO = new ProjectDAO();
-
-    @Override
-    public List<ProjectView> getProjects() {
-        List<ProjectView> projects = projectDAO.getAll().stream()
-                .map(project -> new ProjectView(project.getName(), project.getProjectState(), String.valueOf(project.getId())))
-                .collect(Collectors.toList());
-        return projects;
-    }
 
     @Override
     public List<Project> getUserProjects(String userId) {

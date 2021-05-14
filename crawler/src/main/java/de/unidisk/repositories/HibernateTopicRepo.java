@@ -2,21 +2,18 @@ package de.unidisk.repositories;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
+import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.contracts.repositories.params.topic.UpdateTopicParams;
 import de.unidisk.dao.KeywordDAO;
 import de.unidisk.dao.TopicDAO;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Topic;
-import de.unidisk.contracts.repositories.ITopicRepository;
 import de.unidisk.entities.hibernate.TopicScore;
 
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
 import java.util.List;
 import java.util.Optional;
 
-@ApplicationScoped
-@ManagedBean(name = "topicRepository")
+
 public class HibernateTopicRepo implements ITopicRepository {
 
 

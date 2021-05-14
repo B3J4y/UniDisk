@@ -1,19 +1,20 @@
 package de.unidisk.services;
 
 import de.unidisk.common.exceptions.EntityNotFoundException;
+import de.unidisk.contracts.services.IResultService;
 import de.unidisk.crawler.model.ScoreResult;
 import de.unidisk.dao.*;
-import de.unidisk.entities.hibernate.*;
-import de.unidisk.contracts.services.IResultService;
+import de.unidisk.entities.hibernate.KeyWordScore;
+import de.unidisk.entities.hibernate.Keyword;
+import de.unidisk.entities.hibernate.SearchMetaData;
+import de.unidisk.entities.hibernate.Topic;
 
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
+import javax.ws.rs.ext.Provider;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
-@ManagedBean(name = "resultService")
-@ApplicationScoped
+@Provider
 public class HibernateResultService implements IResultService {
 
     @Override
