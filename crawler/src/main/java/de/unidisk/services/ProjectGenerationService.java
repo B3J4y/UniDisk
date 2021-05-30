@@ -50,8 +50,10 @@ public class ProjectGenerationService {
                 ProjectSubtype.BY_TOPICS
         ));
         final List<Topic> topics = new ArrayList<>();
+        final int projectCopyId = projectCopy.getId();
         for(Topic topic: project.getTopics()){
-            final Topic topicCopy = topicRepository.createTopic(projectCopy.getId(), topic.getName());
+            final String topicName = topic.getName();
+            final Topic topicCopy = topicRepository.createTopic(projectCopyId, topicName);
             final RecommendationResult result = keywordRecommendationService.getTopicRecommendations(topic.getName());
             final List<KeywordRecommendation> recommendations = result.getRecommendations().stream().limit(5).collect(Collectors.toList());
             final List<Keyword> keywords = new ArrayList<>();

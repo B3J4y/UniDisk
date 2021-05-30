@@ -35,5 +35,10 @@ services:
       - solr-precreate
       - gettingstarted
 
+  recommendation:
+    build: ./recommendation
+    ports:
+      - 8083:8000
+
 volumes:
   solr_data:
