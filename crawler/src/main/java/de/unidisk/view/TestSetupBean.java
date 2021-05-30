@@ -17,6 +17,7 @@ import de.unidisk.dao.UniversityDAO;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateProjectRepo;
+import de.unidisk.repositories.HibernateTopicRepo;
 import de.unidisk.services.HibernateResultService;
 import de.unidisk.services.KeywordRecommendationService;
 import de.unidisk.services.ProjectGenerationService;
@@ -67,6 +68,7 @@ public class TestSetupBean {
         final TestSetupBean bean = new TestSetupBean();
         bean.setProjectRepository(new HibernateProjectRepo());
         bean.setKeywordRepository(new HibernateKeywordRepo());
+        bean.setTopicRepository(new HibernateTopicRepo());
         bean.setResultService(new HibernateResultService());
         bean.setUniversityRepository(new UniversityDAO());
         return bean;
