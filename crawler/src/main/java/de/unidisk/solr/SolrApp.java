@@ -116,6 +116,11 @@ public class SolrApp {
         lock.lock();
 
         try {
+            if(!scoringService.canEvaluate()){
+                logInfo("Currently unable to score keywords.");
+                return;
+            }
+
             final List<Project> pendingProjects = projectRepository.getProjects(ProjectState.WAITING);
 
             if (pendingProjects.isEmpty()) {

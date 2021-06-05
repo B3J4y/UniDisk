@@ -80,6 +80,20 @@ public class SolrScoringService implements IScoringService {
         return scoreResults;
     }
 
+    @Override
+    public boolean canEvaluate() {
+        SolrQuery q = new SolrQuery("*:*");
+        q.setRows(0);  // don't request data
+        try {
+            long coreDocuments =  new SolrConnector(solrConfiguration).query(q).getResults().getNumFound();
+            return coreDocuments > 50;
+        } catch (IOException | SolrServerException e) {
+            // Not being able to connect to Solr automatically means that we can't evaluate
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private List<SolrDocument> getKeyDocs(SolrConnector connector, String key) throws IOException, SolrServerException {
         final SolrQuery query =new SolrStichwort(key).buildQuery(new ArrayList<>());
         QueryResponse response = connector.query(query);
