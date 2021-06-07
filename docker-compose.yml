@@ -6,6 +6,7 @@ services:
       - 8081:8080
     depends_on:
       - db
+      - solr
     environment:
       - DOCKER_COMPOSE=1
   db:
@@ -33,7 +34,7 @@ services:
       - solr_data:/var/solr
     command:
       - solr-precreate
-      - gettingstarted
+      - unidisc
 
   recommendation:
     build: ./recommendation
