@@ -9,6 +9,7 @@ import de.unidisk.contracts.services.IResultService;
 import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.model.ScoreResult;
 import de.unidisk.dao.ProjectDAO;
+import de.unidisk.dao.UniversityDAO;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
@@ -147,7 +148,9 @@ public class SolrApp {
 
         final IScoringService scoringService = new SolrScoringService(keywordRepository,
                 topicRepository,
-                SolrConfiguration.getInstance());
+                SolrConfiguration.getInstance(),
+                new UniversityDAO()
+        );
         final IProjectRepository projectRepository = new ProjectDAO();
         final IResultService resultService = new HibernateResultService();
         final ProjectGenerationService projectGenerationService = new ProjectGenerationService(

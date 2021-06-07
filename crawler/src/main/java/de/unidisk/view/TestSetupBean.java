@@ -183,7 +183,8 @@ public class TestSetupBean {
 
 
         scoringTimer = new Timer();
-        final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository, SolrConfiguration.getInstance());
+        final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository,
+                SolrConfiguration.getInstance(), universityRepository);
         final ProjectGenerationService projectGenerationService = new ProjectGenerationService(
                 projectRepository,
                 topicRepository,

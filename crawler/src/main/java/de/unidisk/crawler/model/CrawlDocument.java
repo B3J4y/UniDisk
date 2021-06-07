@@ -26,17 +26,15 @@ public class CrawlDocument {
     @Field
     public int depth;
 
-    @Field
-    public int universityId;
 
-    public CrawlDocument(String id, String url, String title, String content, int depth, Long datum, int universityId) {
+
+    public CrawlDocument(String id, String url, String title, String content, int depth, Long datum) {
         this.id = id;
         this.title = title;
         this.content = content;
         this.datum = datum;
         this.url = url;
         this.depth = depth;
-        this.universityId = universityId;
     }
 
     public CrawlDocument(SolrDocument document){
@@ -47,7 +45,6 @@ public class CrawlDocument {
         this.url = getProperty("url",document);
         Long d = getProperty("depth",document);
         this.depth = d.intValue();
-        this.universityId = ((Long) getProperty("universityId",document)).intValue();
     }
 
     private static <T> T getProperty(String field, SolrDocument document){

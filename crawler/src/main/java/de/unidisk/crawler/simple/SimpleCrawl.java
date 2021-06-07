@@ -123,7 +123,8 @@ public class SimpleCrawl implements ICrawler {
         CrawlDocument simpleCrawlDocument =
                 new CrawlDocument(documentId,
                         url, pageTitle,
-                        safe, page.getWebURL().getDepth(), timestamp, universityId);
+                        safe, page.getWebURL().getDepth(), timestamp
+                );
         try {
             new SimpleSolarSystem(solrUrl).sendPageToTheMoon(simpleCrawlDocument);
         } catch (IOException e) {

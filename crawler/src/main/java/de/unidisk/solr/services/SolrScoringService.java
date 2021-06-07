@@ -4,12 +4,15 @@ import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.config.SolrConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
+import de.unidisk.contracts.repositories.IUniversityRepository;
 import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.datatype.SolrStichwort;
 import de.unidisk.crawler.model.CrawlDocument;
 import de.unidisk.crawler.model.ScoreResult;
+import de.unidisk.crawler.util.DomainHelper;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.TopicScore;
+import de.unidisk.entities.hibernate.University;
 import de.unidisk.solr.SolrConnector;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -18,9 +21,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SolrScoringService implements IScoringService {
@@ -28,11 +29,31 @@ public class SolrScoringService implements IScoringService {
     private IKeywordRepository keywordRepository;
     private ITopicRepository topicRepository;
     private SolrConfiguration solrConfiguration;
+    private IUniversityRepository universityRepository;
 
-    public SolrScoringService(IKeywordRepository keywordRepository, ITopicRepository topicRepository, SolrConfiguration solrConfiguration) {
+    private Map<String,Integer> universityDomainMap;
+
+    public SolrScoringService(IKeywordRepository keywordRepository, ITopicRepository topicRepository, SolrConfiguration solrConfiguration, IUniversityRepository universityRepository) {
         this.keywordRepository = keywordRepository;
         this.solrConfiguration = solrConfiguration;
         this.topicRepository = topicRepository;
+        this.universityRepository = universityRepository;
+    }
+
+    private void setupUniversityDomains(){
+        if(universityDomainMap != null)
+            return;
+        universityDomainMap = this.buildUniversityMap();
+    }
+
+    private Map<String,Integer> buildUniversityMap(){
+        final List<University> universities = universityRepository.getUniversities();
+        final Map<String,Integer> universityMap = new HashMap<>();
+        for(University university : universities){
+            final String domain = DomainHelper.getDomain(university.getSeedUrl());
+            universityMap.put(domain,university.getId());
+        }
+        return universityMap;
     }
 
     @Override
@@ -40,12 +61,19 @@ public class SolrScoringService implements IScoringService {
         final Optional<Keyword> keyword = this.keywordRepository.getKeyword(keywordId);
         if(!keyword.isPresent())
             return null;
+
+        setupUniversityDomains();
         try {
             final SolrConnector solrConnector = new SolrConnector(solrConfiguration);
             final List<SolrDocument> docs = getKeyDocs(solrConnector, keyword.get().getName());
             final List<ScoreResult> results = docs.stream().map(d -> {
                 final CrawlDocument crawlDocument = new CrawlDocument(d);
-                final int universityId = crawlDocument.universityId;
+                final String resultDomain = DomainHelper.getDomain(crawlDocument.url);
+
+                if(!universityDomainMap.containsKey(resultDomain)){
+                    System.out.println("Unable to find university for domain: " + resultDomain);
+                }
+                final int universityId = universityDomainMap.get(resultDomain);
                 return new ScoreResult(
                         keywordId,
                         (float) d.get("score"),
