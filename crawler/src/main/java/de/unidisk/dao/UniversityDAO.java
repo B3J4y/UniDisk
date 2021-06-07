@@ -61,7 +61,7 @@ public class UniversityDAO implements IUniversityRepository {
 
     @Override
     public List<University> getUniversities() {
-        return HibernateUtil.execute(session -> session.createQuery("from University ", University.class).getResultList());
+        return HibernateUtil.execute(session -> session.createQuery("select u from University u ", University.class).getResultList());
     }
 
     @Override
@@ -93,5 +93,13 @@ public class UniversityDAO implements IUniversityRepository {
         currentSession.update(u);
         transaction.commit();
         currentSession.close();
+    }
+
+    @Override
+    public University create(University university) {
+        return HibernateUtil.execute(session -> {
+            session.save(university);
+            return university;
+        });
     }
 }

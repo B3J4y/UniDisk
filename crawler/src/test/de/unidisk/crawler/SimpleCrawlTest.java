@@ -31,7 +31,7 @@ public class SimpleCrawlTest {
         ICrawler crawler = new SimpleCrawl(
                 crawlerConfiguration.getStorageLocation(),
                 seeds,
-                SolrConfiguration.getInstance().getUrl(),
+                SolrConfiguration.getInstance().getCoreUrl(),
                 CrawlConfiguration.fromCrawlerConfiguration(crawlerConfiguration)
         );
         crawler.startCrawl(seeds[0].getSeedUrl());
