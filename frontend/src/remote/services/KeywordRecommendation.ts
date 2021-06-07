@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { KEYWORD_SERVICE_ENDPOINT } from 'config';
 export type KeywordRecommedation = {
   keyword: string;
   // Value between [0,1]
@@ -16,7 +17,7 @@ export type RecommendationUsedParams = {
 };
 export class KeywordRecommendationService {
   private client = axios.create({
-    baseURL: 'http://localhost:8001',
+    baseURL: KEYWORD_SERVICE_ENDPOINT,
   });
 
   public async recommendationUsed(params: RecommendationUsedParams): Promise<void> {
