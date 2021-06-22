@@ -102,6 +102,7 @@ public class TestSetupBean {
 
         initCore();
         seed();
+        if(!config.getCrawlerConfiguration().isDisabled())
         setupCrawlJob();
         setupScoringJob();
     }
