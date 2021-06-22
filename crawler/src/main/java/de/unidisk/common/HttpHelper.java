@@ -31,6 +31,8 @@ public class HttpHelper {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestMethod("POST");
+        // 5 seconds
+        con.setReadTimeout(5000);
 
         int status = con.getResponseCode();
         if(status != 200)
@@ -53,6 +55,8 @@ public class HttpHelper {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestMethod("GET");
+        // 5 seconds
+        con.setReadTimeout(5000);
 
         int status = con.getResponseCode();
         if(status != 200)
