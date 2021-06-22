@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 fastapi = "*"
-top2vec = "*"
 numpy = "*"
 uvicorn = "*"
+bertopic = "*"
 
 [dev-packages]
 

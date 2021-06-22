@@ -5,7 +5,7 @@ from timeit import default_timer as timer
 from pydantic import BaseModel
 import uuid
 from fastapi.middleware.cors import CORSMiddleware
-from model_top2vec import Top2VecRecommender
+from model_bert import BERTRecommender
 
 app = FastAPI()
 
@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-model = Top2VecRecommender()
+model = BERTRecommender()
 
 @app.get("/hello")
 def hello():
@@ -34,12 +34,14 @@ def store_request(request_id : str, query: str):
         myfile.write(query+";"+request_id+"\n")
 
 @app.get("/similiar")
-def similiar(q: str, count: Optional[int] = 10):
-    similiar_words = model.get_recommendations(q,n=count)
+def similiar(topic: str, q: Optional[str] = "", count: Optional[int] = 10, keywords: Optional[str] = ""):
+    similiar_words = model.get_recommendations(q,topic,n=count,keywords=keywords.split(","))
+
+    response_words = [(x[0].capitalize(), x[1]) for x in similiar_words]
     request_id = uuid.uuid4()
     #store_request(str(request_id),q)
 
-    return {"requestId": request_id, "similiar": similiar_words}
+    return {"requestId": request_id, "similiar": response_words}
 
 class KeywordUsedDto(BaseModel):
     keyword: str
