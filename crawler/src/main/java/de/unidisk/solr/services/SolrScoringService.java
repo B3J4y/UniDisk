@@ -33,6 +33,8 @@ public class SolrScoringService implements IScoringService {
 
     private Map<String,Integer> universityDomainMap;
 
+    private static final int MAX_UNI_RESULT_COUNT = 100;
+
     public SolrScoringService(IKeywordRepository keywordRepository, ITopicRepository topicRepository, SolrConfiguration solrConfiguration, IUniversityRepository universityRepository) {
         this.keywordRepository = keywordRepository;
         this.solrConfiguration = solrConfiguration;
@@ -57,7 +59,7 @@ public class SolrScoringService implements IScoringService {
     }
 
     @Override
-    public List<ScoreResult> getKeywordScore(int projectId, int keywordId) {
+    public List<ScoreResult> getKeywordScores(int projectId, int keywordId) {
         final Optional<Keyword> keyword = this.keywordRepository.getKeyword(keywordId);
         if(!keyword.isPresent())
             return null;
@@ -72,6 +74,7 @@ public class SolrScoringService implements IScoringService {
 
                 if(!universityDomainMap.containsKey(resultDomain)){
                     System.out.println("Unable to find university for domain: " + resultDomain);
+                    return null;
                 }
                 final int universityId = universityDomainMap.get(resultDomain);
                 return new ScoreResult(
@@ -82,7 +85,7 @@ public class SolrScoringService implements IScoringService {
                         crawlDocument.url,
                         crawlDocument.title
                 );
-            }).collect(Collectors.toList());
+            }).filter(Objects::nonNull).collect(Collectors.toList());
             return results;
         } catch (IOException | SolrServerException e) {
             e.printStackTrace();
@@ -106,6 +109,26 @@ public class SolrScoringService implements IScoringService {
             )
         ).collect(Collectors.toList());
         return scoreResults;
+    }
+
+    @Override
+    public List<ScoreResult> filterRelevantKeywordScores(List<ScoreResult> keywordScores) {
+        final Map<Integer,List<ScoreResult>> universityScores = new HashMap<>();
+
+        for(ScoreResult score : keywordScores){
+            final int universityId = score.getUniversityId();
+            if(universityScores.containsKey(universityId)){
+                universityScores.get(universityId).add(score);
+            }else{
+                final ArrayList<ScoreResult> result = new ArrayList<>();
+                result.add(score);
+                universityScores.put(universityId,result);
+            }
+        }
+
+        return universityScores.values().stream().flatMap(scores ->
+             scores.stream().sorted(Comparator.comparing(ScoreResult::getScore).reversed()).limit(MAX_UNI_RESULT_COUNT)
+        ).collect(Collectors.toList());
     }
 
     @Override

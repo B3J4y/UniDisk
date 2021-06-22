@@ -75,6 +75,7 @@ public class SolrLifecycle  {
             return;
         }
 
+        removeContainer();
         String cmd = "docker run -d -p "+PORT+":8983 --name " + CONTAINER + " solr:8 solr-create -c " + CORE;
         runCommand(cmd);
 
@@ -92,6 +93,10 @@ public class SolrLifecycle  {
         }
     }
 
+    private static void removeContainer() throws IOException, InterruptedException {
+        runCommand("docker rm -fv "+ CONTAINER);
+    }
+
 
     public static void clean() throws IOException {
 
@@ -99,6 +104,7 @@ public class SolrLifecycle  {
         try {
           solr.deleteByQuery("*:*");
           solr.commit();
+          removeContainer();
         } catch (Exception e) {
             e.printStackTrace();
         }

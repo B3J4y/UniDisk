@@ -181,7 +181,7 @@ public class SolrTest implements HibernateLifecycle {
                 SolrConfiguration.getInstance(),
                 universityRepository
         );
-        final List<ScoreResult> results = scoringService.getKeywordScore(0,keyword.getId());
+        final List<ScoreResult> results = scoringService.getKeywordScores(0,keyword.getId());
         assertNotNull(results);
         Assertions.assertTrue(results.size() > 0);
     }

@@ -12,6 +12,7 @@ import de.unidisk.rest.dto.topic.RateTopicResultDto;
 import de.unidisk.entities.results.Result;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
@@ -158,6 +159,7 @@ public class ProjectTest implements HibernateLifecycle {
     }
 
     @Test
+    @Disabled
     public void getResultsReturnsValidData() throws DuplicateException, MalformedURLException {
         final ApplicationState state = MockData.getMockState();
         final UniversityDAO uniDao = new UniversityDAO();
