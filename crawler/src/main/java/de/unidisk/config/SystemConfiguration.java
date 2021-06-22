@@ -70,12 +70,16 @@ public class SystemConfiguration {
     final int maxVisits = Integer.parseInt(properties.getProperty(prefix+"maxSeedVisits"));
     final long uniCrawlInterval = Long.parseLong(properties.getProperty(prefix+"uni.interval"));
     final long crawlInterval = Long.parseLong(properties.getProperty(prefix+"interval"));
+    final String disabledPropertyValue = properties.getProperty(prefix+"disabled");
+    final boolean disabled = disabledPropertyValue != null && disabledPropertyValue.equals("1");
+
     return new CrawlerConfiguration(
             storageLocation,
             maxDepth,
             maxVisits,
             uniCrawlInterval,
-            crawlInterval
+            crawlInterval,
+            disabled
     );
   }
 
