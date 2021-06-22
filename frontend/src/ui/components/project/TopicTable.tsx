@@ -72,6 +72,7 @@ export function ProjectTopics(props: ProjectTopicsProps) {
           <TopicKeywords
             topicId={selected?.id}
             keywords={selected?.keywords ?? []}
+            topicName={selected.name}
             disabled={disabled}
           />
         )}
@@ -82,6 +83,7 @@ export function ProjectTopics(props: ProjectTopicsProps) {
 
 type TopicKeywordsProps = {
   topicId: Topic['id'];
+  topicName: string;
   keywords: Keyword[];
   disabled?: boolean;
 };
@@ -98,7 +100,11 @@ function TopicKeywords(props: TopicKeywordsProps) {
         </Grid>
       </Toolbar>
       {!disabled && (
-        <CreateKeywordForm topicId={props.topicId} topicKeywords={keywords.map((k) => k.name)} />
+        <CreateKeywordForm
+          topicName={props.topicName}
+          topicId={props.topicId}
+          topicKeywords={keywords.map((k) => k.name)}
+        />
       )}
       {keywords.length === 0 && <p>Noch keine Stichworte hinzugefügt</p>}
       {keywords.length > 0 && (
