@@ -150,7 +150,7 @@ export class ProjectApiRepository extends BaseApiRepository implements ProjectRe
           };
         }, {} as Record<ProjectType, ProjectResult>),
       };
-      console.log(projectResults);
+
       return projectResults;
     });
   }
