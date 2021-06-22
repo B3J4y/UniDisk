@@ -53,26 +53,26 @@ public class MockData {
                 ))
         ));
 
-        final Project p3 = new Project("Beispielprojekt", ProjectState.WAITING,Arrays.asList(
+        final Project p3 = new Project("Biologie", ProjectState.WAITING,Arrays.asList(
                 new Topic(
-                        "Geräte",0, Arrays.asList(
+                        "Zelle",0, Arrays.asList(
                         new Keyword(
-                                "Tablet"
+                                "Ribosomen"
                         ),
 
                         new Keyword(
-                                "Smartphone"
+                                "Zellkern"
                         ),
-                        new Keyword("Laptop"),
-                        new Keyword("IOT")
+                        new Keyword("Proteine"),
+                        new Keyword("Bindung")
                 )
                 ),
                 new Topic(
-                        "Software", 0, Arrays.asList(
-                        new Keyword("Microsoft"),
-                        new Keyword("O365"),
-                        new Keyword("Moodle"),
-                        new Keyword("Office")
+                        "Medizin", 0, Arrays.asList(
+                        new Keyword("Ambulanz"),
+                        new Keyword("Krankenhaus"),
+                        new Keyword("Pflege"),
+                        new Keyword("Covid")
                 )
                 )
         ));
@@ -98,9 +98,39 @@ public class MockData {
         ));
         p4.setProcessingError("Fehler bei der Verarbeitung.");
 
+        final Project p5 = new Project("Informatik", ProjectState.WAITING,Arrays.asList(
+                new Topic(
+                        "Machine Learning",0, Arrays.asList(
+                        new Keyword(
+                                "Neuronale Netzwerke"
+                        ),
+
+                        new Keyword(
+                                "Computer Vision"
+                        ),
+                        new Keyword("Statistik"),
+                        new Keyword("Topic labeling")
+                )
+                ),
+                new Topic(
+                        "Netzwerk", 0, Arrays.asList(
+                        new Keyword("Knoten"),
+                        new Keyword("P2P"),
+                        new Keyword("Kryptowährung"),
+                        new Keyword("Internet")
+                    )
+                ),
+                new Topic(
+                        "Software", 0, Arrays.asList(
+                        new Keyword("Java"),
+                        new Keyword("Python"),
+                        new Keyword("Software Engineering")
+                    )
+                )
+        ));
 
 
 
-        return Arrays.asList(p1,p2,p3,p4);
+        return Arrays.asList(p1,p2,p3,p4,p5);
     }
 }
