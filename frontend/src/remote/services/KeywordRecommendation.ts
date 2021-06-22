@@ -27,11 +27,18 @@ export class KeywordRecommendationService {
     });
   }
 
-  public async search(query: string, count: number = 10): Promise<KeywordRecommedationResult> {
+  public async search(
+    topic: string,
+    query: string,
+    count: number = 10,
+    keywords?: string[],
+  ): Promise<KeywordRecommedationResult> {
     const result = await this.client.get(`/similiar`, {
       params: {
         q: query,
         count,
+        topic,
+        keywords: (keywords ?? []).join(','),
       },
     });
 

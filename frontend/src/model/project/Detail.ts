@@ -50,7 +50,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   public constructor(private repository: ProjectRepository, private eventBus: EventBus) {
     super();
 
-    eventBus.subscribe(TopicCreatedEvent, (event: TopicCreatedEvent) => {
+    eventBus.subscribe(TopicCreatedEvent.Name, (event: TopicCreatedEvent) => {
       const project = this.state.entity.data;
       if (!project || project.id !== event.projectId) return;
 
@@ -64,7 +64,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       });
     });
 
-    eventBus.subscribe(TopicUpdatedEvent, (event: TopicUpdatedEvent) => {
+    eventBus.subscribe(TopicUpdatedEvent.Name, (event: TopicUpdatedEvent) => {
       const project = this.state.entity.data;
       if (!project) return;
 
@@ -80,7 +80,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       });
     });
 
-    eventBus.subscribe(TopicDeletedEvent, (event: TopicDeletedEvent) => {
+    eventBus.subscribe(TopicDeletedEvent.Name, (event: TopicDeletedEvent) => {
       const project = this.state.entity.data;
       if (!project) return;
 
@@ -99,7 +99,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       });
     });
 
-    eventBus.subscribe(KeywordCreatedEvent, (event: KeywordCreatedEvent) => {
+    eventBus.subscribe(KeywordCreatedEvent.Name, (event: KeywordCreatedEvent) => {
       const project = this.state.entity.data;
       if (!project) return;
 
@@ -121,7 +121,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       this.setState({ ...this.state, entity: Resource.success(updatedProject) });
     });
 
-    eventBus.subscribe(KeywordDeletedEvent, (event: KeywordDeletedEvent) => {
+    eventBus.subscribe(KeywordDeletedEvent.Name, (event: KeywordDeletedEvent) => {
       const project = this.state.entity.data;
       if (!project) return;
 
@@ -145,7 +145,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       this.setState({ ...this.state, entity: Resource.success(updatedProject) });
     });
 
-    eventBus.subscribe(TopicRelevanceChangeEvent, (event: TopicRelevanceChangeEvent) => {
+    eventBus.subscribe(TopicRelevanceChangeEvent.Name, (event: TopicRelevanceChangeEvent) => {
       const topicScores = this.state.topicResults[event.args.topicId];
       if (!topicScores) {
         this.state.topicResults[event.args.topicId] = {};

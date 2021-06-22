@@ -16,9 +16,9 @@ export class ProjectAllContainer extends EntityAllStateContainer<Project, Projec
     super(eventBus);
 
     this.subscribeToEvents({
-      create: ProjectCreatedEvent,
-      update: ProjectUpdatedEvent,
-      delete: ProjectDeletedEvent,
+      create: ProjectCreatedEvent.Name,
+      update: ProjectUpdatedEvent.Name,
+      delete: ProjectDeletedEvent.Name,
     });
   }
 
