@@ -41,5 +41,15 @@ services:
     ports:
       - 8083:8000
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        RECOMMENDATION_ENDPOINT: "http://localhost:8083"
+        API_ENDPOINT: "http://localhost:8081/unidisk/rest/"
+    ports:
+      - 80:80
+
 volumes:
   solr_data:

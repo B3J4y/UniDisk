@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose up db solr adminer recommendation
+docker-compose up db solr adminer recommendation frontend
