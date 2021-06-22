@@ -3,6 +3,7 @@ package de.unidisk.rest.dto.project;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.ProjectState;
 import de.unidisk.entities.hibernate.Topic;
+
 import java.util.List;
 
 public class ProjectPreview {
@@ -23,7 +24,7 @@ public class ProjectPreview {
         preview.id = String.valueOf(project.getId());
         preview.name = project.getName();
         preview.processingError = project.getProcessingError();
-        preview.projectState = project.getProjectState();
+        preview.projectState = project.getSubprojectState();
         preview.processingError = project.getProcessingError();
         preview.topics = project.getTopics();
         return preview;
