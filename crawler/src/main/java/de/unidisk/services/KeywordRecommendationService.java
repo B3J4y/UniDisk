@@ -8,8 +8,6 @@ import de.unidisk.contracts.services.recommendation.RecommendationResult;
 
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,7 +45,7 @@ public class KeywordRecommendationService implements IKeywordRecommendationServi
     @Override
     public RecommendationResult getTopicRecommendations(String topic) {
         try {
-            String queryParam = "q="+URLEncoder.encode(topic,"UTF-8");
+            String queryParam = "topic="+URLEncoder.encode(topic,"UTF-8");
             String url ="http://localhost:8083/similiar?"+queryParam;
             HttpHelper.HttpResponse response = HttpHelper.get(url);
             if(response.getStatusCode() != 200)
@@ -66,10 +64,6 @@ public class KeywordRecommendationService implements IKeywordRecommendationServi
                     recommendations,
                     dto.getRequestId()
             );
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (ProtocolException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
