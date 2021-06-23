@@ -11,3 +11,4 @@ out/
 /crawler/target/*
 /wikicrawl/pages/*
 recommendation/train
+crawler/src/main/resources/firebase-sa.json
