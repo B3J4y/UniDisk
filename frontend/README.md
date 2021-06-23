@@ -14,6 +14,10 @@ This directory contains the frontend for Unidisk which is built with React.
 
 The application configuration is located in _src/config.ts_.
 
+### Firebase
+
+Ask one of the maintainers for the firebase config file and place it into _src_ as _firebase-config.json_.
+
 ## Deployment
 
 TBD
