@@ -55,8 +55,6 @@ public class SolrApp {
     }
 
     void evaluateProject(Project project) {
-
-
       logInfo("Start processing project " + project.getName() + " with id " + project.getId() +" of type "  + project.getProjectSubtype() + ".");
       long evaluationStart = System.currentTimeMillis();
       try {
@@ -153,6 +151,11 @@ public class SolrApp {
         try {
             if(!scoringService.canEvaluate()){
                 logInfo("Currently unable to score keywords.");
+                return;
+            }
+
+            if(!projectGenerationService.isAvailable()){
+                logInfo("Project generation service not available.");
                 return;
             }
 

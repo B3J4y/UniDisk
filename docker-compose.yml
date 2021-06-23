@@ -1,14 +1,17 @@
 version: "3"
 services:
-  web:
+  api:
     build: .
     ports:
       - 8081:8080
     depends_on:
       - db
       - solr
+
     environment:
       - DOCKER_COMPOSE=1
+      - SOLR_URL=solr
+      - RECOMMENDATION_URL=http://recommendation:8000
   db:
     container_name: unidisk_db
     image: mysql:8
@@ -45,9 +48,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-      args:
-        RECOMMENDATION_ENDPOINT: "http://localhost:8083"
-        API_ENDPOINT: "http://localhost:8081/unidisk/rest/"
     ports:
       - 80:80
 

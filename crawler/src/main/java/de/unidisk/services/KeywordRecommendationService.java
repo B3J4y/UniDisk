@@ -42,11 +42,28 @@ public class KeywordRecommendationService implements IKeywordRecommendationServi
         }
     }
 
+    private String getEndpoint(){
+        final String envUrl =  System.getenv("RECOMMENDATION_URL");
+        final String endpoint = envUrl != null ? envUrl : "http://localhost:8083";
+        return endpoint;
+    }
+
+    public boolean isAvailable() {
+        try {
+            HttpHelper.HttpResponse response = HttpHelper.get(getEndpoint() + "/health");
+            return response.getStatusCode() == 200;
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     @Override
     public RecommendationResult getTopicRecommendations(String topic) {
         try {
             String queryParam = "topic="+URLEncoder.encode(topic,"UTF-8");
-            String url ="http://localhost:8083/similiar?"+queryParam;
+            String url = getEndpoint() +"/similiar?"+queryParam;
+            System.out.println(url);
             HttpHelper.HttpResponse response = HttpHelper.get(url);
             if(response.getStatusCode() != 200)
                 return null;

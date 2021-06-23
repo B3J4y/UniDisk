@@ -38,7 +38,9 @@ public class SystemConfiguration {
   private static SolrConfiguration solrConfigurationFromProperties(Properties properties){
     final String prefix = "solr.";
 
-    final String server = properties.getProperty(prefix+"connection.url");
+    final String envServer =  System.getenv("SOLR_URL");
+
+    final String server =envServer!= null ? envServer : properties.getProperty(prefix+"connection.url");
     final int port = Integer.parseInt(properties.getProperty(prefix+"connection.port"));
     final String core = properties.getProperty(prefix+"core");
     final int rowLimit = Integer.parseInt(properties.getProperty(prefix+"rowLimit"));

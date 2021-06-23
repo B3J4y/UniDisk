@@ -24,6 +24,9 @@ public class ProjectGenerationService {
     IKeywordRepository keywordRepository;
     IKeywordRecommendationService keywordRecommendationService;
 
+    public boolean isAvailable(){
+        return keywordRecommendationService.isAvailable();
+    }
 
     public ProjectGenerationService(IProjectRepository projectRepository, ITopicRepository topicRepository, IKeywordRepository keywordRepository, IKeywordRecommendationService keywordRecommendationService) {
         this.projectRepository = projectRepository;

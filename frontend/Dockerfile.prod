@@ -8,10 +8,7 @@ RUN npm ci
 RUN npm install react-scripts@4.0.3 -g
 COPY . ./
 
-ARG RECOMMENDATION_ENDPOINT
-ENV RECOMMENDATION_ENDPOINT=$RECOMMENDATION_ENDPOINT
-
-RUN npm run build:dev
+RUN npm run build:prod
 
 # production environment
 FROM nginx:stable-alpine

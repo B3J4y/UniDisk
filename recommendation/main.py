@@ -24,9 +24,9 @@ app.add_middleware(
 
 model = BERTRecommender()
 
-@app.get("/hello")
-def hello():
-    return {"Hello": "World"}
+@app.get("/health")
+def health():
+    return "Healthy"
 
 
 def store_request(request_id : str, query: str):
