@@ -9,3 +9,5 @@ out/
 *.class
 /crawler/.idea/workspace.xml
 /crawler/target/*
+/wikicrawl/pages/*
+recommendation/train
