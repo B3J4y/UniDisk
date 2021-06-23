@@ -26,7 +26,7 @@ We use Docker to simplify development.
 Run `docker compose up -d` to create a development environment with a MySQL, Solr and Tomcat Server.
 The API is then available under _localhost:8081/unidisk/rest_.
 In order for code changes to take effect, the services need to be rebuilt (`docker-compose up -d --build`). This takes some time therefore
-it makes sense to instead kill the web service (`docker rm -fv unidisk_web_1`) and start the server via IntelliJ (or any other way).
+it makes sense to instead kill the web service (`docker rm -fv unidisk_api_1`) and start the server via IntelliJ (or any other way).
 If the server is started via IntelliJ the API is accessible from _localhost:8080/unidisk_war/rest_.
 
 #### Admin Dashboards
@@ -37,6 +37,14 @@ Server: _db_
 Benutzer: _user_
 Passwort: _secret_
 Datenbank: _unidisk_
+
+### Authentication
+
+We use Firebase for authentication purposes. Accounts must be created via the Firebase console or CLI. Self sign up is currently not possible.
+
+#### Authentication Method
+
+The authentication method can be changed by modifying the `authentication` property in _unidisk.properties_. If the specified value is not `firebase` all incoming requests are authenticated if any bearer token is set in the request header.
 
 ### Database
 
@@ -81,6 +89,10 @@ Follow the installation guide from https://lucene.apache.org/solr/guide/7_0/inde
 
 If solr isn't running execute `solr start -p 8983`. The further setup will use port 8983 as default.
 If you chose another one make sure to adapt the urls and commands.
+
+##### Firebase
+
+Ask one of the maintainers for the Firebase service account file and place it into _crawler/src/main/resources_ as _firebase-sa.json_. This is only necessary if you want to use Firebase authentication.
 
 ##### Create Core
 
