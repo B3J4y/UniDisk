@@ -7,10 +7,12 @@ import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.contracts.repositories.params.project.UpdateProjectParams;
 import de.unidisk.entities.hibernate.*;
-import de.unidisk.rest.dto.topic.RateTopicResultDto;
 import de.unidisk.entities.results.KeywordResult;
 import de.unidisk.entities.results.Result;
+import de.unidisk.rest.dto.topic.RateTopicResultDto;
+import org.hibernate.query.Query;
 
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,6 +75,8 @@ public class ProjectDAO  implements IProjectRepository {
         }
         final Project project = p.get();
         project.setProjectState(state);
+        if(state == ProjectState.RUNNING)
+            project.setProcessingHeartbeat(java.time.Instant.now());
         HibernateUtil.execute(session -> {
             session.update(project);
             return null;
@@ -213,6 +217,25 @@ public class ProjectDAO  implements IProjectRepository {
             final boolean finished = projectsStream.map(Project::finishedProcessing).reduce(true,Boolean::logicalAnd);
             return finished;
         });
+    }
+
+    @Override
+    public void updateHeartbeat(String projectId) throws EntityNotFoundException {
+
+        EntityNotFoundException exception = HibernateUtil.execute(session -> {
+
+            final Optional<Project> p = this.getProject(projectId);
+            if(!p.isPresent())
+                return new EntityNotFoundException(Project.class,Integer.parseInt(projectId));
+
+            final Project project = p.get();
+            project.setProcessingHeartbeat(java.time.Instant.now());
+            session.update(project);
+
+            return null;
+            });
+        if(exception != null)
+            throw exception;
     }
 
     @Override
@@ -412,5 +435,49 @@ public class ProjectDAO  implements IProjectRepository {
         return HibernateUtil.execute((session -> {
             return session.createQuery("select p from Project p where p.projectState = :state", Project.class).setParameter("state",state).list();
         }));
+    }
+
+    @Override
+    public List<Project> getDeadProjects() {
+        final java.time.Instant latestAllowedHeartbeat = getLatestAllowedHearbeat();
+        return HibernateUtil.execute((session -> {
+            Query query = session.createQuery("select p from Project p where p.projectState = :state and p.processingHeartbeat < :allowedHeartbeat", Project.class)
+                    .setParameter("state",ProjectState.RUNNING)
+                    .setParameter("allowedHeartbeat",latestAllowedHeartbeat);
+            return query.list();
+        }));
+    }
+
+    public void cleanDeadProjects() {
+        final java.time.Instant latestAllowedHeartbeat = getLatestAllowedHearbeat();
+        HibernateUtil.execute(session -> {
+
+            Query keywordScoreQuery = session.createQuery("delete from KeyWordScore ks where ks.id in (" +
+                    "Select ks.id from KeyWordScore ks " +
+                            "where ks.keyword.finishedProcessingAt IS NULL " +
+                            "and ks.keyword.topic.project.projectState = :state " +
+                            "and ks.keyword.topic.project.processingHeartbeat < :allowedHeartbeat " +
+                    ")")
+                     .setParameter("state",ProjectState.RUNNING)
+                    .setParameter("allowedHeartbeat",latestAllowedHeartbeat);
+
+            Query topicScoreQuery = session.createQuery("delete from TopicScore ts where ts.id in (" +
+                    "Select ts.id from TopicScore ts " +
+                    "where ts.topic.finishedProcessingAt IS NULL " +
+                    "and ts.topic.project.projectState = :state " +
+                    "and ts.topic.project.processingHeartbeat < :allowedHeartbeat " +
+                    ")")
+                    .setParameter("state",ProjectState.RUNNING)
+                    .setParameter("allowedHeartbeat",latestAllowedHeartbeat);
+
+            keywordScoreQuery.executeUpdate();
+            topicScoreQuery.executeUpdate();
+
+            return null;
+        });
+    }
+
+    private java.time.Instant getLatestAllowedHearbeat(){
+        return java.time.Instant.now().minus(10, ChronoUnit.MINUTES);
     }
 }

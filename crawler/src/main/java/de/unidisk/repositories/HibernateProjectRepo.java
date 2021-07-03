@@ -75,6 +75,11 @@ public class HibernateProjectRepo implements IProjectRepository {
     }
 
     @Override
+    public List<Project> getDeadProjects() {
+        return projectDAO.getDeadProjects();
+    }
+
+    @Override
     public void updateProjectState(int projectId, ProjectState state) {
         projectDAO.updateProjectState(projectId,state);
     }
@@ -107,6 +112,16 @@ public class HibernateProjectRepo implements IProjectRepository {
     @Override
     public boolean projectFinishedProcessing(String projectId) {
         return projectDAO.projectFinishedProcessing(projectId);
+    }
+
+    @Override
+    public void updateHeartbeat(String projectId) throws EntityNotFoundException {
+        projectDAO.updateHeartbeat(projectId);
+    }
+
+    @Override
+    public void cleanDeadProjects() {
+        projectDAO.cleanDeadProjects();
     }
 
 }

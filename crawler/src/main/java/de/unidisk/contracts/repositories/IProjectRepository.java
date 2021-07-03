@@ -50,6 +50,13 @@ public interface IProjectRepository extends Serializable {
 
     List<Project> getProjects(ProjectState state);
 
+    /**
+     * Returns all projects that are running but haven't had an
+     * heartbeat update within an allowed timespan.
+     * @return
+     */
+    List<Project> getDeadProjects();
+
     void updateProjectState(int projectId, ProjectState state);
     void setProjectError(int projectId, String message);
     void clearProjectError(int projectId);
@@ -59,4 +66,7 @@ public interface IProjectRepository extends Serializable {
     List<Project> getSubprojects(String projectId);
     Project generateSubprojectByCustom(String projectId) throws EntityNotFoundException, DuplicateException;
     boolean projectFinishedProcessing(String projectId);
+
+    void updateHeartbeat(String projectId)  throws EntityNotFoundException;
+    void cleanDeadProjects();
 }

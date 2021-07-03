@@ -184,5 +184,21 @@ public class TopicDAO {
         );
     }
 
+    public void finishedProcessing(int topicId) throws EntityNotFoundException {
+        final EntityNotFoundException result = HibernateUtil.execute(session -> {
+            final Optional<Topic> optionalTopic = this.getTopic(topicId);
+            if(!optionalTopic.isPresent())
+            {
+                return new EntityNotFoundException(Topic.class,topicId);
+            }
+            final Topic topic = optionalTopic.get();
+            topic.setFinishedProcessingAt(java.time.Instant.now());
+            session.update(topic);
 
+            return null;
+        });
+
+        if(result != null)
+            throw result;
+    }
 }

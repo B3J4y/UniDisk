@@ -1,9 +1,11 @@
 package de.unidisk.entities.hibernate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.List;
 
 @Entity(name = "Keyword")
@@ -12,7 +14,10 @@ public class Keyword implements Input {
     @GeneratedValue
     int id;
 
-
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "topicId", insertable = false, updatable = false)
+    private Topic topic;
     private int topicId;
     private String name;
     private boolean isSuggestion = false;
@@ -20,6 +25,11 @@ public class Keyword implements Input {
     @OneToMany(fetch = FetchType.EAGER,mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<KeyWordScore> keyWordScores;
+
+    @Basic
+    @Column()
+    @JsonIgnore()
+    private java.time.Instant finishedProcessingAt;
 
     public Keyword() {
 
@@ -98,5 +108,13 @@ public class Keyword implements Input {
 
     public void setKeyWordScores(List<KeyWordScore> keyWordScores) {
         this.keyWordScores = keyWordScores;
+    }
+
+    public boolean finishedProcessing(){
+        return finishedProcessingAt != null;
+    }
+
+    public void setFinishedProcessingAt(Instant finishedProcessingAt) {
+        this.finishedProcessingAt = finishedProcessingAt;
     }
 }

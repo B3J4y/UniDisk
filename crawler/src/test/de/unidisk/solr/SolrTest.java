@@ -150,7 +150,9 @@ public class SolrTest implements HibernateLifecycle {
         );
         HibernateTestSetup.Setup(state);
 
-        SolrApp sapp = new SolrApp(projectRepository,scoringService,resultService,projectGenerationService);
+        SolrApp sapp = new SolrApp(projectRepository,scoringService,resultService,
+                projectGenerationService, keywordRepository, topicRepository
+        );
         try {
             sapp.execute();
             assertTrue(true);

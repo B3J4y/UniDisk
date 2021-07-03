@@ -27,4 +27,6 @@ public interface ITopicRepository {
     List<TopicScore> getScores(int topicId) throws EntityNotFoundException;
 
     double getScore(int id);
+
+    void finishedProcessing(int topicId) throws EntityNotFoundException;
 }

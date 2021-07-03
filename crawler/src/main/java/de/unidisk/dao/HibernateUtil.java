@@ -8,6 +8,7 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.ConstraintViolationException;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 
@@ -41,6 +42,12 @@ public class HibernateUtil {
             sessionFactory = config.buildSessionFactory();
         }
         return sessionFactory;
+    }
+    public static void executeVoid(Consumer<Session> action){
+        execute(session -> {
+            action.accept(session);
+            return null;
+        });
     }
 
     public static <T> T execute(Function<Session,T> action){
