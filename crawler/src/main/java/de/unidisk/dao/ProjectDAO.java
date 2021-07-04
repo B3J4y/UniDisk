@@ -451,24 +451,31 @@ public class ProjectDAO  implements IProjectRepository {
     public void cleanDeadProjects() {
         final java.time.Instant latestAllowedHeartbeat = getLatestAllowedHearbeat();
         HibernateUtil.execute(session -> {
+            // MySQL doesn't allow select on the same table that the outer update is targeting
+            // and Hibernate doesn't allow to select ids from a temp table therefore ids need
+            // to be fetched in separate step.
 
-            Query keywordScoreQuery = session.createQuery("delete from KeyWordScore ks where ks.id in (" +
+            List<Integer> keywordScoreIds = session.createQuery(
                     "Select ks.id from KeyWordScore ks " +
-                            "where ks.keyword.finishedProcessingAt IS NULL " +
-                            "and ks.keyword.topic.project.projectState = :state " +
-                            "and ks.keyword.topic.project.processingHeartbeat < :allowedHeartbeat " +
-                    ")")
-                     .setParameter("state",ProjectState.RUNNING)
-                    .setParameter("allowedHeartbeat",latestAllowedHeartbeat);
+                    "where ks.keyword.finishedProcessingAt IS NULL " +
+                    "and ks.keyword.topic.project.projectState = :state " +
+                    "and ks.keyword.topic.project.processingHeartbeat < :allowedHeartbeat ", Integer.class)
+                    .setParameter("state",ProjectState.RUNNING)
+                    .setParameter("allowedHeartbeat",latestAllowedHeartbeat).list();
 
-            Query topicScoreQuery = session.createQuery("delete from TopicScore ts where ts.id in (" +
+            Query keywordScoreQuery = session.createQuery("delete from KeyWordScore ks where ks.id in :ids")
+                     .setParameter("ids",keywordScoreIds);
+
+            List<Integer> topicScoreIds = session.createQuery(
                     "Select ts.id from TopicScore ts " +
                     "where ts.topic.finishedProcessingAt IS NULL " +
                     "and ts.topic.project.projectState = :state " +
-                    "and ts.topic.project.processingHeartbeat < :allowedHeartbeat " +
-                    ")")
+                    "and ts.topic.project.processingHeartbeat < :allowedHeartbeat",Integer.class)
                     .setParameter("state",ProjectState.RUNNING)
-                    .setParameter("allowedHeartbeat",latestAllowedHeartbeat);
+                    .setParameter("allowedHeartbeat",latestAllowedHeartbeat).list();
+
+            Query topicScoreQuery = session.createQuery("delete TopicScore ts where ts.id in :ids")
+                    .setParameter("ids",topicScoreIds);
 
             keywordScoreQuery.executeUpdate();
             topicScoreQuery.executeUpdate();
