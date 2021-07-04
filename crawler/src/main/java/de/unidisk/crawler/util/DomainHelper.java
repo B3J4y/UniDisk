@@ -1,20 +1,20 @@
 package de.unidisk.crawler.util;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public  class DomainHelper {
 
     private DomainHelper(){}
 
-    public static String getDomain(String url){
-        URI uri;
+    public static String getDomain(String urlString){
+        URL url;
         try {
-            uri = new URI(url);
-        } catch (URISyntaxException e) {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
             e.printStackTrace();
-            return url;
+            return null;
         }
-        return uri.getHost();
+        return url.getHost();
     }
 }
