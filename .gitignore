@@ -12,3 +12,4 @@ out/
 /wikicrawl/pages/*
 recommendation/train
 crawler/src/main/resources/firebase-sa.json
+.DS_Store
