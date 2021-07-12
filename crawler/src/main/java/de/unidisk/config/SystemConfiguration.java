@@ -20,6 +20,7 @@ public class SystemConfiguration {
 
   private boolean production;
   private long scoringInterval;
+  private boolean firebaseAuthentication;
 
   static private final Logger logger = LogManager.getLogger(SystemConfiguration.class.getName());
 
@@ -33,6 +34,8 @@ public class SystemConfiguration {
     databaseConfiguration = databaseConfigurationFromProperties(properties);
     production = properties.getProperty("environment.production").equals("1");
     scoringInterval = Long.parseLong(properties.getProperty("scoring.interval").trim());
+
+    firebaseAuthentication = properties.getProperty("authentication","").equals("firebase");
   }
 
   private static SolrConfiguration solrConfigurationFromProperties(Properties properties){
@@ -120,5 +123,9 @@ public class SystemConfiguration {
 
   public long getScoringInterval() {
     return scoringInterval;
+  }
+
+  public boolean useFirebaseAuthentication() {
+    return firebaseAuthentication;
   }
 }

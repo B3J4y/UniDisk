@@ -1,6 +1,7 @@
 package de.unidisk.rest;
 
 
+import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
@@ -13,6 +14,7 @@ import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateProjectRepo;
 import de.unidisk.repositories.HibernateTopicRepo;
 import de.unidisk.rest.authentication.AuthenticationService;
+import de.unidisk.rest.authentication.FirebaseAuthenticationService;
 import de.unidisk.services.HibernateResultService;
 import de.unidisk.services.KeywordRecommendationService;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -29,9 +31,17 @@ public class InjectionBinder extends AbstractBinder {
         bind(HibernateTopicRepo.class).to(ITopicRepository.class);
         bind(HibernateKeywordRepo.class).to(IKeywordRepository.class);
         bind(UniversityDAO.class).to(IUniversityRepository.class);
-        bind(AuthenticationService.class).to(IAuthenticationService.class);
+        bindAuthenticationService();
         bind(KeywordRecommendationService.class).to(IKeywordRecommendationService.class);
         bind(HibernateResultService.class).to(IResultService.class);
+    }
+
+    void bindAuthenticationService(){
+        if(SystemConfiguration.getInstance().useFirebaseAuthentication()){
+            bind(FirebaseAuthenticationService.class).to(IAuthenticationService.class);
+        }else{
+            bind(AuthenticationService.class).to(IAuthenticationService.class);
+        }
     }
 
 

@@ -10,3 +10,4 @@ export const USE_STUBS = false;
 const LOCAL_DEV_ENDPOINT = 'http://localhost:8080/unidisk_war/rest/';
 
 export const API_ENDPOINT = LOCAL_DEV_ENDPOINT;
+export const USE_FIREBASE_AUTH = true;

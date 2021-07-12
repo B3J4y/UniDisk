@@ -9,3 +9,7 @@ out/
 *.class
 /crawler/.idea/workspace.xml
 /crawler/target/*
+/wikicrawl/pages/*
+recommendation/train
+crawler/src/main/resources/firebase-sa.json
+.DS_Store
