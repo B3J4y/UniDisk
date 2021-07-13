@@ -47,7 +47,7 @@ public class UniCrawlService implements SimpleCrawl.IProgressListener {
         final SimpleCrawl crawler = new SimpleCrawl(
                 crawlerConfiguration.getStorageLocation(),
                 urlArr,
-                SolrConfiguration.getInstance().getUrl(),
+                SolrConfiguration.getInstance().getCoreUrl(),
                 crawlConfiguration
         );
         crawler.setProgressListener(this);

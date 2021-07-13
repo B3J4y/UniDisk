@@ -13,24 +13,26 @@ export class EventSubscription {
 export class EventBus {
   private subscriptions: Record<string, Record<string, (event: Event) => void>> = {};
 
-  public subscribe<T extends Event>(event: any, callback: (event: T) => void): EventSubscription {
-    const name = event.name;
-
+  public subscribe<T extends Event>(
+    event: string,
+    callback: (event: T) => void,
+  ): EventSubscription {
     const id = (new Date().getMilliseconds() + Math.random() * 1000).toString();
-    if (!this.subscriptions[name]) {
-      this.subscriptions[name] = {};
+    if (!this.subscriptions[event]) {
+      this.subscriptions[event] = {};
     }
     // @ts-ignore
-    this.subscriptions[name][id] = callback;
+    this.subscriptions[event][id] = callback;
 
     return new EventSubscription(() => {
-      const eventSubscriptions = this.subscriptions[name];
+      const eventSubscriptions = this.subscriptions[event];
       delete eventSubscriptions.id;
     });
   }
 
   public publish(event: Event): void {
     const { eventName } = event;
+
     const eventSubscriber = this.subscriptions[eventName];
     if (!eventSubscriber) return;
 

@@ -2,6 +2,7 @@ package de.unidisk.view;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
+import de.unidisk.common.exceptions.SeedData;
 import de.unidisk.config.SolrConfiguration;
 import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
@@ -15,21 +16,33 @@ import de.unidisk.dao.HibernateTestSetup;
 import de.unidisk.dao.HibernateUtil;
 import de.unidisk.dao.UniversityDAO;
 import de.unidisk.entities.hibernate.Project;
+import de.unidisk.entities.hibernate.University;
 import de.unidisk.repositories.HibernateKeywordRepo;
 import de.unidisk.repositories.HibernateProjectRepo;
+import de.unidisk.repositories.HibernateTopicRepo;
 import de.unidisk.services.HibernateResultService;
 import de.unidisk.services.KeywordRecommendationService;
 import de.unidisk.services.ProjectGenerationService;
 import de.unidisk.solr.SolrApp;
+import de.unidisk.solr.SolrConnector;
 import de.unidisk.solr.services.SolrScoringService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.request.CoreAdminRequest;
+import org.apache.solr.client.solrj.response.CoreAdminResponse;
+import org.apache.solr.common.params.CoreAdminParams;
 
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.ws.rs.ext.Provider;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 /**
  * Klasse initialisiert die Datenbank mit Testdaten.
@@ -67,6 +80,7 @@ public class TestSetupBean {
         final TestSetupBean bean = new TestSetupBean();
         bean.setProjectRepository(new HibernateProjectRepo());
         bean.setKeywordRepository(new HibernateKeywordRepo());
+        bean.setTopicRepository(new HibernateTopicRepo());
         bean.setResultService(new HibernateResultService());
         bean.setUniversityRepository(new UniversityDAO());
         return bean;
@@ -74,7 +88,7 @@ public class TestSetupBean {
 
     private Timer crawlTimer,scoringTimer;
 
-    public void init() {
+    public void init() throws IOException, SolrServerException {
         SystemConfiguration config = SystemConfiguration.getInstance();
         if(config.getDatabaseConfiguration().isInitializeMockData()){
             final ApplicationState state = MockData.getMockState();
@@ -85,8 +99,56 @@ public class TestSetupBean {
             }
             HibernateTestSetup.Setup(state);
         }
+
+        initCore();
+        seed();
+        if(!config.getCrawlerConfiguration().isDisabled())
         setupCrawlJob();
         setupScoringJob();
+    }
+
+    private void seed() {
+        final List<University> existingUniversities = universityRepository.getUniversities();
+        final Set<String> existingNames = existingUniversities.stream().map(University::getName).collect(Collectors.toSet());
+        final List<University> universitySeeds = SeedData.getSeedUniversities();
+
+        final List<University> newUniversities = universitySeeds.stream().filter(university -> !existingNames.contains(university.getName())).collect(Collectors.toList());
+        if(newUniversities.isEmpty())
+            return;
+        logInfo("Create " + newUniversities.size() + " new universities");
+        for (University newUniversity : newUniversities) {
+            universityRepository.create(newUniversity);
+        }
+    }
+
+
+    private boolean coreExists(SolrClient client, String coreName) throws IOException, SolrServerException {
+        CoreAdminRequest request = new CoreAdminRequest();
+        request.setAction(CoreAdminParams.CoreAdminAction.STATUS);
+        CoreAdminResponse cores = request.process(client);
+        for (int i = 0; i < cores.getCoreStatus().size(); i++) {
+            String core = cores.getCoreStatus().getName(i);
+            if(core.equals(coreName)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void initCore() throws IOException, SolrServerException {
+        SolrConfiguration solrConfiguration = SystemConfiguration.getInstance().getSolrConfiguration();
+        SolrClient client = new SolrConnector(solrConfiguration).getServerClient();
+        String coreName = solrConfiguration.getCore();
+
+        if(coreExists(client,coreName)){
+            logInfo("Core already exists.");
+            return;
+        }
+        throw new RuntimeException("Solr core does not exist.");
+    }
+
+    private void logInfo(String info){
+        System.out.println(info);
     }
 
     @PreDestroy
@@ -122,7 +184,8 @@ public class TestSetupBean {
 
 
         scoringTimer = new Timer();
-        final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository, SolrConfiguration.getInstance());
+        final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository,
+                SolrConfiguration.getInstance(), universityRepository);
         final ProjectGenerationService projectGenerationService = new ProjectGenerationService(
                 projectRepository,
                 topicRepository,

@@ -31,6 +31,17 @@ public class SearchMetaDataDAO {
         return smd;
     }
 
+    public SearchMetaData createMetaData(URL url, int universityId, Long timestamp,Session session) {
+        University university = new University();
+        university.setId(universityId);
+        SearchMetaData smd = new SearchMetaData();
+        smd.setUrl(url.toExternalForm());
+        smd.setUniversity(university);
+        smd.setTimestamp(timestamp);
+        session.save(smd);
+        return smd;
+    }
+
     public Optional<SearchMetaData> get(int id){
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction transaction = currentSession.getTransaction();

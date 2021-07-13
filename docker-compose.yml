@@ -6,8 +6,12 @@ services:
       - 8081:8080
     depends_on:
       - db
+      - solr
+
     environment:
       - DOCKER_COMPOSE=1
+      - SOLR_URL=solr
+      - RECOMMENDATION_URL=http://recommendation:8000
   db:
     container_name: unidisk_db
     image: mysql:8
@@ -33,7 +37,22 @@ services:
       - solr_data:/var/solr
     command:
       - solr-precreate
-      - gettingstarted
+      - unidisc
+
+  recommendation:
+    build: ./recommendation
+    ports:
+      - 8083:8000
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - 80:80
+    depends_on:
+      - recommendation
+      - api
 
 volumes:
   solr_data:

@@ -75,6 +75,22 @@ public class KeywordScoreDAO implements ScoringDAO {
         return keywordScore;
     }
 
+    public KeyWordScore createKeywordScore(int keywordId, double score, String pageTitle, SearchMetaData searchMetaData, Session session){
+        final Keyword keyword = new Keyword();
+        keyword.setId(keywordId);
+
+        final KeyWordScore keywordScore = new KeyWordScore();
+        keywordScore.setScore(score);
+        keywordScore.setKeyword(keyword);
+        final String title = pageTitle.length() > 255 ? pageTitle.substring(0,255) : pageTitle;
+        keywordScore.setPageTitle(title);
+        keywordScore.setSearchMetaData(searchMetaData);
+        final int id = (int) session.save(keywordScore);
+
+        keywordScore.setId(id);
+        return keywordScore;
+    }
+
     public Optional<KeyWordScore> get(int id){
         Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
         Transaction transaction = currentSession.getTransaction();

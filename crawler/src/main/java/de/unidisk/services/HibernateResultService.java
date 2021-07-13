@@ -12,7 +12,9 @@ import de.unidisk.entities.hibernate.Topic;
 import javax.ws.rs.ext.Provider;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Provider
 public class HibernateResultService implements IResultService {
@@ -31,6 +33,42 @@ public class HibernateResultService implements IResultService {
                 result.getUniversityId(), result.getTimestamp());
         final KeyWordScore score = kScoreDao.createKeywordScore(keyword.getId(),result.getScore(), result.getPageTitle());
         kScoreDao.setMetaData(score.getId(),searchMetaData.getId());
+    }
+
+    @Override
+    public void createKeywordScores(List<ScoreResult> results) throws EntityNotFoundException, MalformedURLException {
+        HibernateUtil.execute(session -> {
+            final List<Integer> keywordIds = results.stream().map(ScoreResult::getEntityId).collect(Collectors.toList());
+            final List<Keyword> keywords = session.createQuery("select k from Keyword  k where k.id in :ids",Keyword.class
+            ).setParameter("ids",keywordIds).list();
+
+
+            final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
+            final KeywordScoreDAO kScoreDao = new KeywordScoreDAO();
+            final int batchSize = 50;
+
+            for(int i= 0; i < results.size();i++){
+
+                final ScoreResult result = results.get(i);
+                try {
+                    final SearchMetaData searchMetaData = searchMetaDataDAO.createMetaData(new URL(result.getUrl()),
+                            result.getUniversityId(), result.getTimestamp(), session
+                    );
+                    kScoreDao.createKeywordScore(result.getEntityId(),result.getScore(), result.getPageTitle(),searchMetaData,session);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+
+                if ( i % batchSize == 0 ) {
+                    //flush a batch of inserts and release memory:
+                    session.flush();
+                    session.clear();
+                }
+            }
+
+            return null;
+        });
     }
 
     @Override

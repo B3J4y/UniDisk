@@ -117,6 +117,12 @@ public class Project {
         return projectState;
     }
 
+    @JsonIgnore
+    public ProjectState getSubprojectState() {
+        final boolean finishedSubprojects =  getSubprojects().stream().map(p -> p.getProjectState() == ProjectState.FINISHED).reduce(true,(v1, v2) -> v1 && v2);
+        return getProjectState() == ProjectState.FINISHED && !finishedSubprojects ? ProjectState.RUNNING : getProjectState();
+    }
+
     public void setProjectState(ProjectState projectState) {
         this.projectState = projectState;
     }

@@ -1,7 +1,5 @@
 package de.unidisk.config;
 
-import de.unidisk.crawler.model.UniversitySeed;
-
 public class CrawlerConfiguration {
 
     private String storageLocation;
@@ -9,14 +7,16 @@ public class CrawlerConfiguration {
     private int maxVisits;
     private long uniCrawlInterval;
     private long crawlInterval;
+    private boolean disabled;
 
 
-    public CrawlerConfiguration(String storageLocation, int maxDepth, int maxVisits, long uniCrawlInterval, long crawlInterval) {
+    public CrawlerConfiguration(String storageLocation, int maxDepth, int maxVisits, long uniCrawlInterval, long crawlInterval, boolean disabled) {
         this.storageLocation = storageLocation;
         this.maxDepth = maxDepth;
         this.maxVisits = maxVisits;
         this.uniCrawlInterval = uniCrawlInterval;
         this.crawlInterval = crawlInterval;
+        this.disabled = disabled;
     }
 
 
@@ -38,5 +38,10 @@ public class CrawlerConfiguration {
 
     public long getCrawlInterval() {
         return crawlInterval;
+    }
+
+
+    public boolean isDisabled() {
+        return disabled;
     }
 }

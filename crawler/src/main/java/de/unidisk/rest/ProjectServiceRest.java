@@ -60,6 +60,7 @@ public class ProjectServiceRest {
         if(!p.getUserId().equals(getContextUserId(context))){
             return Response.status(Response.Status.FORBIDDEN).entity("Nur der Projektbesitzer hat Zugriff auf das Projekt.").build();
         }
+        p.setProjectState(p.getSubprojectState());
         return Response.ok(p).build();
     }
 

@@ -12,6 +12,7 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name = "hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <property name="hibernate.current_session_context_class">thread</property>
+        <property name="hibernate.jdbc.batch_size">100</property>
         <!-- Assume test is the database name -->
 
         <property name="connection.pool_size">100</property>

@@ -6,6 +6,7 @@ import de.unidisk.config.SolrConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.IProjectRepository;
 import de.unidisk.contracts.repositories.ITopicRepository;
+import de.unidisk.contracts.repositories.IUniversityRepository;
 import de.unidisk.contracts.services.IResultService;
 import de.unidisk.contracts.services.IScoringService;
 import de.unidisk.crawler.datatype.SolrStichwort;
@@ -15,6 +16,7 @@ import de.unidisk.crawler.model.ScoreResult;
 import de.unidisk.crawler.simple.SimpleSolarSystem;
 import de.unidisk.dao.HibernateTestSetup;
 import de.unidisk.dao.ProjectDAO;
+import de.unidisk.dao.UniversityDAO;
 import de.unidisk.entities.HibernateLifecycle;
 import de.unidisk.entities.hibernate.*;
 import de.unidisk.repositories.HibernateKeywordRepo;
@@ -40,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -58,8 +59,7 @@ public class SolrTest implements HibernateLifecycle {
             "test",
             "inhalt",
             3,
-            System.currentTimeMillis(),
-            1
+            System.currentTimeMillis()
     );
 
 
@@ -90,7 +90,7 @@ public class SolrTest implements HibernateLifecycle {
         SolrConnector connector = new SolrConnector(SolrConfiguration.getInstance());
         try {
             final SolrConfiguration solrConfiguration = SolrConfiguration.getInstance();
-            final SimpleSolarSystem solarSystem = new SimpleSolarSystem(solrConfiguration.getUrl());
+            final SimpleSolarSystem solarSystem = new SimpleSolarSystem(solrConfiguration.getCoreUrl());
 
             solarSystem.sendPageToTheMoon(document);
 
@@ -107,25 +107,11 @@ public class SolrTest implements HibernateLifecycle {
     @DisabledIfEnvironmentVariable(named = "CI", matches = "1")
     public void canParseCrawlDocument() throws IOException, SolrServerException, InterruptedException {
         final SolrConfiguration solrConfiguration = SolrConfiguration.getInstance();
-        final SimpleSolarSystem solarSystem = new SimpleSolarSystem(solrConfiguration.getUrl());
+        final SimpleSolarSystem solarSystem = new SimpleSolarSystem(solrConfiguration.getCoreUrl());
         solarSystem.sendPageToTheMoon(document);
         final SolrConnector solrConnector = new SolrConnector(solrConfiguration);
         final List<org.apache.solr.common.SolrDocument> docs = getKeyDocs(solrConnector, "inhalt");
         assertTrue(docs.size() > 0);
-
-        final List<ScoreResult> results = docs.stream().map(d -> {
-            final CrawlDocument crawlDocument = new CrawlDocument(d);
-            final int universityId = crawlDocument.universityId;
-            return new ScoreResult(
-                    0,
-                    (float) d.get("score"),
-                    universityId,
-                    crawlDocument.datum,
-                    crawlDocument.url,
-                    crawlDocument.title
-            );
-        }).collect(Collectors.toList());
-        assertTrue(true);
     }
 
     private List<org.apache.solr.common.SolrDocument> getKeyDocs(SolrConnector connector, String key) throws IOException, SolrServerException {
@@ -145,8 +131,9 @@ public class SolrTest implements HibernateLifecycle {
     public void solrAppTest(){
         final IKeywordRepository keywordRepository = new HibernateKeywordRepo();
         final ITopicRepository topicRepository = new HibernateTopicRepo();
+        final IUniversityRepository universityRepository = new UniversityDAO();
 
-        final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository, SolrConfiguration.getInstance());
+        final IScoringService scoringService = new SolrScoringService(keywordRepository,topicRepository, SolrConfiguration.getInstance(),universityRepository);
         final IProjectRepository projectRepository = new ProjectDAO();
         final IResultService resultService = new HibernateResultService();
         final ProjectGenerationService projectGenerationService = new ProjectGenerationService(
@@ -178,21 +165,23 @@ public class SolrTest implements HibernateLifecycle {
     @DisabledIfEnvironmentVariable(named = "CI", matches = "1")
     public void canGetKeywordScores() throws IOException, SolrServerException {
         setupMocks();
-        final String solrUrl = SolrConfiguration.getInstance().getUrl();
+        final String solrUrl = SolrConfiguration.getInstance().getCoreUrl();
         final SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(solrUrl);
         final Keyword keyword = new Keyword(
                 "randomkeywordstringstuff",
                 0
         );
-        simpleSolarSystem.sendPageToTheMoon(new CrawlDocument("x", "https://www.google.com", "title", keyword.getName(), 0, System.currentTimeMillis(), 0));
+        final IUniversityRepository universityRepository = new UniversityDAO();
+        simpleSolarSystem.sendPageToTheMoon(new CrawlDocument("x", "https://www.google.com", "title", keyword.getName(), 0, System.currentTimeMillis()));
         final Optional<Keyword> optionalKeyword = Optional.of(keyword);
         when(keywordRepository.getKeyword(keyword.getId())).thenReturn(optionalKeyword);
         final SolrScoringService scoringService = new SolrScoringService(
                 keywordRepository,
                 topicRepository,
-                SolrConfiguration.getInstance()
+                SolrConfiguration.getInstance(),
+                universityRepository
         );
-        final List<ScoreResult> results = scoringService.getKeywordScore(0,keyword.getId());
+        final List<ScoreResult> results = scoringService.getKeywordScores(0,keyword.getId());
         assertNotNull(results);
         Assertions.assertTrue(results.size() > 0);
     }
@@ -201,19 +190,21 @@ public class SolrTest implements HibernateLifecycle {
     @DisabledIfEnvironmentVariable(named = "CI", matches = "1")
     public void canGetTopicScore() throws IOException, SolrServerException, EntityNotFoundException {
         setupMocks();
-        final String solrUrl = SolrConfiguration.getInstance().getUrl();
+        final String solrUrl = SolrConfiguration.getInstance().getCoreUrl();
         final SimpleSolarSystem simpleSolarSystem = new SimpleSolarSystem(solrUrl);
         final Topic topic = new Topic(
                 "randomtopicstringstuff",
                 0
         );
-        simpleSolarSystem.sendPageToTheMoon(new CrawlDocument("x", "https://www.google.com", "title", topic.getName(), 0, System.currentTimeMillis(), 0));
+        final IUniversityRepository universityRepository = new UniversityDAO();
+        simpleSolarSystem.sendPageToTheMoon(new CrawlDocument("x", "https://www.google.com", "title", topic.getName(), 0, System.currentTimeMillis()));
         final Optional<Topic> optionalTopic = Optional.of(topic);
         when(topicRepository.getTopic(topic.getId())).thenReturn(optionalTopic);
         final SolrScoringService scoringService = new SolrScoringService(
                 keywordRepository,
                 topicRepository,
-                SolrConfiguration.getInstance()
+                SolrConfiguration.getInstance(),
+                universityRepository
         );
         final List<ScoreResult> result = scoringService.getTopicScores(0,optionalTopic.get().getId());
         assertNotNull(result);

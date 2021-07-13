@@ -6,10 +6,8 @@ import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.entities.hibernate.Keyword;
 import de.unidisk.entities.hibernate.Project;
 import de.unidisk.entities.hibernate.Topic;
-import de.unidisk.entities.hibernate.University;
 import org.apache.commons.lang3.RandomStringUtils;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class HibernateTestSetup {
@@ -24,16 +22,6 @@ public class HibernateTestSetup {
         final String userId = "0";
         final ProjectDAO projectDAO = new ProjectDAO();
         final TopicDAO topicDAO = new TopicDAO();
-        final TopicScoreDAO topicScoreDAO = new TopicScoreDAO();
-
-        final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
-
-        final UniversityDAO uniDao = new UniversityDAO();
-        state.getUniversities().forEach((u) -> {
-            final University dbUni = uniDao.addUniversity(u);
-            u.setId(dbUni.getId());
-        });
-        final List<String> universityNames = state.getUniversities().stream().map(University::getName).collect(Collectors.toList());
 
         state.getProjectList().forEach((p) -> {
             final Project dbProject;

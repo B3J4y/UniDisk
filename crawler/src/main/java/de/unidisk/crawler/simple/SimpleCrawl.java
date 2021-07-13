@@ -53,13 +53,13 @@ public class SimpleCrawl implements ICrawler {
 
     private void startCrawl(UniversitySeed seed, Boolean isParallel) throws Exception {
         String crawlStorageFolder = this.storageLocation;
-        int numberOfCrawlers = 1;
+        int numberOfCrawlers = 3;
 
         CrawlConfig config = new CrawlConfig();
         config.setMaxDepthOfCrawling(crawlConfiguration.getMaxLinkDepth());
         config.setMaxPagesToFetch(crawlConfiguration.getMaxPages());
         config.setCrawlStorageFolder(crawlStorageFolder);
-        config.setResumableCrawling(true);
+        config.setResumableCrawling(false);
         // Instantiate the controller for this crawl.
         PageFetcher pageFetcher = new PageFetcher(config);
 
@@ -91,7 +91,7 @@ public class SimpleCrawl implements ICrawler {
         final String domain = DomainHelper.getDomain(seed.getSeedUrl());
         CrawlController.WebCrawlerFactory<UniversityCrawler> factory = () -> new UniversityCrawler(
                 whiteList,
-                (page) -> processPage(page, seed.getUniversityId(), domain),
+                (page) -> processPage(page, domain),
                 this.crawlConfiguration
         );
         return factory;
@@ -99,7 +99,7 @@ public class SimpleCrawl implements ICrawler {
 
 
 
-    Void processPage(Page page, int universityId, String universityDomain){
+    Void processPage(Page page, String universityDomain){
         if (!(page.getParseData() instanceof HtmlParseData))
             return null;
 
@@ -123,7 +123,8 @@ public class SimpleCrawl implements ICrawler {
         CrawlDocument simpleCrawlDocument =
                 new CrawlDocument(documentId,
                         url, pageTitle,
-                        safe, page.getWebURL().getDepth(), timestamp, universityId);
+                        safe, page.getWebURL().getDepth(), timestamp
+                );
         try {
             new SimpleSolarSystem(solrUrl).sendPageToTheMoon(simpleCrawlDocument);
         } catch (IOException e) {
