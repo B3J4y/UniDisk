@@ -9,7 +9,6 @@ out/
 *.class
 /crawler/.idea/workspace.xml
 /crawler/target/*
-firebase-config.json
 /wikicrawl/pages/*
 recommendation/train
 crawler/src/main/resources/firebase-sa.json
