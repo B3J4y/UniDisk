@@ -15,3 +15,5 @@ export const API_ENDPOINT = process.env.API_ENDPOINT ?? LOCAL_DOCKER_ENDPOINT;
 
 export const KEYWORD_SERVICE_ENDPOINT =
   process.env.RECOMMENDATION_ENDPOINT ?? 'http://localhost:8083';
+
+export const USE_FIREBASE_AUTH = true;

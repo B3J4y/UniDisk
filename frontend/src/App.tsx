@@ -8,6 +8,9 @@ import history from './services/History';
 import { StatedLoginForm } from './ui/pages/auth/Login';
 import { Dashboard } from './ui/pages/Dashboard';
 import Routes from './ui/pages/Routes';
+import setupFirebase from './remote/services/Firebase';
+
+setupFirebase();
 
 function App(): JSX.Element {
   const userContainer = provider.getUserContainer();

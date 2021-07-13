@@ -1,4 +1,4 @@
-import { API_ENDPOINT, USE_STUBS } from 'config';
+import { API_ENDPOINT, USE_FIREBASE_AUTH, USE_STUBS } from 'config';
 import { KeywordRepository, ProjectRepository, TopicRepository } from 'data/repositories';
 import { ProjectAllContainer, ProjectDetailContainer } from 'model';
 import { KeywordDetailContainer } from 'model/keyword/Detail';
@@ -10,6 +10,7 @@ import { TopicApiRepository } from 'remote/repository';
 import { KeywordApiRepository } from 'remote/repository/api/Keyword';
 import { ProjectApiRepository } from 'remote/repository/api/Project';
 import { AuthStub } from 'remote/services/Authentication';
+import { FirebaseAuthenticationService } from 'remote/services/FirebaseAuthentication';
 import { KeywordRecommendationService } from 'remote/services/KeywordRecommendation';
 import { ProjectRepositoryStub, KeywordRepositoryStub, TopicRepositoryStub } from 'remote/stubs';
 import { EventBus } from 'services/event/bus';
@@ -78,5 +79,6 @@ export function useProvider() {
 }
 
 export const getAuthenticationService = (): IAuthenticationService => {
-  return new AuthStub();
+  if (!USE_FIREBASE_AUTH) return new AuthStub();
+  return new FirebaseAuthenticationService();
 };
