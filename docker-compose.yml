@@ -50,6 +50,9 @@ services:
       dockerfile: Dockerfile.prod
     ports:
       - 80:80
+    depends_on:
+      - recommendation
+      - api
 
 volumes:
   solr_data:
