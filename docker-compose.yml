@@ -12,6 +12,7 @@ services:
       - DOCKER_COMPOSE=1
       - SOLR_URL=solr
       - RECOMMENDATION_URL=http://recommendation:8000
+      - RESUME_CRAWLER=1
 
   db:
     container_name: unidisk_db

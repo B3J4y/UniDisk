@@ -78,13 +78,18 @@ public class SystemConfiguration {
     final String disabledPropertyValue = properties.getProperty(prefix+"disabled");
     final boolean disabled = disabledPropertyValue != null && disabledPropertyValue.equals("1");
 
+    final String resumePropertyValue = System.getenv("RESUME_CRAWLER");
+    final boolean resume = resumePropertyValue == null || resumePropertyValue.equals("1");
+
+
     return new CrawlerConfiguration(
             storageLocation,
             maxDepth,
             maxVisits,
             uniCrawlInterval,
             crawlInterval,
-            disabled
+            disabled,
+            resume
     );
   }
 
