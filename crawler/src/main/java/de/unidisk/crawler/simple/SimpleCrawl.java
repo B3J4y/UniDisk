@@ -59,7 +59,7 @@ public class SimpleCrawl implements ICrawler {
         config.setMaxDepthOfCrawling(crawlConfiguration.getMaxLinkDepth());
         config.setMaxPagesToFetch(crawlConfiguration.getMaxPages());
         config.setCrawlStorageFolder(crawlStorageFolder);
-        config.setResumableCrawling(true);
+        config.setResumableCrawling(false);
         // Instantiate the controller for this crawl.
         PageFetcher pageFetcher = new PageFetcher(config);
 

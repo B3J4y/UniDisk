@@ -2,7 +2,7 @@ version: "3"
 services:
   api:
     build: .
-    restart: always 
+    restart: always
     ports:
       - 8081:8080
     depends_on:
@@ -33,7 +33,7 @@ services:
       - 8082:8080
 
   solr:
-    restart: always 
+    restart: always
     image: solr:8
     ports:
       - 8983:8983
@@ -44,13 +44,13 @@ services:
       - unidisc
 
   recommendation:
-    restart: always 
+    restart: always
     build: ./recommendation
     ports:
       - 8083:8000
 
   frontend:
-    restart: always 
+    restart: always
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
