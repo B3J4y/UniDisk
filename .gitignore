@@ -10,3 +10,5 @@ out/
 /crawler/.idea/workspace.xml
 /crawler/target/*
 wikicrawl
+firebase-sa.json
+firebase-config.json
