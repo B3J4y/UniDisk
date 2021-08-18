@@ -8,6 +8,8 @@ export const THEME = { primary: '#2b669a', colorOnPrimary: 'white' };
 export const USE_STUBS = false;
 
 const LOCAL_DOCKER_ENDPOINT = 'http://localhost:80/api/unidisk/rest/';
+// Local endpoint when using npm run start
+const LOCAL_DOCKER_DEV_ENDPOINT = 'http://localhost:8081/unidisk/rest/';
 //IntelliJ
 const LOCAL_DEV_ENDPOINT = 'http://localhost:8080/unidisk_war/rest/';
 
