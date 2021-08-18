@@ -179,7 +179,7 @@ function TableItem(props: TableItemProps) {
   const { url, pageTitle, topicId } = props;
 
   useEffect(() => {
-    if (props.relevance) setFeedbackState(props.relevance);
+    setFeedbackState(props.relevance);
   }, [props.relevance]);
   const styles = useStyles();
   const provider = useProvider();

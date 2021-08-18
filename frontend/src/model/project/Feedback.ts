@@ -15,14 +15,13 @@ export class FeedbackResultContainer extends Container<FeedbackResultState> {
 
   public async rate(args: RateResultArgs): Promise<void> {
     const stream = Operation.execute(() => this.repository.rateResult(args));
+    // publish right away for fast UI reaction
+    this.eventBus.publish(new TopicRelevanceChangeEvent(args));
     for await (const event of stream) {
       this.setState({
         ...this.state,
         status: event,
       });
-    }
-    if (this.state.status.isFinished) {
-      this.eventBus.publish(new TopicRelevanceChangeEvent(args));
     }
   }
 }
