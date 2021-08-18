@@ -8,8 +8,8 @@ import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.project.CreateProjectParams;
 import de.unidisk.dao.*;
 import de.unidisk.entities.hibernate.*;
-import de.unidisk.rest.dto.topic.RateTopicResultDto;
 import de.unidisk.entities.results.Result;
+import de.unidisk.rest.dto.topic.RateTopicResultDto;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -22,8 +22,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static de.unidisk.entities.util.TestFactory.createKeyword;
-import static de.unidisk.entities.util.TestFactory.randomUniversityUrl;
+import static de.unidisk.entities.util.TestFactory.*;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -287,10 +286,13 @@ public class ProjectTest implements HibernateLifecycle {
 
 
     @Test
-    public void rateResultSucceeds() throws MalformedURLException, EntityNotFoundException {
+    public void rateResultSucceeds() throws MalformedURLException, EntityNotFoundException, DuplicateException {
 
         final ProjectDAO dao = new ProjectDAO();
-        final Keyword keyword = createKeyword();
+        final Project project = createRawProject();
+        final Keyword keyword = createKeyword(project);
+        dao.generateSubprojectByCustom(String.valueOf(project.getId()));
+
         final University university = new UniversityDAO().addUniversity("test");
         final String url = "https://www.google.com";
 
@@ -303,8 +305,11 @@ public class ProjectTest implements HibernateLifecycle {
         dao.rateResult(new RateTopicResultDto(String.valueOf(keyword.getTopicId()), url, ResultRelevance.RELEVANT));
         HibernateUtil.execute(session -> {
             final List<ProjectRelevanceScore> scores = session.createQuery("select s from ProjectRelevanceScore  s", ProjectRelevanceScore.class).list();
-            assertEquals(1, scores.size());
-            assertEquals(ResultRelevance.RELEVANT, scores.get(0).getResultRelevance());
+            assertEquals(2, scores.size());
+            for(ProjectRelevanceScore score : scores){
+                assertEquals(ResultRelevance.RELEVANT, score.getResultRelevance());
+            }
+
             return null;
         });
     }
