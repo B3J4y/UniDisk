@@ -48,11 +48,6 @@ def get_recommendations(topic, query, keywords, model,n=10):
     query_words = get_query_recommendations(query,model,keywords+[query],n)
     words = {}
 
-    # print("topic")
-    # print(topic_words)
-    # print("\nquery")
-    # print(query_words)
-
     for word,score in topic_words + query_words:
         if word in words:
             words[word] += float(score) 
