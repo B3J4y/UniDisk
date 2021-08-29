@@ -5,7 +5,7 @@ from timeit import default_timer as timer
 from pydantic import BaseModel
 import uuid
 from fastapi.middleware.cors import CORSMiddleware
-from model_bert import BERTRecommender
+from model_top2vec import Top2VecRecommender
 
 app = FastAPI()
 
@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-model = BERTRecommender()
+model = Top2VecRecommender()
 
 @app.get("/health")
 def health():
