@@ -413,4 +413,20 @@ public class ProjectDAO  implements IProjectRepository {
             return session.createQuery("select p from Project p where p.projectState = :state", Project.class).setParameter("state",state).list();
         }));
     }
+
+    public double getProjectScore(int projectId) {
+        return (double) HibernateUtil.execute(session -> {
+            final List<ProjectRelevanceScore> scores = session.createQuery("select s from Project p " +
+                    "INNER JOIN Topic t on p.id = t.projectId " +
+                    "INNER JOIN ProjectRelevanceScore s ON s.topicId = t.id " +
+                    "where p.id = :pId", ProjectRelevanceScore.class)
+                    .setParameter("pId",projectId)
+                    .getResultList();
+
+            final int sum = scores.stream().mapToInt(s -> s.getResultRelevance() == ResultRelevance.RELEVANT ? 1 : 0).reduce(0, Integer::sum);
+            // Check empty scores to prevent division by zero
+            final int scoresCount = scores.isEmpty() ? 1 : scores.size();
+            return sum / scoresCount;
+        });
+    }
 }
