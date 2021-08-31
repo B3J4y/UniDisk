@@ -1,5 +1,6 @@
 package de.unidisk.entities.hibernate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
@@ -7,11 +8,17 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "Topic")
+@Table(
+        uniqueConstraints={
+                @UniqueConstraint(columnNames = {"projectId", "name"}),
+        }
+)
 public class Topic implements Serializable,Input {
     @Id
     @GeneratedValue
@@ -22,6 +29,11 @@ public class Topic implements Serializable,Input {
     @Fetch(value = FetchMode.SUBSELECT)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<TopicScore> topicScores;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "projectId", insertable = false, updatable = false)
+    private Project project;
 
     private int projectId;
 
@@ -36,6 +48,11 @@ public class Topic implements Serializable,Input {
     @Fetch(value = FetchMode.SUBSELECT)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<ProjectRelevanceScore> relevanceScores;
+
+    @Basic
+    @Column()
+    @JsonIgnore()
+    private java.time.Instant finishedProcessingAt;
 
     public Topic() {
     }
@@ -108,5 +125,17 @@ public class Topic implements Serializable,Input {
 
     public List<ProjectRelevanceScore> getRelevanceScores() {
         return relevanceScores;
+    }
+
+    public boolean finishedProcessing(){
+        return finishedProcessingAt != null;
+    }
+
+    public Instant getFinishedProcessingAt() {
+        return finishedProcessingAt;
+    }
+
+    public void setFinishedProcessingAt(Instant finishedProcessingAt) {
+        this.finishedProcessingAt = finishedProcessingAt;
     }
 }

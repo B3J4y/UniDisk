@@ -21,7 +21,12 @@ export function CreateTopicForm(props: CreateTopicFormProps) {
     <Subscribe to={[container]}>
       {(container) => {
         const createTopic = async () => {
-          if (existingTopicNames.includes(name.trim())) {
+          const topicName = name.toLowerCase().trim();
+          if (
+            existingTopicNames.some(
+              (existingName) => existingName.toLowerCase().trim() === topicName,
+            )
+          ) {
             setInputError('Thema mit gleichem Namen existiert bereits.');
             return;
           }

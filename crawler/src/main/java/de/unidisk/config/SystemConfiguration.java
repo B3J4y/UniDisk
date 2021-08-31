@@ -41,7 +41,9 @@ public class SystemConfiguration {
   private static SolrConfiguration solrConfigurationFromProperties(Properties properties){
     final String prefix = "solr.";
 
-    final String server = properties.getProperty(prefix+"connection.url");
+    final String envServer =  System.getenv("SOLR_URL");
+
+    final String server =envServer!= null ? envServer : properties.getProperty(prefix+"connection.url");
     final int port = Integer.parseInt(properties.getProperty(prefix+"connection.port"));
     final String core = properties.getProperty(prefix+"core");
     final int rowLimit = Integer.parseInt(properties.getProperty(prefix+"rowLimit"));
@@ -73,12 +75,21 @@ public class SystemConfiguration {
     final int maxVisits = Integer.parseInt(properties.getProperty(prefix+"maxSeedVisits"));
     final long uniCrawlInterval = Long.parseLong(properties.getProperty(prefix+"uni.interval"));
     final long crawlInterval = Long.parseLong(properties.getProperty(prefix+"interval"));
+    final String disabledPropertyValue = properties.getProperty(prefix+"disabled");
+    final boolean disabled = disabledPropertyValue != null && disabledPropertyValue.equals("1");
+
+    final String resumePropertyValue = System.getenv("RESUME_CRAWLER");
+    final boolean resume = resumePropertyValue == null || resumePropertyValue.equals("1");
+
+
     return new CrawlerConfiguration(
             storageLocation,
             maxDepth,
             maxVisits,
             uniCrawlInterval,
-            crawlInterval
+            crawlInterval,
+            disabled,
+            resume
     );
   }
 

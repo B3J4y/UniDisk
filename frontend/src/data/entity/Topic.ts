@@ -2,7 +2,7 @@ import { FeedbackStatus } from 'data/repositories';
 import { Keyword } from './Keyword';
 import { University } from './University';
 
-type BaseTopic = {
+export type BaseTopic = {
   id: string;
   name: string;
 };

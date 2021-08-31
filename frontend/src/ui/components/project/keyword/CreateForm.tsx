@@ -7,12 +7,13 @@ import { Subscribe } from 'unstated-typescript';
 
 export type CreateKeywordFormProps = {
   topicId: Topic['id'];
+  topicName: string;
   topicKeywords: string[];
   disabled?: boolean;
 };
 
 export function CreateKeywordForm(props: CreateKeywordFormProps) {
-  const { topicId, topicKeywords } = props;
+  const { topicId, topicKeywords, topicName } = props;
   const provider = useProvider();
   const recommendationService = provider.getKeywordRecommendationService();
   const disabled = props.disabled ?? false;
@@ -34,7 +35,7 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
       return undefined;
     }
     try {
-      const results = await recommendationService.search(name);
+      const results = await recommendationService.search(topicName, name, undefined, topicKeywords);
       setCurrentRecommendation(results);
     } catch (e) {
     } finally {

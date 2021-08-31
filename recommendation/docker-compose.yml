@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  keyword_api:
+    build: .
+    volumes:
+      - .:/src
+    ports:
+      - "8001:8000"

@@ -79,8 +79,12 @@ public class SolrConfiguration {
         query.set("wt", "json");
     }
 
-    public String getUrl(){
+    public String getCoreUrl(){
         return "http://" + getServer() + ":" + getPort() + "/solr/" + getCore();
+    }
+
+    public String getServerUrl(){
+        return "http://" + getServer() + ":" + getPort() + "/solr";
     }
 
 }

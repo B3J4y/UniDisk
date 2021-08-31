@@ -4,28 +4,32 @@ import { DeleteEvent, EntityEvent } from './base';
 import { Event } from './bus';
 
 export class TopicDeletedEvent extends DeleteEvent {
-  eventName = 'TopicDeletedEvent';
+  public static Name = 'TopicDeletedEvent';
+  eventName = TopicDeletedEvent.Name;
   public constructor(topicId: Topic['id']) {
     super(topicId);
   }
 }
 
 export class TopicCreatedEvent extends EntityEvent<Topic> {
-  eventName = 'TopicCreatedEvent';
+  public static Name = 'TopicCreatedEvent';
+  eventName = TopicCreatedEvent.Name;
   public constructor(topic: Topic, public projectId: Project['id']) {
     super(topic);
   }
 }
 
 export class TopicUpdatedEvent extends EntityEvent<Topic> {
-  eventName = 'TopicUpdatedEvent';
+  public static Name = 'TopicUpdatedEvent';
+  eventName = TopicUpdatedEvent.Name;
   public constructor(topic: Topic) {
     super(topic);
   }
 }
 
 export class TopicRelevanceChangeEvent extends Event {
-  eventName = 'TopicRelevanceChangeEvent';
+  public static Name = 'TopicRelevanceChangeEvent';
+  eventName = TopicRelevanceChangeEvent.Name;
   public constructor(public args: RateResultArgs) {
     super();
   }

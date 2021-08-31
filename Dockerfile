@@ -2,6 +2,7 @@ FROM maven:3.6.3-jdk-8-slim AS build
 
 COPY crawler/src /home/app/src
 COPY crawler/pom.xml /home/app
+# skip tests
 RUN mvn -f /home/app/pom.xml package -Dmaven.test.skip=true
 
 FROM tomcat:8.5

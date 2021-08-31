@@ -15,4 +15,6 @@ public interface IUniversityRepository {
     List<University> getUniversities(long timeSinceLastCrawl);
 
     void setLastCrawlTime(int universityId, long timestamp);
+
+    University create(University university);
 }

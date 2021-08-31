@@ -7,7 +7,11 @@ import java.util.List;
 
 public interface IScoringService {
 
-    List<ScoreResult> getKeywordScore(int projectId, int keywordId);
+    List<ScoreResult> getKeywordScores(int projectId, int keywordId);
 
     List<ScoreResult> getTopicScores(int projectId, int topicId) throws EntityNotFoundException;
+
+    List<ScoreResult> filterRelevantKeywordScores(List<ScoreResult> keywordScores);
+
+    boolean canEvaluate();
 }

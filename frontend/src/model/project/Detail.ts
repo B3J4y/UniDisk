@@ -1,9 +1,10 @@
-import { ProjectDetails, ProjectState } from 'data/entity';
+import { BaseTopic, ProjectDetails, ProjectState, TopicResult } from 'data/entity';
 import {
   CreateProjectArgs,
   FeedbackStatus,
   ProjectEvaluationResult,
   ProjectRepository,
+  ProjectResult,
   UpdateProjectArgs,
 } from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';
@@ -34,6 +35,8 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   UpdateProjectArgs,
   ProjectDetailState
 > {
+  private topicMap: Record<string, BaseTopic> = {};
+
   protected onCreate(entity: ProjectDetails): void {
     this.eventBus.publish(new ProjectCreatedEvent(entity));
   }
@@ -50,7 +53,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
   public constructor(private repository: ProjectRepository, private eventBus: EventBus) {
     super();
 
-    eventBus.subscribe(TopicCreatedEvent, (event: TopicCreatedEvent) => {
+    eventBus.subscribe(TopicCreatedEvent.Name, (event: TopicCreatedEvent) => {
       const project = this.state.entity.data;
       if (!project || project.id !== event.projectId) return;
 
@@ -64,7 +67,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       });
     });
 
-    eventBus.subscribe(TopicUpdatedEvent, (event: TopicUpdatedEvent) => {
+    eventBus.subscribe(TopicUpdatedEvent.Name, (event: TopicUpdatedEvent) => {
       const project = this.state.entity.data;
       if (!project) return;
 
@@ -80,7 +83,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       });
     });
 
-    eventBus.subscribe(TopicDeletedEvent, (event: TopicDeletedEvent) => {
+    eventBus.subscribe(TopicDeletedEvent.Name, (event: TopicDeletedEvent) => {
       const project = this.state.entity.data;
       if (!project) return;
 
@@ -99,7 +102,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       });
     });
 
-    eventBus.subscribe(KeywordCreatedEvent, (event: KeywordCreatedEvent) => {
+    eventBus.subscribe(KeywordCreatedEvent.Name, (event: KeywordCreatedEvent) => {
       const project = this.state.entity.data;
       if (!project) return;
 
@@ -121,7 +124,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       this.setState({ ...this.state, entity: Resource.success(updatedProject) });
     });
 
-    eventBus.subscribe(KeywordDeletedEvent, (event: KeywordDeletedEvent) => {
+    eventBus.subscribe(KeywordDeletedEvent.Name, (event: KeywordDeletedEvent) => {
       const project = this.state.entity.data;
       if (!project) return;
 
@@ -145,13 +148,38 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
       this.setState({ ...this.state, entity: Resource.success(updatedProject) });
     });
 
-    eventBus.subscribe(TopicRelevanceChangeEvent, (event: TopicRelevanceChangeEvent) => {
-      const topicScores = this.state.topicResults[event.args.topicId];
-      if (!topicScores) {
-        this.state.topicResults[event.args.topicId] = {};
+    eventBus.subscribe(TopicRelevanceChangeEvent.Name, (event: TopicRelevanceChangeEvent) => {
+      if (!this.getProject()) return;
+
+      const { args } = event;
+
+      const topic = this.topicMap[args.topicId];
+
+      if (!topic) {
+        return;
       }
 
-      this.state.topicResults[event.args.topicId][event.args.url] = event.args.relevance;
+      const resultData = this.state.result.data;
+      if (!resultData) {
+        return;
+      }
+
+      const otherTopics = Object.values(resultData.results).map((result) => {
+        return result.topicResults.find((t) => t.topic.name === topic.name);
+      });
+
+      otherTopics.forEach((t) => {
+        if (t) {
+          const topicId = t.topic.id;
+
+          const topicScores = this.state.topicResults[topicId];
+          if (!topicScores) {
+            this.state.topicResults[topicId] = {};
+          }
+
+          this.state.topicResults[topicId][event.args.url] = event.args.relevance;
+        }
+      });
 
       this.setState({ ...this.state });
     });
@@ -222,6 +250,12 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
         const topicResults: Record<string, Record<string, FeedbackStatus>> = {};
 
         Object.values(event.data!.results).forEach((result) => {
+          result.topicResults.forEach(({ topic }) => {
+            if (!this.topicMap[topic.id]) {
+              this.topicMap[topic.id] = topic;
+            }
+          });
+
           result.relevanceScores.forEach((score) => {
             if (!topicResults[score.topicId]) {
               topicResults[score.topicId] = {};
