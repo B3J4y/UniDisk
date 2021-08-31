@@ -1,6 +1,7 @@
 package de.unidisk.contracts.repositories;
 
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
@@ -18,4 +19,6 @@ public interface IKeywordRepository {
     Keyword updateKeyword(UpdateKeywordParams params) throws DuplicateException;
 
     boolean deleteKeyword(int keywordId);
+
+    void finishedProcessing(int keywordId) throws EntityNotFoundException;
 }

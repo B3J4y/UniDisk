@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -312,5 +313,99 @@ public class ProjectTest implements HibernateLifecycle {
 
             return null;
         });
+    }
+
+    @Test
+    public void getDeadProjectsTest() throws DuplicateException {
+        final ProjectDAO dao = new ProjectDAO();
+        final Project p1 = dao.createProject(new CreateProjectParams("0","test"));
+
+        Arrays.stream(ProjectState.values()).filter(state -> state != ProjectState.RUNNING).forEach(state -> {
+            try {
+               final Project p = dao.createProject(new CreateProjectParams("0",state.toString()));
+               final Project p2 =  dao.createProject(new CreateProjectParams("0",state.toString()+"_"));
+                HibernateUtil.executeVoid(session -> {
+                    p.setProjectState(state);
+                    p2.setProjectState(state);
+                    p.setProcessingHeartbeat(java.time.Instant.now().minus(15, ChronoUnit.MINUTES));
+                    session.update(p);
+                    session.update(p2);
+                });
+
+
+            } catch (DuplicateException e) {
+                e.printStackTrace();
+            }
+        });
+        HibernateUtil.executeVoid(session -> {
+            p1.setProjectState(ProjectState.RUNNING);
+            p1.setProcessingHeartbeat(java.time.Instant.now().minus(15, ChronoUnit.MINUTES));
+            session.update(p1);
+        });
+
+        final List<Project> deadProjects = dao.getDeadProjects();
+        assertEquals(1,deadProjects.size());
+    }
+
+    @Test
+    public void cleanDeadProjectsTest() throws DuplicateException, MalformedURLException, EntityNotFoundException {
+        final ProjectDAO dao = new ProjectDAO();
+        final KeywordScoreDAO keywordScoreDAO = new KeywordScoreDAO();
+        final KeywordDAO keywordDAO = new KeywordDAO();
+        final TopicDAO topicDAO = new TopicDAO();
+        final University university = new UniversityDAO().create(new University("24"));
+        final SearchMetaDataDAO searchMetaDataDAO = new SearchMetaDataDAO();
+        final TopicScoreDAO topicScoreDAO = new TopicScoreDAO();
+        final Project project = dao.createProject(new CreateProjectParams("0","test"));
+        HibernateUtil.executeVoid(session -> {
+            project.setProjectState(ProjectState.RUNNING);
+            project.setProcessingHeartbeat(java.time.Instant.now().minus(15, ChronoUnit.MINUTES));
+            session.update(project);
+        });
+
+        Topic finishedTopic = topicDAO.createTopic("1",project.getId(), Arrays.asList("1","2"));
+        finishedTopic.getKeywords().forEach(keyword -> {
+            keywordScoreDAO.createKeywordScore(keyword.getId(),5,"");
+            try {
+                keywordDAO.finishedProcessing(keyword.getId());
+            } catch (EntityNotFoundException e) {
+                e.printStackTrace();
+            }
+        });
+
+        finishedTopic = topicDAO.getTopic(finishedTopic.getId()).get();
+
+        Topic unfinishedTopic = topicDAO.createTopic("2",project.getId(), Arrays.asList("1","2"));
+
+        List<Keyword> unfinishedKeywords = unfinishedTopic.getKeywords();
+        Keyword unfinishedKeyword1 = unfinishedKeywords.get(0);
+        keywordScoreDAO.createKeywordScore(unfinishedKeyword1.getId(),5,"");
+        keywordScoreDAO.createKeywordScore(unfinishedKeywords.get(1).getId(),3,"");
+
+        final URL url = new URL("https://www.google.com");
+        topicScoreDAO.addScore(unfinishedTopic, 5, searchMetaDataDAO.createMetaData(url, university.getId(), 0l));
+        TopicScore finishedTopicScore = topicScoreDAO.addScore(finishedTopic, 3, searchMetaDataDAO.createMetaData(url, university.getId(), 0l));
+        topicDAO.finishedProcessing(finishedTopic.getId());
+
+        dao.cleanDeadProjects();
+
+        final Project reloadedProject = dao.getProject(String.valueOf(project.getId())).get();
+        final Topic reloadedUnfinished = reloadedProject.getTopics().stream().filter(t -> t.getId() == unfinishedTopic.getId()).findFirst().get();
+        assertEquals(0,reloadedUnfinished.getTopicScores().size());
+        Topic finalFinishedTopic = finishedTopic;
+        final Topic reloadedFinished = reloadedProject.getTopics().stream().filter(t -> t.getId() == finalFinishedTopic.getId()).findFirst().get();
+
+        assertEquals(getTopicKeywordScoreIds(finishedTopic),getTopicKeywordScoreIds(reloadedFinished));
+        assertEquals(finishedTopicScore.getId(), reloadedFinished.getTopicScores().get(0).getId());
+
+        Keyword unfinishedKeyword = reloadedUnfinished.getKeywords().stream().filter(k -> k.getId() == unfinishedKeyword1.getId()).findFirst().get();
+        assertEquals(0,unfinishedKeyword.getKeyWordScores().size());
+
+    }
+
+    List<Integer> getTopicKeywordScoreIds(Topic t) {
+        return t.getKeywords().stream().map(Keyword::getKeyWordScores).map(scores -> {
+            return scores.stream().map(KeyWordScore::getId).collect(Collectors.toList());
+        }).flatMap(Collection::stream).collect(Collectors.toList());
     }
 }

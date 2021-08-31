@@ -6,6 +6,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,11 @@ public class Project {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ProjectSubtype projectSubtype;
+
+    @Basic
+    @Column()
+    @JsonIgnore()
+    private java.time.Instant processingHeartbeat;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
@@ -185,5 +191,13 @@ public class Project {
     @JsonIgnore
     public Project getParentProject() {
         return parentProject;
+    }
+
+    public Instant getProcessingHeartbeat() {
+        return processingHeartbeat;
+    }
+
+    public void setProcessingHeartbeat(Instant processingHeartbeat) {
+        this.processingHeartbeat = processingHeartbeat;
     }
 }

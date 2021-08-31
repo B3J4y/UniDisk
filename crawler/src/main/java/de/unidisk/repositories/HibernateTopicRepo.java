@@ -60,4 +60,9 @@ public class HibernateTopicRepo implements ITopicRepository {
     public double getScore(int id) {
         return dao.getScore(id);
     }
+
+    @Override
+    public void finishedProcessing(int topicId) throws EntityNotFoundException {
+        dao.finishedProcessing(topicId);
+    }
 }
