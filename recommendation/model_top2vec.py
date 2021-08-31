@@ -5,10 +5,13 @@ class Top2VecRecommender(TopicWordRecommender):
     def setup(self) -> None:
         self.model = Top2Vec.load("top2vec.model")
 
-    def get_recommendations(self, query: str, n = 10):
-        return get_recommendations(query,self.model,n)
+    def get_recommendations(self, query: str,topic: str, keywords: [str] = [], n = 10):
+        return get_recommendations(topic,query,keywords,self.model,n)
 
-def get_recommendations(query,model,n=10):
+
+def get_query_recommendations(query,model, ignore_words=[] ,n=10):
+    if query.strip() == "":
+        return []
     try:
         topic_words, word_scores, topic_scores, topic_nums = model.search_topics(keywords=[query],num_topics=2)
         if len(topic_words) == 0:
@@ -16,7 +19,7 @@ def get_recommendations(query,model,n=10):
         current_topic = 0
         current_word = 0
         response = []
-        used_words = set()
+        used_words = set(ignore_words)
 
         while len(response) < n:
             words = topic_words[current_topic]
@@ -39,3 +42,18 @@ def get_recommendations(query,model,n=10):
         if "has not been learned" in str(err):
             return []
         raise err
+
+def get_recommendations(topic, query, keywords, model,n=10):
+    topic_words = get_query_recommendations(topic,model,keywords+[topic],n)
+    query_words = get_query_recommendations(query,model,keywords+[query],n)
+    words = {}
+
+    for word,score in topic_words + query_words:
+        if word in words:
+            words[word] += float(score) 
+        else:
+            words[word] = float(score)
+
+    sorted_scores = sorted(words.items(), key=lambda kv: kv[1],reverse=True)
+    result = sorted_scores[:n]
+    return result
