@@ -10,7 +10,9 @@ import de.unidisk.entities.hibernate.*;
 import de.unidisk.entities.results.KeywordResult;
 import de.unidisk.entities.results.Result;
 import de.unidisk.rest.dto.topic.RateTopicResultDto;
+import org.hibernate.Session;
 import org.hibernate.query.Query;
+
 
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -113,15 +115,26 @@ public class ProjectDAO  implements IProjectRepository {
 
         HibernateUtil.execute(session -> {
 
-            final Optional<ProjectRelevanceScore> existingScore = session.createQuery("Select score from ProjectRelevanceScore score " +
-            "where score.topicId = :topicId and score.searchMetaData.url = :url"
-            ).setParameter("topicId", topicId)
-                    .setParameter("url", args.getUrl()).uniqueResultOptional();
+            final Topic topic = session.createQuery("Select t from Topic t where t.id = :id",Topic.class).setParameter("id",topicId).uniqueResult();
+            final Project project = this.findProjectById(topic.getProjectId(),session).get();
 
-            if(existingScore.isPresent()){
-                final ProjectRelevanceScore score = existingScore.get();
-                score.setResultRelevance(args.getRelevance());
-                session.update(score);
+            final List<Integer> projectIds = (!project.isSubproject() ? this.mergeProjectWithSubprojects(project) : this.mergeSubprojectWithRelated(project))
+                    .stream().map(Project::getId).collect(Collectors.toList());
+
+            final List<Integer> topicIds = session.createQuery("select t.id from Topic t where t.name = :name and t.projectId IN :projectIds", Integer.class)
+                    .setParameter("name",topic.getName())
+                    .setParameter("projectIds",projectIds).list();
+
+            final List<ProjectRelevanceScore> existingScores = session.createQuery("Select score from ProjectRelevanceScore score " +
+            "where score.topicId IN :topicIds and score.searchMetaData.url = :url",ProjectRelevanceScore.class
+            ).setParameter("topicIds", topicIds)
+                    .setParameter("url", args.getUrl()).list();
+
+            if(!existingScores.isEmpty()){
+                for(ProjectRelevanceScore score : existingScores){
+                    score.setResultRelevance(args.getRelevance());
+                    session.update(score);
+                }
                 return null;
             }
 
@@ -139,11 +152,14 @@ public class ProjectDAO  implements IProjectRepository {
 
             final SearchMetaData searchMetaData =searchMetaDataList.get(0);
 
-            final ProjectRelevanceScore score = new ProjectRelevanceScore();
-            score.setSearchMetaData(searchMetaData);
-            score.setTopicId(topicId);
-            score.setResultRelevance(args.getRelevance());
-            session.save(score);
+            for(Integer tId : topicIds){
+                final ProjectRelevanceScore score = new ProjectRelevanceScore();
+                score.setSearchMetaData(searchMetaData);
+                score.setResultRelevance(args.getRelevance());
+                score.setTopicId(tId);
+                session.save(score);
+            }
+
             return null;
         });
     }
@@ -322,13 +338,16 @@ public class ProjectDAO  implements IProjectRepository {
     }
 
     private Optional<Project> findProjectById(int id) {
-        return HibernateUtil.execute(session ->  {
-            return session.createQuery("select p from Project p where p.id = :id", Project.class)
-                    .setParameter("id", id)
-                    .uniqueResultOptional();
-
-        });
+        return HibernateUtil.execute(session -> findProjectById(id,session));
     }
+
+    private Optional<Project> findProjectById(int id, Session session) {
+        return session.createQuery("select p from Project p where p.id = :id", Project.class)
+                .setParameter("id", id)
+                .uniqueResultOptional();
+    }
+
+
 
     public Optional<Project> findProject(String name) {
         return HibernateUtil.execute(session ->  {
@@ -428,6 +447,13 @@ public class ProjectDAO  implements IProjectRepository {
         final List<Project> projects = new ArrayList<Project>(Arrays.asList(project));
         projects.addAll(project.getSubprojects());
         return projects;
+    }
+
+    private List<Project> mergeSubprojectWithRelated(Project project){
+        final Project parent = project.getParentProject();
+        if(parent == null)
+                throw new RuntimeException("Provided project is not parent project.");
+        return mergeProjectWithSubprojects(parent);
     }
 
     @Override

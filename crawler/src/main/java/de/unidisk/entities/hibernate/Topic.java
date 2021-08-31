@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity(name = "Topic")
+@Table(
+        uniqueConstraints={
+                @UniqueConstraint(columnNames = {"projectId", "name"}),
+        }
+)
 public class Topic implements Serializable,Input {
     @Id
     @GeneratedValue

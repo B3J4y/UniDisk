@@ -40,6 +40,12 @@ public final class TestFactory {
         return k;
     }
 
+    public static Keyword createKeyword(Project project){
+        final Topic t = createTopic(project);
+        Keyword k = new KeywordDAO().addKeyword(UUID.randomUUID().toString(),t.getId());
+        return k;
+    }
+
     public static Topic createTopic(){
         Project p = null;
         try {
@@ -47,7 +53,11 @@ public final class TestFactory {
         } catch (DuplicateException e) {
             e.printStackTrace();
         }
-        Topic t = new TopicDAO().createTopic(UUID.randomUUID().toString(),p.getId());
+        return createTopic(p);
+    }
+
+    public static Topic createTopic(Project project){
+        Topic t = new TopicDAO().createTopic(UUID.randomUUID().toString(),project.getId());
         return t;
     }
 
