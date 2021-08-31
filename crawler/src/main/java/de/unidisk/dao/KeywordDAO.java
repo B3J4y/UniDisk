@@ -1,23 +1,16 @@
 package de.unidisk.dao;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
-import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
 import de.unidisk.contracts.repositories.params.keyword.UpdateKeywordParams;
 import de.unidisk.entities.hibernate.Keyword;
-import de.unidisk.entities.hibernate.Project;
-import de.unidisk.entities.hibernate.Topic;
-
-import org.hibernate.NonUniqueObjectException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import org.hibernate.exception.ConstraintViolationException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 public class KeywordDAO {
@@ -90,18 +83,13 @@ public class KeywordDAO {
     }
 
     public Optional<Keyword> get(int keywordId){
-        Session currentSession = HibernateUtil.getSessionFactory().getCurrentSession();
-        Transaction transaction = currentSession.getTransaction();
-        if (!transaction.isActive()) {
-            transaction.begin();
-        }
-        final Optional<Keyword> keyword = currentSession.
+        return HibernateUtil.execute(session -> get(keywordId,session));
+    }
+
+    private Optional<Keyword> get(int keywordId, Session session){
+        final Optional<Keyword> keyword = session.
                 createQuery("select t from Keyword t where t.id = :id", Keyword.class)
-        .setParameter("id", keywordId ).uniqueResultOptional();
-
-
-        transaction.commit();
-        currentSession.close();
+                .setParameter("id", keywordId ).uniqueResultOptional();
         return keyword;
     }
 
@@ -126,64 +114,6 @@ public class KeywordDAO {
     }
 
 
-    public List<Keyword> addKeywords(int topicId, List<String> keywordList) {
-        List<Keyword> keywords = new ArrayList<>();
-        Session currentSession = HibernateUtil.getSessionFactory().openSession();
-        Transaction tnx = currentSession.beginTransaction();
-        for (String keywordName : keywordList) {
-            Keyword keyword = currentSession.createQuery("select k from Keyword k where k.topicId = :name ", Keyword.class)
-                    .setParameter("name", topicId)
-                    .uniqueResultOptional()
-                    .orElse(new Keyword(keywordName));
-
-            try {
-                currentSession.save(keyword);
-            } catch (NonUniqueObjectException exp) {
-
-            }
-            currentSession.saveOrUpdate(keyword);
-            keywords.add(keyword);
-        }
-        tnx.commit();
-        currentSession.close();
-        return keywords;
-    }
-
-    /**
-     * Find keywords by topic name
-     */
-    public List<Keyword> findKeyWordsByTopic(String topic) {
-        Session currentSession = HibernateUtil.getSessionFactory().openSession();
-        Transaction transaction = currentSession.getTransaction();
-        transaction.begin();
-        List<Keyword> keywords = currentSession.createQuery("select k from Keyword k  where k.topicId = :name", Keyword.class)
-                .setParameter("name", topic)
-                .list();
-        transaction.commit();
-        currentSession.close();
-        return keywords;
-    }
-
-    public List<Keyword> findKeywordsByTopics(List<String> topics) {
-
-        Session currentSession = HibernateUtil.getSessionFactory().openSession();
-        Transaction transaction = currentSession.getTransaction();
-        transaction.begin();
-        List<Keyword> keywords = currentSession.createQuery("select k from Keyword k where k.topicId in :topics", Keyword.class)
-                .setParameter("topics", topics)
-                .list();
-        transaction.commit();
-        currentSession.close();
-        return keywords;
-    }
-
-    public List<Keyword> getProjectKeywords(Project p) {
-
-        return findKeywordsByTopics(p.getTopics().stream().map(
-                Topic::getName
-        ).collect(Collectors.toList()));
-    }
-
     public List<Keyword> getProjectKeywords(int projectId) {
 
         Session currentSession = HibernateUtil.getSessionFactory().openSession();
@@ -196,5 +126,23 @@ public class KeywordDAO {
         transaction.commit();
         currentSession.close();
         return keywords;
+    }
+
+    public void finishedProcessing(int keywordId) throws EntityNotFoundException {
+        final EntityNotFoundException result = HibernateUtil.execute(session -> {
+            final Optional<Keyword> optionalKeyword = this.get(keywordId,session);
+            if(!optionalKeyword.isPresent())
+            {
+                return new EntityNotFoundException(Keyword.class,keywordId);
+            }
+            final Keyword keyword = optionalKeyword.get();
+            keyword.setFinishedProcessingAt(java.time.Instant.now());
+            session.update(keyword);
+
+            return null;
+        });
+
+        if(result != null)
+            throw result;
     }
 }

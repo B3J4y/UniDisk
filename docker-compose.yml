@@ -2,16 +2,18 @@ version: "3"
 services:
   api:
     build: .
+    restart: always
     ports:
       - 8081:8080
     depends_on:
       - db
       - solr
-
     environment:
       - DOCKER_COMPOSE=1
       - SOLR_URL=solr
       - RECOMMENDATION_URL=http://recommendation:8000
+      - RESUME_CRAWLER=1
+
   db:
     container_name: unidisk_db
     image: mysql:8
@@ -23,6 +25,8 @@ services:
       MYSQL_PASSWORD: secret
     ports:
       - 3306:3306
+    volumes:
+      - db_data:/var/lib/mysql
 
   adminer:
     image: adminer
@@ -30,6 +34,7 @@ services:
       - 8082:8080
 
   solr:
+    restart: always
     image: solr:8
     ports:
       - 8983:8983
@@ -40,11 +45,13 @@ services:
       - unidisc
 
   recommendation:
+    restart: always
     build: ./recommendation
     ports:
       - 8083:8000
 
   frontend:
+    restart: always
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
@@ -53,6 +60,8 @@ services:
     depends_on:
       - recommendation
       - api
+      - solr
 
 volumes:
   solr_data:
+  db_data:

@@ -192,7 +192,9 @@ public class TestSetupBean {
                 keywordRepository,
                 new KeywordRecommendationService()
         );
-        solrApp = new SolrApp(projectRepository,scoringService,resultService,projectGenerationService);
+        solrApp = new SolrApp(projectRepository,scoringService,resultService
+                ,projectGenerationService,keywordRepository, topicRepository
+        );
 
         final long scoringInterval = SystemConfiguration.getInstance().getScoringInterval();
         scoringTimer.scheduleAtFixedRate(new TimerTask() {

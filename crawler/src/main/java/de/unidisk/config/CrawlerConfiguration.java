@@ -8,15 +8,17 @@ public class CrawlerConfiguration {
     private long uniCrawlInterval;
     private long crawlInterval;
     private boolean disabled;
+    private boolean resumeable;
 
 
-    public CrawlerConfiguration(String storageLocation, int maxDepth, int maxVisits, long uniCrawlInterval, long crawlInterval, boolean disabled) {
+    public CrawlerConfiguration(String storageLocation, int maxDepth, int maxVisits, long uniCrawlInterval, long crawlInterval, boolean disabled, boolean resumeable) {
         this.storageLocation = storageLocation;
         this.maxDepth = maxDepth;
         this.maxVisits = maxVisits;
         this.uniCrawlInterval = uniCrawlInterval;
         this.crawlInterval = crawlInterval;
         this.disabled = disabled;
+        this.resumeable = resumeable;
     }
 
 
@@ -43,5 +45,9 @@ public class CrawlerConfiguration {
 
     public boolean isDisabled() {
         return disabled;
+    }
+
+    public boolean isResumeable() {
+        return resumeable;
     }
 }

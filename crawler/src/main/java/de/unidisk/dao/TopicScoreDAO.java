@@ -1,7 +1,9 @@
 package de.unidisk.dao;
 
-import de.unidisk.common.exceptions.EntityNotFoundException;
-import de.unidisk.entities.hibernate.*;
+import de.unidisk.entities.hibernate.Input;
+import de.unidisk.entities.hibernate.SearchMetaData;
+import de.unidisk.entities.hibernate.Topic;
+import de.unidisk.entities.hibernate.TopicScore;
 import org.hibernate.Session;
 
 import java.util.Optional;
@@ -36,24 +38,4 @@ public class TopicScoreDAO implements ScoringDAO<TopicScore> {
         });
     }
 
-    private TopicScore findOrFail(int topicScoreId) throws EntityNotFoundException {
-        final Optional<TopicScore> score = HibernateUtil.execute(session -> {
-            return session.createQuery("select p from TopicScore p where p.id = :id", TopicScore.class)
-                    .setParameter("id", topicScoreId)
-                    .uniqueResultOptional();
-
-        });
-        if (!score.isPresent())
-            throw new EntityNotFoundException(TopicScore.class, topicScoreId);
-        return score.get();
-    }
-
-
-    private Project getParentProject(int projectId, Session session){
-        final Project p = session.createQuery("SELECT p from Project p where p.id = :id", Project.class)
-                    .setParameter("id",projectId).getSingleResult();
-        if(p.getProjectSubtype() == ProjectSubtype.DEFAULT)
-                return p;
-        return p.getParentProject();
-    }
 }

@@ -1,5 +1,6 @@
 package de.unidisk.repositories;
 
+import de.unidisk.common.exceptions.EntityNotFoundException;
 import de.unidisk.contracts.exceptions.DuplicateException;
 import de.unidisk.contracts.repositories.IKeywordRepository;
 import de.unidisk.contracts.repositories.params.keyword.CreateKeywordParams;
@@ -31,5 +32,10 @@ public class HibernateKeywordRepo implements IKeywordRepository {
     @Override
     public boolean deleteKeyword(int keywordId) {
         return dao.deleteKeyword(keywordId);
+    }
+
+    @Override
+    public void finishedProcessing(int keywordId) throws EntityNotFoundException {
+        dao.finishedProcessing(keywordId);
     }
 }
