@@ -56,7 +56,7 @@ public class UniCrawlService implements SimpleCrawl.IProgressListener {
 
     public void start(long timeSinceLastCrawl){
         logger.info("Start UniCrawlService");
-        final List<University> unis = universityRepository.getUniversities(timeSinceLastCrawl);
+        final List<University> unis = universityRepository.getCrawlableUniversities(timeSinceLastCrawl);
         if(unis == null || unis.size() == 0){
             logger.info("No seeds to crawl.");
             return;

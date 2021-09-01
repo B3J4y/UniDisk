@@ -19,6 +19,7 @@ public class UniversityDAO implements IUniversityRepository {
         University university;
         if (!optUni.isPresent()) {
             university = new University(name);
+            university.setCrawlingDisabled(false);
             currentSession.saveOrUpdate(university);
             tnx.commit();
         } else {
@@ -65,9 +66,9 @@ public class UniversityDAO implements IUniversityRepository {
     }
 
     @Override
-    public List<University> getUniversities(long timeSinceLastCrawl) {
+    public List<University> getCrawlableUniversities(long timeSinceLastCrawl) {
         return HibernateUtil.execute(session -> {
-            List<University> universities = session.createQuery("select u from University u where abs(u.lastCrawl - :current ) > :period ", University.class)
+            List<University> universities = session.createQuery("select u from University u where abs(u.lastCrawl - :current ) > :period and u.crawlingDisabled = false", University.class)
                     .setParameter("period",timeSinceLastCrawl)
                     .setParameter("current", System.currentTimeMillis())
                     .getResultList();

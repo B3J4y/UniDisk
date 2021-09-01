@@ -78,7 +78,7 @@ public class UniversityTest implements HibernateLifecycle {
         University ancientCrawlUni = universityDAO.addUniversity("UP");
         universityDAO.setLastCrawlTime(ancientCrawlUni.getId(),current- (interval * 2));
 
-        List<University> universities = universityDAO.getUniversities(interval);
+        List<University> universities = universityDAO.getCrawlableUniversities(interval);
         assertEquals(1,universities.size());
         assertEquals(ancientCrawlUni.getId(), universities.get(0).getId());
     }

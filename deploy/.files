@@ -1,0 +1,3 @@
+frontend/src/firebase-config.json
+crawler/src/main/resources/firebase-sa.json
+recommendation/top2vec.model

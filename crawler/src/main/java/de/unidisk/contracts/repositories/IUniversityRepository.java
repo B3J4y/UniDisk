@@ -10,9 +10,9 @@ public interface IUniversityRepository {
     /*
     Returns all university entities where the difference
     between the last crawl and now is greater than the
-    given time period.
+    given time period and crawling is enabled.
      */
-    List<University> getUniversities(long timeSinceLastCrawl);
+    List<University> getCrawlableUniversities(long timeSinceLastCrawl);
 
     void setLastCrawlTime(int universityId, long timestamp);
 

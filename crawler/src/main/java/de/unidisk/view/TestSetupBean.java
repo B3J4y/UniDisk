@@ -2,7 +2,6 @@ package de.unidisk.view;
 
 import de.unidisk.common.ApplicationState;
 import de.unidisk.common.MockData;
-import de.unidisk.common.exceptions.SeedData;
 import de.unidisk.config.SolrConfiguration;
 import de.unidisk.config.SystemConfiguration;
 import de.unidisk.contracts.repositories.IKeywordRepository;
@@ -37,9 +36,11 @@ import org.apache.solr.common.params.CoreAdminParams;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.ws.rs.ext.Provider;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
@@ -107,18 +108,30 @@ public class TestSetupBean {
         setupScoringJob();
     }
 
-    private void seed() {
+    private void seed() throws IOException {
         final List<University> existingUniversities = universityRepository.getUniversities();
-        final Set<String> existingNames = existingUniversities.stream().map(University::getName).collect(Collectors.toSet());
-        final List<University> universitySeeds = SeedData.getSeedUniversities();
+        if(existingUniversities.isEmpty()){
+            final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("university.csv");
+            List<String> lines =  new BufferedReader(new InputStreamReader(inputStream))
+                    .lines().skip(1).collect(Collectors.toList());
 
-        final List<University> newUniversities = universitySeeds.stream().filter(university -> !existingNames.contains(university.getName())).collect(Collectors.toList());
-        if(newUniversities.isEmpty())
-            return;
-        logInfo("Create " + newUniversities.size() + " new universities");
-        for (University newUniversity : newUniversities) {
-            universityRepository.create(newUniversity);
+            for(String line : lines){
+                final String[] columns = line.split(",");
+                final int id = Integer.parseInt(columns[0]);
+                final long lastCrawl = Long.parseLong(columns[1]);
+                final double lat = Double.parseDouble(columns[2]);
+                final double lng = Double.parseDouble(columns[3]);
+                final String name = columns[4];
+                final boolean crawlingDisabled = columns[5].equals("0");
+                final String seedUrl = columns[6];
+                final University university = new University(
+                    id,name,lat,lng, seedUrl,lastCrawl,crawlingDisabled
+                );
+                universityRepository.create(university);
+            }
+
         }
+
     }
 
 
