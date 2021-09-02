@@ -8,6 +8,7 @@ services:
     depends_on:
       - db
       - solr
+      - recommendation
     environment:
       - DOCKER_COMPOSE=1
       - SOLR_URL=solr
@@ -47,6 +48,8 @@ services:
   recommendation:
     restart: always
     build: ./recommendation
+    volumes:
+      - recommendation_data:/var
     ports:
       - 8083:8000
 
@@ -65,3 +68,4 @@ services:
 volumes:
   solr_data:
   db_data:
+  recommendation_data:
