@@ -30,7 +30,7 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
   const [inputError, setInputError] = React.useState<string | undefined>(undefined);
 
   const search = async () => {
-    if (name.trim().length < 3) {
+    if (name.trim().length < 1) {
       setCurrentRecommendation(undefined);
       return undefined;
     }
