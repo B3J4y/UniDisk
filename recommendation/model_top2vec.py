@@ -43,8 +43,10 @@ def get_query_recommendations(query,model, ignore_words=[] ,n=10):
             return []
         raise err
 
+topic_word_scaling = .5
+
 def get_recommendations(topic, query, keywords, model,n=10):
-    topic_words = get_query_recommendations(topic,model,keywords+[topic],n)
+    topic_words = [(word,score * topic_word_scaling) for word,score in get_query_recommendations(topic,model,keywords+[topic],n)]
     query_words = get_query_recommendations(query,model,keywords+[query],n)
     words = {}
 
