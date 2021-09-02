@@ -66,6 +66,12 @@ public class UniCrawlService implements SimpleCrawl.IProgressListener {
     }
 
     @Override
+    public void onStart(UniversitySeed seed) {
+        // Already update seed time so it's not included in next crawl run
+        onSeedFinished(seed);
+    }
+
+    @Override
     public void onSeedFinished(UniversitySeed seed) {
         universityRepository.setLastCrawlTime(seed.getUniversityId(),System.currentTimeMillis());
     }

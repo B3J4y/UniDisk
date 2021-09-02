@@ -140,6 +140,9 @@ public class SimpleCrawl implements ICrawler {
 
          for (UniversitySeed s : seedList) {
              logger.info("STARTING crawl with seed: "+ s);
+             if(progressListener !=null)
+                 progressListener.onStart(s);
+
              startCrawl(s.getSeedUrl());
              if(progressListener !=null)
                  progressListener.onSeedFinished(s);
@@ -153,6 +156,8 @@ public class SimpleCrawl implements ICrawler {
          for (UniversitySeed s : seedList) {
              Thread t = new Thread(() -> {
                  logger.info("STARTING crawl with seed: "+ s);
+                 if(progressListener !=null)
+                     progressListener.onStart(s);
                  try {
                      startCrawl(s, true);
                      if(progressListener !=null)
@@ -180,6 +185,8 @@ public class SimpleCrawl implements ICrawler {
     }
 
     public interface IProgressListener {
+
+        void onStart(UniversitySeed seed);
 
         void onSeedFinished(UniversitySeed seed);
     }
