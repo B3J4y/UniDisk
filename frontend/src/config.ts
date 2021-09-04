@@ -27,3 +27,5 @@ if (isProd) {
 export const API_ENDPOINT = _API_ENDPOINT;
 export const KEYWORD_SERVICE_ENDPOINT = _KEYWORD_SERVICE_ENDPOINT;
 export const USE_FIREBASE_AUTH = true;
+
+export const PROJECT_EVAL_ITEM_COUNT = 3;
