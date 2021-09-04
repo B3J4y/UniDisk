@@ -33,6 +33,25 @@ import { Center } from 'ui/components/util/Center';
 import { Subscribe } from 'unstated-typescript';
 import { mapProjectState } from 'util/language';
 
+type CenterContainerProps = {
+  children: React.ReactNode;
+};
+function CenterContainer(props: CenterContainerProps) {
+  const { children } = props;
+
+  return (
+    <Grid
+      container
+      xs={12}
+      style={{ height: '100%', width: '100%' }}
+      alignItems="center"
+      justify="center"
+    >
+      {children}
+    </Grid>
+  );
+}
+
 export function ProjectOverviewPage() {
   const provider = useProvider();
 
@@ -48,20 +67,28 @@ export function ProjectOverviewPage() {
         }
 
         if (isLoading || isIdle) {
-          return <CircularProgress />;
+          return (
+            <CenterContainer>
+              <CircularProgress />
+            </CenterContainer>
+          );
         }
 
         if (hasError) {
-          return <p>Etwas lief schief...</p>;
+          return (
+            <CenterContainer>
+              <p>Etwas lief schief...</p>
+            </CenterContainer>
+          );
         }
 
         const projects = data ?? [];
 
         if (projects.length === 0) {
           return (
-            <Grid container xs={12} style={{ height: '100%' }}>
-              <Center child={<NoProjectsView />}></Center>
-            </Grid>
+            <CenterContainer>
+              <NoProjectsView />
+            </CenterContainer>
           );
         }
         return <ProjectsSelection projects={projects} />;
@@ -334,24 +361,29 @@ function NoProjectsView() {
               e.preventDefault();
             }}
           >
-            <Column>
-              <h2>Erstes Projekt</h2>
-              <p>Erstelle dein erstes Projekt und beginne mit der Suche</p>
+            <Paper style={{ maxWidth: '380px' }}>
+              <Column>
+                <h2 style={{ margin: 0 }}>Erstes Projekt</h2>
+                <p style={{ fontSize: 16, textAlign: 'center' }}>
+                  Erstelle dein erstes Projekt und beginne mit der Suche.
+                </p>
 
-              <TextField placeholder="Projektname" onChange={(e) => setName(e.target.value)} />
+                <TextField placeholder="Projektname" onChange={(e) => setName(e.target.value)} />
 
-              <Button
-                type="button"
-                color="primary"
-                onClick={() => {
-                  container.create({
-                    name,
-                  });
-                }}
-              >
-                {container.state.save.isLoading ? <CircularProgress /> : 'Projekt erstellen'}
-              </Button>
-            </Column>
+                <Button
+                  type="button"
+                  color="primary"
+                  variant="contained"
+                  onClick={() => {
+                    container.create({
+                      name,
+                    });
+                  }}
+                >
+                  {container.state.save.isLoading ? <CircularProgress /> : 'Projekt erstellen'}
+                </Button>
+              </Column>
+            </Paper>
           </form>
         );
       }}
@@ -393,6 +425,7 @@ function CreateProjectButton(props: CreateProjectButtonProps) {
       builder={(setOpen) => {
         return (
           <Button
+            color="primary"
             onClick={() => {
               setOpen(true);
             }}

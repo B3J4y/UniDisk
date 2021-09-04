@@ -53,7 +53,7 @@ export function CreateTopicForm(props: CreateTopicFormProps) {
           >
             <Box p={2}>
               <Grid container justify="space-between" alignItems="center" spacing={2}>
-                <Grid item style={{ flexGrow: 1, display: 'flex' }}>
+                <Grid item xs>
                   <TextField
                     onChange={(e) => {
                       setName(e.target.value);

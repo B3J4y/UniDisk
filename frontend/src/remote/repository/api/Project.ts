@@ -45,6 +45,7 @@ function mapModelDtoToEntity(dto: ProjectModelDto): Project {
     id: dto.id.toString(),
     name: dto.name,
     state: mapDtoState(dto.projectState),
+    topics: dto.topics.map(mapTopicDto),
   };
 }
 

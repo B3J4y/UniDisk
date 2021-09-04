@@ -1,4 +1,4 @@
-import { BaseTopic, ProjectDetails, ProjectState, TopicResult } from 'data/entity';
+import { BaseTopic, Project, ProjectDetails, ProjectState, TopicResult } from 'data/entity';
 import {
   CreateProjectArgs,
   FeedbackStatus,
@@ -62,9 +62,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
         topics: [...project.topics, { ...event.entity, keywords: [] }],
       };
 
-      this.setState({
-        entity: Resource.success(newProject),
-      });
+      this.updateProject(newProject);
     });
 
     eventBus.subscribe(TopicUpdatedEvent.Name, (event: TopicUpdatedEvent) => {
@@ -78,9 +76,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
         ),
       };
 
-      this.setState({
-        entity: Resource.success(newProject),
-      });
+      this.updateProject(newProject);
     });
 
     eventBus.subscribe(TopicDeletedEvent.Name, (event: TopicDeletedEvent) => {
@@ -97,9 +93,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
         topics,
       };
 
-      this.setState({
-        entity: Resource.success(newProject),
-      });
+      this.updateProject(newProject);
     });
 
     eventBus.subscribe(KeywordCreatedEvent.Name, (event: KeywordCreatedEvent) => {
@@ -121,7 +115,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
         topics: topics.map((t) => (t.id === newTopic.id ? newTopic : t)),
       };
 
-      this.setState({ ...this.state, entity: Resource.success(updatedProject) });
+      this.updateProject(updatedProject);
     });
 
     eventBus.subscribe(KeywordDeletedEvent.Name, (event: KeywordDeletedEvent) => {
@@ -145,7 +139,7 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
         topics: topics.map((t) => (t.id === newTopic.id ? newTopic : t)),
       };
 
-      this.setState({ ...this.state, entity: Resource.success(updatedProject) });
+      this.updateProject(updatedProject);
     });
 
     eventBus.subscribe(TopicRelevanceChangeEvent.Name, (event: TopicRelevanceChangeEvent) => {
@@ -183,6 +177,16 @@ export class ProjectDetailContainer extends EntityDetailStateContainer<
 
       this.setState({ ...this.state });
     });
+  }
+
+  private updateProject(newProject: ProjectDetails, publish: boolean = true) {
+    this.setState({
+      ...this.state,
+      entity: Resource.success(newProject),
+    });
+    if (publish) {
+      this.eventBus.publish(new ProjectUpdatedEvent(newProject));
+    }
   }
 
   public async enqueue(): Promise<void> {

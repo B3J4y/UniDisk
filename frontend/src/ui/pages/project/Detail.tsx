@@ -194,11 +194,11 @@ const items: Item[] = [
     name: 'Auswertung',
     icon: <AssessmentIcon />,
   },
-  {
-    view: 'map',
-    name: 'Karte',
-    icon: <MapIcon />,
-  },
+  // {
+  //   view: 'map',
+  //   name: 'Karte',
+  //   icon: <MapIcon />,
+  // },
 ];
 
 type NavigationDrawerProps = {

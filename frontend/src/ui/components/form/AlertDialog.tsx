@@ -11,18 +11,47 @@ export type AlertDialogProps = {
   title: string;
   builder: (setOpen: (open: boolean) => void) => JSX.Element;
   positiveAction?: string;
+  hideAction?: boolean;
   content?: JSX.Element;
   contentText?: string;
   action: () => Promise<{ success: boolean; error?: string }>;
 };
 export default function AlertDialog(props: AlertDialogProps) {
   const { builder, positiveAction, content, contentText, title, action } = props;
+
+  const hideAction = props.hideAction ?? false;
   const [open, setOpen] = React.useState(false);
   const [isLoading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>(undefined);
   const handleClose = () => {
     setOpen(false);
   };
+
+  let actionNode: React.ReactNode | undefined;
+  if (!isLoading) {
+    actionNode = (
+      <Button
+        onClick={async () => {
+          setLoading(true);
+          setError(undefined);
+          try {
+            const result = await action();
+            if (result.success) handleClose();
+            else setError(result.error);
+          } catch (e) {
+            console.error(e);
+          } finally {
+            setLoading(false);
+          }
+        }}
+        color="primary"
+        autoFocus
+      >
+        {' '}
+        {positiveAction ?? 'Bestätigen'}
+      </Button>
+    );
+  }
 
   return (
     <div>
@@ -47,27 +76,7 @@ export default function AlertDialog(props: AlertDialogProps) {
               Abbrechen
             </Button>
           )}
-          {!isLoading && (
-            <Button
-              onClick={async () => {
-                setLoading(true);
-                setError(undefined);
-                try {
-                  const result = await action();
-                  if (result.success) handleClose();
-                  else setError(result.error);
-                } catch (e) {
-                  console.error(e);
-                } finally {
-                  setLoading(false);
-                }
-              }}
-              color="primary"
-              autoFocus
-            >
-              {positiveAction ?? 'Bestätigen'}
-            </Button>
-          )}
+          {actionNode && !hideAction && actionNode}
           {isLoading && <CircularProgress />}
         </DialogActions>
       </Dialog>
