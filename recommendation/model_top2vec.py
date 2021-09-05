@@ -1,6 +1,14 @@
 from model import TopicWordRecommender
 from top2vec import Top2Vec
 
+
+query_scaling = .8
+topic_word_scaling = .5
+keyword_scaling = .3
+
+# number of keywords included in calculation
+keyword_count = 3
+
 class Top2VecRecommender(TopicWordRecommender):
     def setup(self) -> None:
         self.model = Top2Vec.load("top2vec.model")
@@ -43,14 +51,23 @@ def get_query_recommendations(query,model, ignore_words=[] ,n=10):
             return []
         raise err
 
-topic_word_scaling = .5
+def scale_results(results,scale):
+    return [(word,score * topic_word_scaling) for word,score in results]
+
+def flatten(t):
+    return [item for sublist in t for item in sublist]
 
 def get_recommendations(topic, query, keywords, model,n=10):
-    topic_words = [(word,score * topic_word_scaling) for word,score in get_query_recommendations(topic,model,keywords+[topic],n)]
-    query_words = get_query_recommendations(query,model,keywords+[query],n)
+    ignore_words = [topic,query] + keywords
+    topic_words = scale_results(get_query_recommendations(topic,model,ignore_words,n), topic_word_scaling)
+    query_words = scale_results(get_query_recommendations(query,model,ignore_words,n), query_scaling)
+    keywords_results = [scale_results(get_query_recommendations(keyword,model,ignore_words,n),keyword_scaling) for keyword in keywords[:keyword_count]]
+
+    scoring_words = flatten(keywords_results+[topic_words,query_words])
+
     words = {}
 
-    for word,score in topic_words + query_words:
+    for word,score in scoring_words:
         if word in words:
             words[word] += float(score) 
         else:
