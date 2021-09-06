@@ -2,9 +2,9 @@ from model import TopicWordRecommender
 from top2vec import Top2Vec
 
 
-query_scaling = .8
+query_scaling = .7
 topic_word_scaling = .5
-keyword_scaling = .3
+keyword_scaling = .4
 
 # number of keywords included in calculation
 keyword_count = 3
