@@ -1,0 +1,1 @@
+export GOOGLE_APPLICATION_CREDENTIALS="crawler/src/main/resources/firebase-sa.json"
