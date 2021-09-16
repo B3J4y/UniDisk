@@ -6,6 +6,7 @@ from pydantic import BaseModel
 import uuid
 from fastapi.middleware.cors import CORSMiddleware
 from model_top2vec import Top2VecRecommender
+from logger import log_request
 
 app = FastAPI()
 
@@ -39,7 +40,7 @@ def similiar(topic: str, q: Optional[str] = "", count: Optional[int] = 10, keywo
 
     response_words = [(x[0].capitalize(), x[1]) for x in similiar_words]
     request_id = uuid.uuid4()
-    #store_request(str(request_id),q)
+    log_request(topic,q,keywords,response_words)
 
     return {"requestId": request_id, "similiar": response_words}
 
