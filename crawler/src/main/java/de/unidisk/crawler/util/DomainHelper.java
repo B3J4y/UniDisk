@@ -15,6 +15,7 @@ public  class DomainHelper {
             e.printStackTrace();
             return null;
         }
-        return url.getHost();
+        final String[] parts = url.getHost().split("\\.");
+        return parts[parts.length - 2];
     }
 }
