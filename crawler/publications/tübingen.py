@@ -66,13 +66,13 @@ def crawl_urls():
             time.sleep(.3)
             page += 1
 
-    with open("thübingen_urls.txt","w")as file:
+    with open("tübingen_urls.txt","w")as file:
         content = "\n".join(urls)
         file.write(content)
 
 def fetch_content():
-    with open("thübingen_urls.txt","r") as file:
-        with open('thübingen.csv', 'w', newline='') as csvfile:
+    with open("tübingen_urls.txt","r") as file:
+        with open('tübingen.csv', 'w', newline='') as csvfile:
             spamwriter = csv.writer(csvfile, delimiter='\t')
             spamwriter.writerow(["title","abstract","pdf"])
             index = 0

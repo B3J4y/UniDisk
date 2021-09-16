@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+from util import fetch_content
 
 fields = [
     #Chemie
@@ -36,6 +37,24 @@ def extract_overview_page_content(content):
         next_page_link = "https://mediatum.ub.tum.de" + next_page_link["href"]
     return (urls,next_page_link)
 
+def export_page_content(content):
+    content_soup = BeautifulSoup(content, 'html.parser')
+    labels = [x.text.replace(":","").strip() for x in content_soup.select(".mask_label")]
+    values = [ x.text for x in content_soup.select(".mask_value")]
+    value_map = {}
+    label_value_map = list(zip(labels,values))
+    for label,value in label_value_map:
+        value_map[label] = value
+    language = value_map["Sprache"]
+    is_german = "de" in language
+    if not is_german:
+        return None
+    title = value_map["Originaltitel"]
+    abstract = value_map["Kurzfassung"]
+    pdf_link = "https://mediatum.ub.tum.de" + content_soup.select_one(".document_download").select_one("a")["href"]
+
+    return [title,abstract,pdf_link]
+
 
 def crawl_urls():
     max_pages = 5
@@ -55,5 +74,9 @@ def crawl_urls():
         content = "\n".join(urls)
         file.write(content)
 
+def fetch():
+    fetch_content("tum_urls.txt","tum.csv",export_page_content)
 
-crawl_urls()
+#crawl_urls()
+
+fetch()
