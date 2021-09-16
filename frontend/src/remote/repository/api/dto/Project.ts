@@ -1,4 +1,5 @@
 import { KeywordResult } from 'data/entity';
+import { TopicModelDto } from './Topic';
 
 export type CreateProjectDto = {
   name: string;
@@ -22,6 +23,7 @@ export type ProjectModelDto = {
   userId: string;
   projectState: ProjectStateDto;
   processingError: string;
+  topics: TopicModelDto[];
 };
 
 export enum ResultRelevanceDto {
