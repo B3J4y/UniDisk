@@ -1,10 +1,9 @@
-import { BaseTopic, Project, ProjectDetails, ProjectState, TopicResult } from 'data/entity';
+import { BaseTopic, ProjectDetails, ProjectState } from 'data/entity';
 import {
   CreateProjectArgs,
   FeedbackStatus,
   ProjectEvaluationResult,
   ProjectRepository,
-  ProjectResult,
   UpdateProjectArgs,
 } from 'data/repositories';
 import { Operation, Resource } from 'data/Resource';

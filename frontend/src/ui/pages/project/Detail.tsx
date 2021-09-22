@@ -31,6 +31,7 @@ import { Provider, Subscribe } from 'unstated-typescript';
 import { ProjectEvaluationPage, ProjectResults as ProjectResultsTable } from './Evaluation';
 
 import EqualizerIcon from '@material-ui/icons/Equalizer';
+import { SHOW_RESULT_MAP } from 'config';
 
 type Views = 'general' | 'map' | 'results' | 'evaluation';
 
@@ -194,12 +195,15 @@ const items: Item[] = [
     name: 'Auswertung',
     icon: <AssessmentIcon />,
   },
-  // {
-  //   view: 'map',
-  //   name: 'Karte',
-  //   icon: <MapIcon />,
-  // },
 ];
+
+if (SHOW_RESULT_MAP) {
+  items.push({
+    view: 'map',
+    name: 'Karte',
+    icon: <MapIcon />,
+  });
+}
 
 type NavigationDrawerProps = {
   active: Views;

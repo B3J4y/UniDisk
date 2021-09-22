@@ -29,7 +29,6 @@ import { Column } from 'ui/components/form/Column';
 import { DequeueProjectDialog } from 'ui/components/project/DequeueDialog';
 import { EnqueueProjectDialog } from 'ui/components/project/EnqueueDialog';
 import { ProjectTopics } from 'ui/components/project/TopicTable';
-import { Center } from 'ui/components/util/Center';
 import { Subscribe } from 'unstated-typescript';
 import { mapProjectState } from 'util/language';
 
