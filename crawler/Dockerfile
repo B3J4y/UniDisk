@@ -1,8 +1,12 @@
 FROM maven:3.6.3-jdk-8-slim AS build
 
-COPY crawler/src /home/app/src
-COPY crawler/pom.xml /home/app
-# skip tests
+# Copy pom first and call verify to download dependencies
+# and let docker handle caching
+COPY pom.xml /home/app/pom.xml
+RUN mvn -f /home/app/pom.xml verify clean --fail-never
+
+COPY src /home/app/src
+# # skip tests
 RUN mvn -f /home/app/pom.xml package -Dmaven.test.skip=true
 
 FROM tomcat:8.5

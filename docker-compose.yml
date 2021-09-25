@@ -1,7 +1,7 @@
 version: "3"
 services:
   api:
-    build: .
+    build: ./crawler
     restart: always
     ports:
       - 8081:8080
@@ -47,6 +47,8 @@ services:
   recommendation:
     restart: always
     build: ./recommendation
+    volumes:
+      - recommendation_data:/var
     ports:
       - 8083:8000
 
@@ -65,3 +67,4 @@ services:
 volumes:
   solr_data:
   db_data:
+  recommendation_data:
