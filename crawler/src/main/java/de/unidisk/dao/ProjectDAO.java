@@ -138,19 +138,19 @@ public class ProjectDAO  implements IProjectRepository {
                 return null;
             }
 
-               final List<KeyWordScore> searchMetaDataList = session.createQuery("" +
+            final List<KeyWordScore> keyWordScores = session.createQuery("" +
                     "Select kws from KeyWordScore  kws " +
                     "INNER JOIN SearchMetaData smd ON kws.searchMetaData.id = smd.id " +
                     "INNER JOIN Topic t ON t.id = kws.keyword.topicId " +
-                            "where t.id = :topicId AND smd.url = :url",
+                            "where t.id IN :topicIds AND smd.url = :url",
                     KeyWordScore.class
-            ).setParameter("topicId", topicId)
+            ).setParameter("topicIds", topicIds)
             .setParameter("url", args.getUrl()).list();
 
-            if(searchMetaDataList.isEmpty())
+            if(keyWordScores.isEmpty())
                 throw new IllegalArgumentException("No search metadata with with matching arguments found.");
 
-            for(KeyWordScore kws : searchMetaDataList){
+            for(KeyWordScore kws : keyWordScores){
                 final int keywordTopicId = kws.getKeyword().getTopicId();
                 final ProjectRelevanceScore score = new ProjectRelevanceScore();
                 score.setSearchMetaData(kws.getSearchMetaData());
