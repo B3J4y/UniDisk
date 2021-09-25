@@ -8,4 +8,4 @@ SUM(case when ProjectRelevanceScore.resultRelevance = 'RELEVANT' then 1 else 0 e
  INNER JOIN ProjectRelevanceScore on ProjectRelevanceScore.topicId = Topic.id
 group by Topic.id
 ) scores 
-ON scores.id = Topic.id
+ON scores.id = Topic.id;

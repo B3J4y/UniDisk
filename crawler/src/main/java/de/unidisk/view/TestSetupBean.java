@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.stream.Collectors;
+import java.io.*;
 
 /**
  * Klasse initialisiert die Datenbank mit Testdaten.
@@ -94,18 +95,35 @@ public class TestSetupBean {
             final ApplicationState state = MockData.getMockState();
             try {
                 HibernateUtil.truncateTable(Project.class);
+                HibernateTestSetup.Setup(state);
             }catch(Exception e){
                 //fails for h2 database
             }
-            HibernateTestSetup.Setup(state);
         }
-
+        createViews();
         initCore();
         seed();
         if(!config.getCrawlerConfiguration().isDisabled())
         setupCrawlJob();
         setupScoringJob();
     }
+
+    private void createViews() throws IOException {
+        final String[] sqlViewFiles = new String[]{
+                "ProjectEvaluation.sql",
+                "TopicEvaluation.sql"
+        };
+
+        for(String sqlViewFile : sqlViewFiles){
+            final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sql/views/"+sqlViewFile);
+            String content =  new BufferedReader(new InputStreamReader(inputStream))
+                    .lines().collect(Collectors.joining("\n"));
+            HibernateUtil.executeVoid(session -> {
+                session.createSQLQuery(content).executeUpdate();
+            });
+        }
+    }
+
 
     private void seed() {
         final List<University> existingUniversities = universityRepository.getUniversities();
