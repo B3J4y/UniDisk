@@ -2,7 +2,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-input = "scores2"
+# use ProjectScores query from crawler/src/main/resources/sql/ProjectScores.sql
+
+input = "scores"
 
 def map_project_type(type):
     if type == "CUSTOM_ONLY":

@@ -26,6 +26,8 @@ import de.unidisk.services.ProjectGenerationService;
 import de.unidisk.solr.SolrApp;
 import de.unidisk.solr.SolrConnector;
 import de.unidisk.solr.services.SolrScoringService;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
@@ -37,7 +39,9 @@ import org.apache.solr.common.params.CoreAdminParams;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
@@ -99,7 +103,7 @@ public class TestSetupBean {
             }
             HibernateTestSetup.Setup(state);
         }
-
+        createViews();
         initCore();
         seed();
         if(!config.getCrawlerConfiguration().isDisabled())
@@ -107,7 +111,58 @@ public class TestSetupBean {
         setupScoringJob();
     }
 
-    private void seed() {
+    private void createViews() throws IOException {
+        final String[] sqlViewFiles = new String[]{
+                "SearchMetaDataEval.sql"
+        };
+        try {
+            for (String sqlViewFile : sqlViewFiles) {
+                final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sql/views/" + sqlViewFile);
+                String content = new BufferedReader(new InputStreamReader(inputStream))
+                        .lines().collect(Collectors.joining("\n"));
+                HibernateUtil.executeVoid(session -> {
+                    session.createSQLQuery(content).executeUpdate();
+                });
+            }
+    }
+
+    private List<String> getResourceFiles(String path) throws IOException {
+
+        List<String> files2 = IOUtils.readLines(TestSetupBean.class.getClassLoader().getResourceAsStream("sql/views/"), Charsets.UTF_8);
+
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        URL url = loader.getResource(path);
+        String folderPath = url.getPath();
+        final File[] files = new File(path).listFiles();
+
+        List<String> filenames = new ArrayList<>();
+
+        try (
+                InputStream in = getResourceAsStream(path);
+                BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+            String resource;
+
+            while ((resource = br.readLine()) != null) {
+                filenames.add(resource);
+            }
+        }
+
+        return filenames;
+    }
+
+    private InputStream getResourceAsStream(String resource) {
+        final InputStream in
+                = getContextClassLoader().getResourceAsStream(resource);
+
+        return in == null ? getClass().getResourceAsStream(resource) : in;
+    }
+
+    private ClassLoader getContextClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
+
+
+    private void seed() throws IOException {
         final List<University> existingUniversities = universityRepository.getUniversities();
         final Set<String> existingNames = existingUniversities.stream().map(University::getName).collect(Collectors.toSet());
         final List<University> universitySeeds = SeedData.getSeedUniversities();
