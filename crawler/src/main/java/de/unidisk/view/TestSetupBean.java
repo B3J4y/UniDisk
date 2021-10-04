@@ -37,7 +37,10 @@ import org.apache.solr.common.params.CoreAdminParams;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.ws.rs.ext.Provider;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
@@ -99,7 +102,7 @@ public class TestSetupBean {
             }
             HibernateTestSetup.Setup(state);
         }
-
+        createViews();
         initCore();
         seed();
         if(!config.getCrawlerConfiguration().isDisabled())
@@ -107,7 +110,21 @@ public class TestSetupBean {
         setupScoringJob();
     }
 
-    private void seed() {
+    private void createViews() throws IOException {
+        final String[] sqlViewFiles = new String[]{
+                "SearchMetaDataEval.sql"
+        };
+        for (String sqlViewFile : sqlViewFiles) {
+            final InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sql/views/" + sqlViewFile);
+            String content = new BufferedReader(new InputStreamReader(inputStream))
+                    .lines().collect(Collectors.joining("\n"));
+            HibernateUtil.executeVoid(session -> {
+                session.createSQLQuery(content).executeUpdate();
+            });
+        }
+    }
+
+    private void seed() throws IOException {
         final List<University> existingUniversities = universityRepository.getUniversities();
         final Set<String> existingNames = existingUniversities.stream().map(University::getName).collect(Collectors.toSet());
         final List<University> universitySeeds = SeedData.getSeedUniversities();
