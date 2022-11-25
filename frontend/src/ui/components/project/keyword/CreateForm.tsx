@@ -30,7 +30,7 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
   const [inputError, setInputError] = React.useState<string | undefined>(undefined);
 
   const search = async () => {
-    if (name.trim().length < 3) {
+    if (name.trim().length < 1) {
       setCurrentRecommendation(undefined);
       return undefined;
     }
@@ -116,7 +116,7 @@ export function CreateKeywordForm(props: CreateKeywordFormProps) {
           >
             <Box p={2}>
               <Grid container alignItems="center" spacing={2}>
-                <Grid item style={{ position: 'relative', display: 'flex', flexGrow: 1 }}>
+                <Grid item xs style={{ position: 'relative' }}>
                   <TextField
                     disabled={disabled}
                     id="recommendation-input"

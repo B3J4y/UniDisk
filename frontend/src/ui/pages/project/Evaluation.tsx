@@ -1,6 +1,7 @@
 import { Grid, IconButton, Link, makeStyles, Tooltip } from '@material-ui/core';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { PROJECT_EVAL_ITEM_COUNT } from 'config';
 import { TopicResult } from 'data/entity';
 import { FeedbackStatus, ProjectEvaluationResult, ProjectType } from 'data/repositories';
 import { ProjectDetailContainer } from 'model';
@@ -21,18 +22,6 @@ export function ProjectEvaluationPage(props: ProjectEvaluationPageProps) {
   );
 }
 
-//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-function shuffleArray<T>(array: T[]): T[] {
-  const arrayCopy = array.slice(0);
-  for (var i = arrayCopy.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var temp = arrayCopy[i];
-    arrayCopy[i] = arrayCopy[j];
-    arrayCopy[j] = temp;
-  }
-  return arrayCopy;
-}
-
 type FeedbackTableProps = {
   results: ProjectEvaluationResult;
   container: ProjectDetailContainer;
@@ -46,7 +35,13 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-function prepareProjectResults(results: TopicResult[], top: number = 3) {
+// Removes query string from url.
+function extractEvaluationUrl(url: string): string {
+  const parts = url.split('?');
+  return parts[0];
+}
+
+function prepareProjectResults(results: TopicResult[], top: number = PROJECT_EVAL_ITEM_COUNT) {
   const topicResults = results.map((topic) => {
     const { keywords } = topic;
 
@@ -54,7 +49,7 @@ function prepareProjectResults(results: TopicResult[], top: number = 3) {
     const urlPageNames: Record<string, string> = {};
 
     keywords.forEach((keyword) => {
-      const url = keyword.searchMetaData.url;
+      const url = extractEvaluationUrl(keyword.searchMetaData.url);
       urlPageNames[url] = keyword.pageTitle;
       const score = keyword.score;
       if (urlScores[url] !== undefined) {

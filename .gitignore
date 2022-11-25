@@ -13,3 +13,4 @@ out/
 recommendation/train
 crawler/src/main/resources/firebase-sa.json
 .DS_Store
+crawler/publications
